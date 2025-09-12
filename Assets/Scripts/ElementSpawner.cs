@@ -18,6 +18,8 @@ public class ElementSpawner : MonoBehaviour
     [SerializeField] private Sprite _hiddenButtonSprite;
     public Sprite HiddenButtonSprite => _hiddenButtonSprite;
 
+    [SerializeField] private Vector2 _buffer = new Vector2(100,100); // Serialized buffer field to adjust in the Inspector
+
     void OnEnable()
     {
         if (CraftingManager.Instance != null)
@@ -84,11 +86,13 @@ public class ElementSpawner : MonoBehaviour
     {
         Vector2 randomPosition = new Vector2
         (
-            Random.Range(SpawnArea.rectTransform.rect.xMin, SpawnArea.rectTransform.rect.xMax),
-            Random.Range(SpawnArea.rectTransform.rect.yMin, SpawnArea.rectTransform.rect.yMax)
+            Random.Range(SpawnArea.rectTransform.rect.xMin + _buffer.x, SpawnArea.rectTransform.rect.xMax - _buffer.x),
+            Random.Range(SpawnArea.rectTransform.rect.yMin + _buffer.y, SpawnArea.rectTransform.rect.yMax - _buffer.y)
         );
 
         Vector3 worldPosition = SpawnArea.rectTransform.TransformPoint(randomPosition);
+
+        Debug.Log(worldPosition);
 
         return SpawnElementAtPosition(type, isotopeNumber, worldPosition);
     }
@@ -154,5 +158,34 @@ public class ElementSpawner : MonoBehaviour
     {
         _spawnButtons[3].interactable = true;
         _spawnButtons[3].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[3];
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (_spawnArea != null)
+        {
+            RectTransform rectTransform = _spawnArea.rectTransform;
+            Vector3[] corners = new Vector3[4];
+            rectTransform.GetWorldCorners(corners);
+
+            // Draw the original spawn area
+            Gizmos.color = Color.green;
+            for (int i = 0; i < 4; i++)
+            {
+                Gizmos.DrawLine(corners[i], corners[(i + 1) % 4]);
+            }
+
+            // Calculate and draw the buffered spawn area
+            Vector3 center = rectTransform.position;
+            Vector2 size = rectTransform.rect.size;
+            Vector3 bufferedMin = rectTransform.TransformPoint(new Vector3(-size.x / 2 + _buffer.x, -size.y / 2 + _buffer.y, 0));
+            Vector3 bufferedMax = rectTransform.TransformPoint(new Vector3(size.x / 2 - _buffer.x, size.y / 2 - _buffer.y, 0));
+
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(new Vector3(bufferedMin.x, bufferedMin.y, 0), new Vector3(bufferedMax.x, bufferedMin.y, 0));
+            Gizmos.DrawLine(new Vector3(bufferedMax.x, bufferedMin.y, 0), new Vector3(bufferedMax.x, bufferedMax.y, 0));
+            Gizmos.DrawLine(new Vector3(bufferedMax.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMax.y, 0));
+            Gizmos.DrawLine(new Vector3(bufferedMin.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMin.y, 0));
+        }
     }
 }

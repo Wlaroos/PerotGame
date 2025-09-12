@@ -708,6 +708,7 @@ MonoBehaviour:
   - {fileID: 1591534932}
   - {fileID: 1757148781}
   _hiddenButtonSprite: {fileID: -1718754075, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
+  _buffer: {x: 400, y: 150}
 --- !u!4 &937413474
 Transform:
   m_ObjectHideFlags: 0
