@@ -10,6 +10,22 @@ public class CraftingManager : MonoBehaviour
     [SerializeField] private GameObject _craftParticles;
     [SerializeField] private GameObject _failParticles;
 
+    // Unity Events for crafting specific elements
+    public UnityEvent OnHydrogen2Crafted;
+    public UnityEvent OnHelium4Crafted;
+    public UnityEvent OnBeryllium8Crafted;
+    public UnityEvent OnCarbon12Crafted;
+    private HashSet<string> craftedElements = new HashSet<string>(); // Track crafted elements to invoke events only once
+    private Dictionary<string, (Element.ElementType, int)> craftingRecipes = new Dictionary<string, (Element.ElementType, int)>
+        {
+            { "Hydrogen1+Hydrogen1", (Element.ElementType.Hydrogen, 2) },
+            { "Hydrogen2+Hydrogen2", (Element.ElementType.Helium, 3) },
+            { "Helium3+Helium3", (Element.ElementType.Helium, 4) },
+            { "Helium4+Helium4", (Element.ElementType.Beryllium, 8) },
+            { "Helium4+Helium4+Helium4", (Element.ElementType.Carbon, 12) },
+            { "Beryllium8+Helium4", (Element.ElementType.Carbon, 12) }
+        };
+
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -21,24 +37,6 @@ public class CraftingManager : MonoBehaviour
             _instance = this;
         }
     }
-
-    private Dictionary<string, (Element.ElementType, int)> craftingRecipes = new Dictionary<string, (Element.ElementType, int)>
-    {
-        { "Hydrogen1+Hydrogen1", (Element.ElementType.Hydrogen, 2) },
-        { "Hydrogen2+Hydrogen2", (Element.ElementType.Helium, 3) },
-        { "Helium3+Helium3", (Element.ElementType.Helium, 4) },
-        { "Helium4+Helium4", (Element.ElementType.Beryllium, 8) },
-        { "Helium4+Helium4+Helium4", (Element.ElementType.Carbon, 12) },
-        { "Beryllium8+Helium4", (Element.ElementType.Carbon, 12) }
-    };
-
-    // Unity Events for crafting specific elements
-    public UnityEvent OnHydrogen2Crafted;
-    public UnityEvent OnHelium4Crafted;
-    public UnityEvent OnBeryllium8Crafted;
-    public UnityEvent OnCarbon12Crafted;
-
-    private HashSet<string> craftedElements = new HashSet<string>(); // Track crafted elements to invoke events only once
 
     public bool TryCraft(Element element1, Element element2)
     {

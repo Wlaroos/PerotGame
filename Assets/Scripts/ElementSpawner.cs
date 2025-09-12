@@ -20,18 +20,7 @@ public class ElementSpawner : MonoBehaviour
 
     [SerializeField] private Vector2 _buffer = new Vector2(100,100); // Serialized buffer field to adjust in the Inspector
 
-    void OnEnable()
-    {
-        if (CraftingManager.Instance != null)
-        {
-            CraftingManager.Instance.OnHydrogen2Crafted.AddListener(FirstHydrogen);
-            CraftingManager.Instance.OnHelium4Crafted.AddListener(FirstHelium);
-            CraftingManager.Instance.OnBeryllium8Crafted.AddListener(FirstBeryllium);
-            CraftingManager.Instance.OnCarbon12Crafted.AddListener(FirstCarbon);
-        }
-    }
-
-    void OnDisable()
+    private void OnDisable()
     {
         if (CraftingManager.Instance != null)
         {
@@ -65,7 +54,6 @@ public class ElementSpawner : MonoBehaviour
             _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite = _hiddenButtonSprite; // Set to hidden sprite
         }
     }
-
     private void OnDestroy()
     {
         if (_instance == this)
@@ -79,6 +67,14 @@ public class ElementSpawner : MonoBehaviour
         if (elementPrefab == null)
         {
             Debug.LogWarning("ElementSpawner: No element prefab assigned.");
+        }
+
+        if (CraftingManager.Instance != null)
+        {
+            CraftingManager.Instance.OnHydrogen2Crafted.AddListener(FirstHydrogen);
+            CraftingManager.Instance.OnHelium4Crafted.AddListener(FirstHelium);
+            CraftingManager.Instance.OnBeryllium8Crafted.AddListener(FirstBeryllium);
+            CraftingManager.Instance.OnCarbon12Crafted.AddListener(FirstCarbon);
         }
     }
 
