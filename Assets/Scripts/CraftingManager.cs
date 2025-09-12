@@ -7,6 +7,8 @@ public class CraftingManager : MonoBehaviour
     private static CraftingManager _instance;
     public static CraftingManager Instance => _instance;
 
+    [SerializeField] private GameObject _particleEffectPrefab;
+
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -50,7 +52,30 @@ public class CraftingManager : MonoBehaviour
             Vector3 spawnPosition = (element1.transform.position + element2.transform.position) / 2;
 
             // Spawn the new element at the midpoint
-            ElementSpawner.Instance.SpawnElementAtPosition(result.Item1, result.Item2, spawnPosition);
+            GameObject craftedElement = ElementSpawner.Instance.SpawnElementAtPosition(result.Item1, result.Item2, spawnPosition);
+
+            // Instantiate particle effect at the spawn position
+            if (_particleEffectPrefab != null)
+            {
+                ParticleSystem particle = Instantiate(_particleEffectPrefab, spawnPosition, _particleEffectPrefab.transform.rotation).GetComponent<ParticleSystem>();
+
+                // Get the color from the crafted element's sprite renderer
+                SpriteRenderer craftedSpriteRenderer = craftedElement.GetComponent<SpriteRenderer>();
+                if (craftedSpriteRenderer != null)
+                {
+                    Color craftedColor = craftedSpriteRenderer.color;
+                    var mainModule = particle.main;
+                    mainModule.startColor = craftedColor; // Set the particle color to match the sprite
+                }
+                else
+                {
+                    Debug.LogWarning("CraftingManager: Crafted element does not have a SpriteRenderer.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("CraftingManager: Particle effect prefab is not assigned.");
+            }
 
             // Check if the crafted element is being crafted for the first time
             string craftedKey = $"{result.Item1}{result.Item2}";
