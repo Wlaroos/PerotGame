@@ -286,8 +286,8 @@ MonoBehaviour:
   isotopeNumber: 1
   _elementSprite: {fileID: 431570445168085939}
   _numberSprite: {fileID: 8413940166419973516}
+  _numberSprite2: {fileID: 4008486147452639158}
   _backgroundSprite: {fileID: 3815635767662009122}
-  _secondNumberSprite: {fileID: 4008486147452639158}
 --- !u!114 &8541206908488812394
 MonoBehaviour:
   m_ObjectHideFlags: 0

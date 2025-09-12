@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 108883825}
   - component: {fileID: 108883827}
   m_Layer: 5
-  m_Name: ButtonBG
+  m_Name: HeliumButtonBG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -235,7 +235,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 826462098}
   m_OnClick:
     m_PersistentCalls:
@@ -701,6 +701,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   elementPrefab: {fileID: 3057944551080756754, guid: 0517a3ac504d30c47a512dbf45255cc4, type: 3}
+  _spawnArea: {fileID: 1546428849}
+  _spawnButtons:
+  - {fileID: 1097703262}
+  - {fileID: 108883827}
+  - {fileID: 1591534932}
+  - {fileID: 1757148781}
+  _hiddenButtonSprite: {fileID: -1718754075, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
 --- !u!4 &937413474
 Transform:
   m_ObjectHideFlags: 0
@@ -729,7 +736,7 @@ GameObject:
   - component: {fileID: 1097703260}
   - component: {fileID: 1097703262}
   m_Layer: 5
-  m_Name: ButtonBG
+  m_Name: HydrogenButtonBG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -832,7 +839,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1258692674}
   m_OnClick:
     m_PersistentCalls:
@@ -929,7 +936,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_TargetDisplay: 0
 --- !u!224 &1200538424
 RectTransform:
@@ -1115,7 +1122,7 @@ GameObject:
   - component: {fileID: 1591534930}
   - component: {fileID: 1591534932}
   m_Layer: 5
-  m_Name: ButtonBG
+  m_Name: BerylliumButtonBG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1218,7 +1225,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 699260751}
   m_OnClick:
     m_PersistentCalls:
@@ -1352,7 +1359,7 @@ GameObject:
   - component: {fileID: 1757148779}
   - component: {fileID: 1757148781}
   m_Layer: 5
-  m_Name: ButtonBG
+  m_Name: CarbonButtonBG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1455,7 +1462,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1999833165}
   m_OnClick:
     m_PersistentCalls:
@@ -1901,6 +1908,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cfa6f848bea7494ca86eb600c37a7bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnHydrogen2Crafted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHelium4Crafted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnBeryllium8Crafted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCarbon12Crafted:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &2084610659
 Transform:
   m_ObjectHideFlags: 0

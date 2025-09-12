@@ -16,8 +16,8 @@ public class Element : MonoBehaviour
 
     [SerializeField] private SpriteRenderer _elementSprite;
     [SerializeField] private SpriteRenderer _numberSprite;
+    [SerializeField] private SpriteRenderer _numberSprite2; // Added for two-digit numbers
     [SerializeField] private SpriteRenderer _backgroundSprite;
-    [SerializeField] private SpriteRenderer _secondNumberSprite; // Added for two-digit numbers
 
     private void Awake()
     {
@@ -33,7 +33,7 @@ public class Element : MonoBehaviour
         {
             Debug.LogError("Element: Background sprite is not assigned.");
         }
-        if (_secondNumberSprite == null)
+        if (_numberSprite2 == null)
         {
             Debug.LogError("Element: Second number sprite is not assigned.");
         }
@@ -46,7 +46,7 @@ public class Element : MonoBehaviour
         if (number < 10)
         {
             _numberSprite.sprite = _numberSprites[number];
-            _secondNumberSprite.gameObject.SetActive(false); // Hide the second digit
+            _numberSprite2.gameObject.SetActive(false); // Hide the second digit
         }
         else
         {
@@ -54,8 +54,8 @@ public class Element : MonoBehaviour
             int ones = number % 10;
 
             _numberSprite.sprite = _numberSprites[tens];
-            _secondNumberSprite.sprite = _numberSprites[ones];
-            _secondNumberSprite.gameObject.SetActive(true); // Show the second digit
+            _numberSprite2.sprite = _numberSprites[ones];
+            _numberSprite2.gameObject.SetActive(true); // Show the second digit
         }
     }
 
@@ -96,5 +96,6 @@ public class Element : MonoBehaviour
         }
 
         _numberSprite.color = new Color(1f, 0f, 0f, 1f); // Red with full opacity
+        _numberSprite2.color = new Color(1f, 0f, 0f, 1f); // Red with full opacity
     }
 }
