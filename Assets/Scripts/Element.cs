@@ -70,25 +70,25 @@ public class Element : MonoBehaviour
                 _elementSprite.sprite = _elementSprites[0];
                 SetNumberSprites(isotopeNumber);
                 _elementSprite.color = new Color(1f, 1f, 1f, 1f); // White with full opacity
-                _backgroundSprite.color = new Color(1f, 1f, 1f, 0.5f); // White with 50% opacity
+                _backgroundSprite.color = new Color(0.8f, 0.8f, 0.8f, 1f); // Darker white with full opacity
                 break;
             case ElementType.Helium:
                 _elementSprite.sprite = _elementSprites[1];
                 SetNumberSprites(isotopeNumber);
                 _elementSprite.color = new Color(1f, 0.84f, 0f, 1f); // Gold with full opacity
-                _backgroundSprite.color = new Color(1f, 0.84f, 0f, 0.5f); // Gold with 50% opacity
+                _backgroundSprite.color = new Color(0.8f, 0.67f, 0f, 1f); // Darker gold with full opacity
                 break;
             case ElementType.Beryllium:
                 _elementSprite.sprite = _elementSprites[2];
                 SetNumberSprites(isotopeNumber);
                 _elementSprite.color = new Color(0.76f, 1f, 0.76f, 1f); // Light green with full opacity
-                _backgroundSprite.color = new Color(0.76f, 1f, 0.76f, 0.5f); // Light green with 50% opacity
+                _backgroundSprite.color = new Color(0.57f, 0.8f, 0.57f, 1f); // Darker green with full opacity
                 break;
             case ElementType.Carbon:
                 _elementSprite.sprite = _elementSprites[3];
                 SetNumberSprites(isotopeNumber);
                 _elementSprite.color = new Color(0.5f, 0.5f, 0.5f, 1f); // Gray with full opacity
-                _backgroundSprite.color = new Color(0.5f, 0.5f, 0.5f, 0.5f); // Gray with 50% opacity
+                _backgroundSprite.color = new Color(0.3f, 0.3f, 0.3f, 1f); // Darker gray with full opacity
                 break;
             default:
                 Debug.LogError("Element: Unknown element type.");

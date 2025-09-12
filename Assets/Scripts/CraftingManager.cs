@@ -7,7 +7,8 @@ public class CraftingManager : MonoBehaviour
     private static CraftingManager _instance;
     public static CraftingManager Instance => _instance;
 
-    [SerializeField] private GameObject _particleEffectPrefab;
+    [SerializeField] private GameObject _craftParticles;
+    [SerializeField] private GameObject _failParticles;
 
     private void Awake()
     {
@@ -55,9 +56,9 @@ public class CraftingManager : MonoBehaviour
             GameObject craftedElement = ElementSpawner.Instance.SpawnElementAtPosition(result.Item1, result.Item2, spawnPosition);
 
             // Instantiate particle effect at the spawn position
-            if (_particleEffectPrefab != null)
+            if (_craftParticles != null)
             {
-                ParticleSystem particle = Instantiate(_particleEffectPrefab, spawnPosition, _particleEffectPrefab.transform.rotation).GetComponent<ParticleSystem>();
+                ParticleSystem particle = Instantiate(_craftParticles, spawnPosition, _craftParticles.transform.rotation).GetComponent<ParticleSystem>();
 
                 // Get the color from the crafted element's sprite renderer
                 SpriteRenderer craftedSpriteRenderer = craftedElement.GetComponent<SpriteRenderer>();
@@ -103,6 +104,17 @@ public class CraftingManager : MonoBehaviour
         // Apply the separation
         element2.transform.position += separationDirection * separationDistance;
         element1.transform.position -= separationDirection * separationDistance;
+
+        // Instantiate fail particle effect at the midpoint
+        Vector3 failPosition = (element1.transform.position + element2.transform.position) / 2;
+        if (_failParticles != null)
+        {
+            Instantiate(_failParticles, failPosition, _failParticles.transform.rotation);
+        }
+        else
+        {
+            Debug.LogWarning("CraftingManager: Fail particle effect prefab is not assigned.");
+        }
 
         return false;
     }
