@@ -89,6 +89,21 @@ public class CraftingManager : MonoBehaviour
         }
 
         Debug.Log("Crafting failed: No matching recipe.");
+
+        // Calculate the separation direction
+        Vector3 separationDirection = (element2.transform.position - element1.transform.position).normalized;
+
+        // Define a dynamic separation distance based on the element sizes or a base distance
+        float separationDistance = 0.33f; // Base distance
+        if (element1.TryGetComponent(out Collider element1Collider) && element2.TryGetComponent(out Collider element2Collider))
+        {
+            separationDistance += (element1Collider.bounds.size.magnitude + element2Collider.bounds.size.magnitude) / 2;
+        }
+
+        // Apply the separation
+        element2.transform.position += separationDirection * separationDistance;
+        element1.transform.position -= separationDirection * separationDistance;
+
         return false;
     }
 

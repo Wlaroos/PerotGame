@@ -92,7 +92,7 @@ public class ElementSpawner : MonoBehaviour
 
         Vector3 worldPosition = SpawnArea.rectTransform.TransformPoint(randomPosition);
 
-        Debug.Log(worldPosition);
+        //Debug.Log(worldPosition);
 
         return SpawnElementAtPosition(type, isotopeNumber, worldPosition);
     }
