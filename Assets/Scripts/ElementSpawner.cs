@@ -36,7 +36,7 @@ public class ElementSpawner : MonoBehaviour
         }
     }
 
-    private GameObject SpawnElement(Element.ElementType type, int isotopeNumber = 1)
+    public GameObject SpawnElement(Element.ElementType type, int isotopeNumber = 1)
     {
         if (elementPrefab == null)
         {

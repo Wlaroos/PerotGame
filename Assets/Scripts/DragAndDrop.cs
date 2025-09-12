@@ -7,6 +7,7 @@ public class DragAndDrop : MonoBehaviour
     [SerializeField] private float dragSpeed = 10f; // Speed of interpolation
 
     private Element element;
+    private Collider2D currentCollision;
 
     private void Awake()
     {
@@ -38,61 +39,34 @@ public class DragAndDrop : MonoBehaviour
         transform.position = Vector2.Lerp(transform.position, targetPosition, dragSpeed * Time.deltaTime);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnMouseUp()
     {
-        // Check if the other object has an Element component
-        Element otherElement = collision.gameObject.GetComponent<Element>();
-        if (otherElement != null)
+        if (currentCollision != null)
         {
-            TryCraftElement(otherElement);
-        }
-    }
-
-    private void TryCraftElement(Element otherElement)
-    {
-        // Ensure both elements are of the same type
-        if (element.Type == otherElement.Type)
-        {
-            switch (element.Type)
+            Element otherElement = currentCollision.GetComponent<Element>();
+            if (otherElement != null)
             {
-                case Element.ElementType.Hydrogen:
-                    if (element.IsotopeNumber == 1 && otherElement.IsotopeNumber == 1)
-                    {
-                        CraftNewElement(Element.ElementType.Hydrogen, 2);
-                    }
-                    else if (element.IsotopeNumber == 2 && otherElement.IsotopeNumber == 2)
-                    {
-                        CraftNewElement(Element.ElementType.Helium, 3);
-                    }
-                    break;
-
-                case Element.ElementType.Helium:
-                    if (element.IsotopeNumber == 3 && otherElement.IsotopeNumber == 3)
-                    {
-                        CraftNewElement(Element.ElementType.Helium, 4);
-                    }
-                    else if (element.IsotopeNumber == 4 && otherElement.IsotopeNumber == 4)
-                    {
-                        CraftNewElement(Element.ElementType.Beryllium, 8);
-                    }
-                    break;
-
-                case Element.ElementType.Beryllium:
-                    if (element.IsotopeNumber == 8 && otherElement.Type == Element.ElementType.Helium && otherElement.IsotopeNumber == 4)
-                    {
-                        CraftNewElement(Element.ElementType.Carbon, 12);
-                    }
-                    break;
+                // Attempt to craft a new element
+                bool crafted = CraftingManager.Instance.TryCraft(element, otherElement);
+                if (crafted)
+                {
+                    Destroy(gameObject);
+                    Destroy(otherElement.gameObject);
+                }
             }
         }
     }
 
-    private void CraftNewElement(Element.ElementType newType, int newIsotopeNumber)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Update the current element to the new type and isotope number
-        element.SetElement(newType, newIsotopeNumber);
+        currentCollision = collision;
+    }
 
-        // Destroy the other element
-        Destroy(gameObject);
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (currentCollision == collision)
+        {
+            currentCollision = null;
+        }
     }
 }
