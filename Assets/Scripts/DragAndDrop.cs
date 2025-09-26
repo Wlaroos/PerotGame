@@ -17,10 +17,6 @@ public class DragAndDrop : MonoBehaviour
     [SerializeField] private GameObject compoundPrefab;  // Prefab for new compounds
     [SerializeField] private GameObject mineralPrefab;   // Prefab for new minerals
 
-    [Header("Effects")]
-    [SerializeField] private GameObject craftParticles;  // Effect when crafting works
-    [SerializeField] private GameObject failParticles;   // Effect when crafting fails
-
     // Runs when the object is created
     private void Awake()
     {
@@ -95,11 +91,12 @@ public class DragAndDrop : MonoBehaviour
 
             if (result != null)
             {
-                // If crafting worked, spawn the right type of object
+                GameObject craftedObj = null;
+
                 if (result is MineralData mineralData)
                 {
-                    GameObject mineralObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity);
-                    Mineral mineralComponent = mineralObj.GetComponent<Mineral>();
+                    craftedObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity);
+                    Mineral mineralComponent = craftedObj.GetComponent<Mineral>();
                     if (mineralComponent != null)
                     {
                         mineralComponent.data = mineralData;
@@ -108,8 +105,8 @@ public class DragAndDrop : MonoBehaviour
                 }
                 else if (result is CompoundData compoundData)
                 {
-                    GameObject compoundObj = Instantiate(compoundPrefab, spawnPosition, Quaternion.identity);
-                    Compound compoundComponent = compoundObj.GetComponent<Compound>();
+                    craftedObj = Instantiate(compoundPrefab, spawnPosition, Quaternion.identity);
+                    Compound compoundComponent = craftedObj.GetComponent<Compound>();
                     if (compoundComponent != null)
                     {
                         compoundComponent.data = compoundData;
@@ -118,8 +115,8 @@ public class DragAndDrop : MonoBehaviour
                 }
                 else if (result is ElementData elementData)
                 {
-                    GameObject elementObj = Instantiate(elementPrefab, spawnPosition, Quaternion.identity);
-                    Element elementComponent = elementObj.GetComponent<Element>();
+                    craftedObj = Instantiate(elementPrefab, spawnPosition, Quaternion.identity);
+                    Element elementComponent = craftedObj.GetComponent<Element>();
                     if (elementComponent != null)
                     {
                         elementComponent.data = elementData;
@@ -128,11 +125,14 @@ public class DragAndDrop : MonoBehaviour
                     }
                 }
 
-                // Play crafting effect
-                if (craftParticles != null)
+                // Play crafting effect using the crafted object's color
+                Color color = Color.white;
+                if (craftedObj != null)
                 {
-                    Instantiate(craftParticles, spawnPosition, Quaternion.Euler(-90, 0, 0));
+                    var sr = craftedObj.GetComponent<SpriteRenderer>();
+                    if (sr != null) color = sr.color;
                 }
+                EffectManager.Instance.PlayCraftEffect(spawnPosition, color);
 
                 // Remove the old objects
                 Destroy(otherObj);
@@ -163,10 +163,7 @@ public class DragAndDrop : MonoBehaviour
 
                 // Play fail effect at the midpoint
                 Vector3 failPosition = (transform.position + otherObj.transform.position) / 2f;
-                if (failParticles != null)
-                {
-                    Instantiate(failParticles, failPosition, Quaternion.Euler(-90, 0, 0));
-                }
+                EffectManager.Instance.PlayFailEffect(failPosition);
             }
         }
         // Put object back to normal draw order
