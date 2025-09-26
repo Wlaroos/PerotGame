@@ -7,6 +7,7 @@ public class ElementData : ScriptableObject
     public Sprite elementSprite;
     public Sprite[] numberSprites;
     public int defaultIsotopeNumber = 1;
+    public Color32 defaultColor = new Color32(255, 255, 255, 255);
 
     private void OnEnable()
     {

@@ -5,6 +5,7 @@ public class CompoundData : ScriptableObject
 {
     public string compoundName;
     public Sprite compoundSprite;
+    public Color32 defaultColor = new Color32(255, 255, 255, 255);
 
     private void OnEnable()
     {

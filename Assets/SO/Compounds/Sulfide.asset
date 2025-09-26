@@ -14,3 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   compoundName: Sulfide
   compoundSprite: {fileID: -1756591527, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
+  defaultColor:
+    serializedVersion: 2
+    rgba: 4280090614

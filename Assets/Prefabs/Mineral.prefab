@@ -367,6 +367,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data: {fileID: 0}
   _mineralSprite: {fileID: 4840574312373783160}
+  _mineralBigSprite: {fileID: 5941345405222065971}
+  _backgroundSprite: {fileID: 3940589358172123659}
 --- !u!114 &302516988093121141
 MonoBehaviour:
   m_ObjectHideFlags: 0

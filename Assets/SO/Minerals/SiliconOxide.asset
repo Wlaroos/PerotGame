@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mineralName: SiliconOxide
   mineralSprite: {fileID: -5732747483443466111, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
+  mineralBigSprite: {fileID: -8679966155197468166, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
