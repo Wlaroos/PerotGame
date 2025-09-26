@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class ElementSpawner : MonoBehaviour
 {
@@ -21,8 +22,8 @@ public class ElementSpawner : MonoBehaviour
     [SerializeField] private Vector2 _buffer = new Vector2(100, 100);
     [SerializeField] private bool _unlockAllElements = false;
 
-    // NEW: Assign these in the inspector, one for each button/type
-    [SerializeField] private ElementData[] _elementDataList;
+    // Changed from array to List
+    [SerializeField] private List<ElementData> _elementDataList = new List<ElementData>();
 
     private void Awake()
     {
@@ -45,6 +46,30 @@ public class ElementSpawner : MonoBehaviour
             }
             _spawnButtons[i].interactable = false;
             _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite = _hiddenButtonSprite;
+        }
+
+        // Auto-fill elements list from Resources/SOs/elements
+        _elementDataList.Clear();
+        ElementData[] loadedElements = Resources.LoadAll<ElementData>("SOs/Elements");
+        _elementDataList.AddRange(loadedElements);
+
+        // Dynamically assign button listeners based on button name and element name
+        for (int i = 0; i < _spawnButtons.Length; i++)
+        {
+            Button btn = _spawnButtons[i];
+            string btnName = btn.name;
+
+            // Find the matching element by name
+            ElementData matchedData = _elementDataList.Find(e => e != null && btnName.Contains(e.name));
+            if (matchedData != null)
+            {
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => SpawnElementAtRandomPosition(matchedData));
+            }
+            else
+            {
+                Debug.LogWarning($"ElementSpawner: No ElementData found matching button name '{btnName}'.");
+            }
         }
     }
 
@@ -111,62 +136,62 @@ public class ElementSpawner : MonoBehaviour
     // Example spawn methods for each element, using the ScriptableObjects
     public void SpawnHydrogen()
     {
-        if (_elementDataList.Length > 0 && _elementDataList[0] != null)
+        if (_elementDataList.Count > 0 && _elementDataList[0] != null)
             SpawnElementAtRandomPosition(_elementDataList[0], 2);
     }
     public void SpawnHelium()
     {
-        if (_elementDataList.Length > 1 && _elementDataList[1] != null)
+        if (_elementDataList.Count > 1 && _elementDataList[1] != null)
             SpawnElementAtRandomPosition(_elementDataList[1], 4);
     }
     public void SpawnBeryllium()
     {
-        if (_elementDataList.Length > 2 && _elementDataList[2] != null)
+        if (_elementDataList.Count > 2 && _elementDataList[2] != null)
             SpawnElementAtRandomPosition(_elementDataList[2], 8);
     }
     public void SpawnCarbon()
     {
-        if (_elementDataList.Length > 3 && _elementDataList[3] != null)
+        if (_elementDataList.Count > 3 && _elementDataList[3] != null)
             SpawnElementAtRandomPosition(_elementDataList[3], 12);
     }
     public void SpawnTitanium()
     {
-        if (_elementDataList.Length > 4 && _elementDataList[4] != null)
+        if (_elementDataList.Count > 4 && _elementDataList[4] != null)
             SpawnElementAtRandomPosition(_elementDataList[4]);
     }
     public void SpawnIron()
     {
-        if (_elementDataList.Length > 5 && _elementDataList[5] != null)
+        if (_elementDataList.Count > 5 && _elementDataList[5] != null)
             SpawnElementAtRandomPosition(_elementDataList[5]);
     }
     public void SpawnCopper()
     {
-        if (_elementDataList.Length > 6 && _elementDataList[6] != null)
+        if (_elementDataList.Count > 6 && _elementDataList[6] != null)
             SpawnElementAtRandomPosition(_elementDataList[6]);
     }
     public void SpawnCalcium()
     {
-        if (_elementDataList.Length > 7 && _elementDataList[7] != null)
+        if (_elementDataList.Count > 7 && _elementDataList[7] != null)
             SpawnElementAtRandomPosition(_elementDataList[7]);
     }
     public void SpawnBarium()
     {
-        if (_elementDataList.Length > 8 && _elementDataList[8] != null)
+        if (_elementDataList.Count > 8 && _elementDataList[8] != null)
             SpawnElementAtRandomPosition(_elementDataList[8]);
     }
     public void SpawnSilicon()
     {
-        if (_elementDataList.Length > 9 && _elementDataList[9] != null)
+        if (_elementDataList.Count > 9 && _elementDataList[9] != null)
             SpawnElementAtRandomPosition(_elementDataList[9]);
     }
     public void SpawnAluminum()
     {
-        if (_elementDataList.Length > 10 && _elementDataList[10] != null)
+        if (_elementDataList.Count > 10 && _elementDataList[10] != null)
             SpawnElementAtRandomPosition(_elementDataList[10]);
     }
     public void SpawnMagnesium()
     {
-        if (_elementDataList.Length > 11 && _elementDataList[11] != null)
+        if (_elementDataList.Count > 11 && _elementDataList[11] != null)
             SpawnElementAtRandomPosition(_elementDataList[11]);
     }
 
