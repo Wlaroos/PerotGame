@@ -22,6 +22,9 @@ public class CompoundSpawner : MonoBehaviour
 
     [SerializeField] private bool _unlockAllCompounds = false;
 
+    // NEW: Assign these in the inspector, one for each button/type
+    [SerializeField] private CompoundData[] _compoundDataList;
+
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -48,11 +51,11 @@ public class CompoundSpawner : MonoBehaviour
 
     private void OnDestroy()
     {
-    if (_instance == this)
-    {
-        _instance = null;
+        if (_instance == this)
+        {
+            _instance = null;
+        }
     }
-}
 
     private void Start()
     {
@@ -62,111 +65,134 @@ public class CompoundSpawner : MonoBehaviour
         }
     }
 
-public GameObject SpawnCompoundAtRandomPosition(Compound.CompoundType type)
-{
-    Vector2 randomPosition = new Vector2
-    (
-        Random.Range(SpawnArea.rectTransform.rect.xMin + _buffer.x, SpawnArea.rectTransform.rect.xMax - _buffer.x),
-        Random.Range(SpawnArea.rectTransform.rect.yMin + _buffer.y, SpawnArea.rectTransform.rect.yMax - _buffer.y)
-    );
-
-    Vector3 worldPosition = SpawnArea.rectTransform.TransformPoint(randomPosition);
-
-    return SpawnCompoundAtPosition(type, worldPosition);
-}
-
-public GameObject SpawnCompoundAtPosition(Compound.CompoundType type, Vector3 position)
-{
-    if (compoundPrefab == null)
+    // NEW: Spawn a compound using CompoundData ScriptableObject
+    public GameObject SpawnCompoundAtRandomPosition(CompoundData data)
     {
-        Debug.LogError("CompoundSpawner: Cannot spawn compound, prefab is not assigned.");
-        return null;
+        Vector2 randomPosition = new Vector2
+        (
+            Random.Range(SpawnArea.rectTransform.rect.xMin + _buffer.x, SpawnArea.rectTransform.rect.xMax - _buffer.x),
+            Random.Range(SpawnArea.rectTransform.rect.yMin + _buffer.y, SpawnArea.rectTransform.rect.yMax - _buffer.y)
+        );
+
+        Vector3 worldPosition = SpawnArea.rectTransform.TransformPoint(randomPosition);
+
+        return SpawnCompoundAtPosition(data, worldPosition);
     }
 
-    GameObject newCompound = Instantiate(compoundPrefab, position, Quaternion.identity);
-    Compound compoundComponent = newCompound.GetComponent<Compound>();
-    if (compoundComponent != null)
+    public GameObject SpawnCompoundAtPosition(CompoundData data, Vector3 position)
     {
-        compoundComponent.SetCompound(type);
-    }
-    else
-    {
-        Debug.LogError("CompoundSpawner: Spawned prefab does not have a Compound component.");
-        Destroy(newCompound);
-        return null;
-    }
-
-    return newCompound;
-}
-
-// Spawn methods for each compound type
-public void SpawnOxide()    { SpawnCompoundAtRandomPosition(Compound.CompoundType.Oxide); }
-public void SpawnCarbonate(){ SpawnCompoundAtRandomPosition(Compound.CompoundType.Carbonate); }
-public void SpawnPhosphate(){ SpawnCompoundAtRandomPosition(Compound.CompoundType.Phosphate); }
-public void SpawnSilicate(){ SpawnCompoundAtRandomPosition(Compound.CompoundType.Silicate); }
-public void SpawnSulfate() { SpawnCompoundAtRandomPosition(Compound.CompoundType.Sulfate); }
-
-// Unlock all buttons at once (call from UI)
-public void UnlockAllButtons()
-{
-    for (int i = 0; i < _spawnButtons.Length; i++)
-    {
-        _spawnButtons[i].interactable = true;
-        _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[i];
-    }
-}
-
-// Optional: Individual unlock methods for event-based unlocking
-private void FirstOxide()
-{
-    _spawnButtons[0].interactable = true;
-    _spawnButtons[0].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[0];
-}
-private void FirstCarbonate()
-{
-    _spawnButtons[1].interactable = true;
-    _spawnButtons[1].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[1];
-}
-private void FirstPhosphate()
-{
-    _spawnButtons[2].interactable = true;
-    _spawnButtons[2].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[2];
-}
-private void FirstSilicate()
-{
-    _spawnButtons[3].interactable = true;
-    _spawnButtons[3].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[3];
-}
-private void FirstSulfate()
-{
-    _spawnButtons[4].interactable = true;
-    _spawnButtons[4].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[4];
-}
-
-private void OnDrawGizmos()
-{
-    if (_spawnArea != null)
-    {
-        RectTransform rectTransform = _spawnArea.rectTransform;
-        Vector3[] corners = new Vector3[4];
-        rectTransform.GetWorldCorners(corners);
-
-        Gizmos.color = Color.green;
-        for (int i = 0; i < 4; i++)
+        if (compoundPrefab == null)
         {
-            Gizmos.DrawLine(corners[i], corners[(i + 1) % 4]);
+            Debug.LogError("CompoundSpawner: Cannot spawn compound, prefab is not assigned.");
+            return null;
         }
 
-        Vector3 center = rectTransform.position;
-        Vector2 size = rectTransform.rect.size;
-        Vector3 bufferedMin = rectTransform.TransformPoint(new Vector3(-size.x / 2 + _buffer.x, -size.y / 2 + _buffer.y, 0));
-        Vector3 bufferedMax = rectTransform.TransformPoint(new Vector3(size.x / 2 - _buffer.x, size.y / 2 - _buffer.y, 0));
+        GameObject newCompound = Instantiate(compoundPrefab, position, Quaternion.identity);
+        Compound compoundComponent = newCompound.GetComponent<Compound>();
+        if (compoundComponent != null)
+        {
+            compoundComponent.data = data;
+            // Optionally call Awake() or a custom Init() if you need to refresh visuals
+            // compoundComponent.RefreshVisuals();
+        }
+        else
+        {
+            Debug.LogError("CompoundSpawner: Spawned prefab does not have a Compound component.");
+            Destroy(newCompound);
+            return null;
+        }
 
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(new Vector3(bufferedMin.x, bufferedMin.y, 0), new Vector3(bufferedMax.x, bufferedMin.y, 0));
-        Gizmos.DrawLine(new Vector3(bufferedMax.x, bufferedMin.y, 0), new Vector3(bufferedMax.x, bufferedMax.y, 0));
-        Gizmos.DrawLine(new Vector3(bufferedMax.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMax.y, 0));
-        Gizmos.DrawLine(new Vector3(bufferedMin.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMin.y, 0));
+        return newCompound;
     }
-}
+
+    // Spawn methods for each compound type, using the ScriptableObjects
+    public void SpawnOxide()
+    {
+        if (_compoundDataList.Length > 0 && _compoundDataList[0] != null)
+            SpawnCompoundAtRandomPosition(_compoundDataList[0]);
+    }
+    public void SpawnCarbonate()
+    {
+        if (_compoundDataList.Length > 1 && _compoundDataList[1] != null)
+            SpawnCompoundAtRandomPosition(_compoundDataList[1]);
+    }
+    public void SpawnPhosphate()
+    {
+        if (_compoundDataList.Length > 2 && _compoundDataList[2] != null)
+            SpawnCompoundAtRandomPosition(_compoundDataList[2]);
+    }
+    public void SpawnSilicate()
+    {
+        if (_compoundDataList.Length > 3 && _compoundDataList[3] != null)
+            SpawnCompoundAtRandomPosition(_compoundDataList[3]);
+    }
+    public void SpawnSulfate()
+    {
+        if (_compoundDataList.Length > 4 && _compoundDataList[4] != null)
+            SpawnCompoundAtRandomPosition(_compoundDataList[4]);
+    }
+
+    // Unlock all buttons at once (call from UI)
+    public void UnlockAllButtons()
+    {
+        for (int i = 0; i < _spawnButtons.Length; i++)
+        {
+            _spawnButtons[i].interactable = true;
+            _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[i];
+        }
+    }
+
+    // Optional: Individual unlock methods for event-based unlocking
+    private void FirstOxide()
+    {
+        _spawnButtons[0].interactable = true;
+        _spawnButtons[0].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[0];
+    }
+    private void FirstCarbonate()
+    {
+        _spawnButtons[1].interactable = true;
+        _spawnButtons[1].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[1];
+    }
+    private void FirstPhosphate()
+    {
+        _spawnButtons[2].interactable = true;
+        _spawnButtons[2].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[2];
+    }
+    private void FirstSilicate()
+    {
+        _spawnButtons[3].interactable = true;
+        _spawnButtons[3].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[3];
+    }
+    private void FirstSulfate()
+    {
+        _spawnButtons[4].interactable = true;
+        _spawnButtons[4].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[4];
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (_spawnArea != null)
+        {
+            RectTransform rectTransform = _spawnArea.rectTransform;
+            Vector3[] corners = new Vector3[4];
+            rectTransform.GetWorldCorners(corners);
+
+            Gizmos.color = Color.green;
+            for (int i = 0; i < 4; i++)
+            {
+                Gizmos.DrawLine(corners[i], corners[(i + 1) % 4]);
+            }
+
+            Vector3 center = rectTransform.position;
+            Vector2 size = rectTransform.rect.size;
+            Vector3 bufferedMin = rectTransform.TransformPoint(new Vector3(-size.x / 2 + _buffer.x, -size.y / 2 + _buffer.y, 0));
+            Vector3 bufferedMax = rectTransform.TransformPoint(new Vector3(size.x / 2 - _buffer.x, size.y / 2 - _buffer.y, 0));
+
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(new Vector3(bufferedMin.x, bufferedMin.y, 0), new Vector3(bufferedMax.x, bufferedMin.y, 0));
+            Gizmos.DrawLine(new Vector3(bufferedMax.x, bufferedMin.y, 0), new Vector3(bufferedMax.x, bufferedMax.y, 0));
+            Gizmos.DrawLine(new Vector3(bufferedMax.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMax.y, 0));
+            Gizmos.DrawLine(new Vector3(bufferedMin.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMin.y, 0));
+        }
+    }
 }

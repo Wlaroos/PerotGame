@@ -11,6 +11,14 @@ public class DragAndDrop : MonoBehaviour
     private Collider2D _collider;
     private SortingGroup _sg;
 
+    [Header("Prefabs")]
+    [SerializeField] private GameObject elementPrefab;
+    [SerializeField] private GameObject compoundPrefab;
+    [SerializeField] private GameObject mineralPrefab;
+
+    [Header("Effects")]
+    [SerializeField] private GameObject failParticles;
+
     private void Awake()
     {
         _element = GetComponent<Element>();
@@ -53,27 +61,94 @@ public class DragAndDrop : MonoBehaviour
         if (_collider != null)
         {
             GameObject otherObj = _collider.gameObject;
-            bool crafted = false;
 
-            // Try element crafting
-            if (_element != null && otherObj.GetComponent<Element>() != null && CraftingManager.Instance != null)
-            {
-                crafted = CraftingManager.Instance.TryCraft(_element, otherObj.GetComponent<Element>());
-            }
-            // Try mineral crafting (generalized: any two objects)
-            else if (MineralCraftingManager.Instance != null)
-            {
-                crafted = MineralCraftingManager.Instance.TryCraft(gameObject, otherObj);
-            }
+            // Get data ScriptableObjects for both objects
+            Element elementA = GetComponent<Element>();
+            Element elementB = otherObj.GetComponent<Element>();
+            Compound compoundA = GetComponent<Compound>();
+            Compound compoundB = otherObj.GetComponent<Compound>();
+            Mineral mineralA = GetComponent<Mineral>();
+            Mineral mineralB = otherObj.GetComponent<Mineral>();
 
-            if (crafted)
+            ScriptableObject dataA =
+                (ScriptableObject)elementA?.data ??
+                (ScriptableObject)compoundA?.data ??
+                (ScriptableObject)mineralA?.data;
+
+            ScriptableObject dataB =
+                (ScriptableObject)elementB?.data ??
+                (ScriptableObject)compoundB?.data ??
+                (ScriptableObject)mineralB?.data;
+
+            // Try crafting
+            ScriptableObject result = CraftingManager.Instance.TryCraft(dataA, dataB);
+
+            if (result != null)
             {
-                _collider = null; // Clear reference before destroying
+                // Instantiate the result prefab and assign the ScriptableObject data
+                Vector3 spawnPosition = (transform.position + otherObj.transform.position) / 2f;
+
+                if (result is MineralData mineralData)
+                {
+                    GameObject mineralObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity);
+                    Mineral mineralComponent = mineralObj.GetComponent<Mineral>();
+                    if (mineralComponent != null)
+                    {
+                        mineralComponent.data = mineralData;
+                    }
+                }
+                else if (result is CompoundData compoundData)
+                {
+                    GameObject compoundObj = Instantiate(compoundPrefab, spawnPosition, Quaternion.identity);
+                    Compound compoundComponent = compoundObj.GetComponent<Compound>();
+                    if (compoundComponent != null)
+                    {
+                        compoundComponent.data = compoundData;
+                    }
+                }
+                else if (result is ElementData elementData)
+                {
+                    GameObject elementObj = Instantiate(elementPrefab, spawnPosition, Quaternion.identity);
+                    Element elementComponent = elementObj.GetComponent<Element>();
+                    if (elementComponent != null)
+                    {
+                        elementComponent.data = elementData;
+                        elementComponent.isotopeNumber = elementData.defaultIsotopeNumber;
+                        elementComponent.SetNumberSprites(elementComponent.isotopeNumber);
+                    }
+                }
+
                 Destroy(otherObj);
-                Destroy(gameObject); // Destroy this object last
+                Destroy(gameObject);
+            }
+            else
+            {
+                // Separation logic: always separate on failed craft
+                Vector3 separationDirection = (otherObj.transform.position - transform.position);
+                if (separationDirection == Vector3.zero)
+                {
+                    separationDirection = Random.insideUnitCircle.normalized;
+                }
+                else
+                {
+                    separationDirection = separationDirection.normalized;
+                }
+                float separationDistance = 0.33f;
+                if (TryGetComponent(out Collider colA) && otherObj.TryGetComponent(out Collider colB))
+                {
+                    separationDistance += (colA.bounds.size.magnitude + colB.bounds.size.magnitude) / 2;
+                }
+                transform.position -= separationDirection * separationDistance;
+                otherObj.transform.position += separationDirection * separationDistance;
+
+                // Particle effect at midpoint
+                Vector3 failPosition = (transform.position + otherObj.transform.position) / 2f;
+                if (failParticles != null)
+                {
+                    Instantiate(failParticles, failPosition, Quaternion.identity);
+                }
             }
         }
-
         if (_sg != null)
             _sg.sortingLayerName = "Default";
     }

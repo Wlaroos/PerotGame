@@ -18,19 +18,11 @@ public class ElementSpawner : MonoBehaviour
     [SerializeField] private Sprite _hiddenButtonSprite;
     public Sprite HiddenButtonSprite => _hiddenButtonSprite;
 
-    [SerializeField] private Vector2 _buffer = new Vector2(100,100); // Serialized buffer field to adjust in the Inspector
+    [SerializeField] private Vector2 _buffer = new Vector2(100, 100);
     [SerializeField] private bool _unlockAllElements = false;
 
-    private void OnDisable()
-    {
-        if (CraftingManager.Instance != null)
-        {
-            CraftingManager.Instance.OnHydrogen2Crafted.RemoveListener(FirstHydrogen);
-            CraftingManager.Instance.OnHelium4Crafted.RemoveListener(FirstHelium);
-            CraftingManager.Instance.OnBeryllium8Crafted.RemoveListener(FirstBeryllium);
-            CraftingManager.Instance.OnCarbon12Crafted.RemoveListener(FirstCarbon);
-        }
-    }
+    // NEW: Assign these in the inspector, one for each button/type
+    [SerializeField] private ElementData[] _elementDataList;
 
     private void Awake()
     {
@@ -51,10 +43,11 @@ public class ElementSpawner : MonoBehaviour
             {
                 Debug.LogError($"ElementSpawner: Button at index {i} does not have a sprite.");
             }
-            _spawnButtons[i].interactable = false; // Disable all buttons initially
-            _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite = _hiddenButtonSprite; // Set to hidden sprite
+            _spawnButtons[i].interactable = false;
+            _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite = _hiddenButtonSprite;
         }
     }
+
     private void OnDestroy()
     {
         if (_instance == this)
@@ -70,21 +63,13 @@ public class ElementSpawner : MonoBehaviour
             Debug.LogWarning("ElementSpawner: No element prefab assigned.");
         }
 
-        if (CraftingManager.Instance != null)
-        {
-            CraftingManager.Instance.OnHydrogen2Crafted.AddListener(FirstHydrogen);
-            CraftingManager.Instance.OnHelium4Crafted.AddListener(FirstHelium);
-            CraftingManager.Instance.OnBeryllium8Crafted.AddListener(FirstBeryllium);
-            CraftingManager.Instance.OnCarbon12Crafted.AddListener(FirstCarbon);
-        }
-
         if (_unlockAllElements)
         {
             UnlockAllButtons();
         }
     }
 
-    public GameObject SpawnElementAtRandomPosition(Element.ElementType type, int isotopeNumber = 1)
+    public GameObject SpawnElementAtRandomPosition(ElementData data, int isotopeNumber = -1)
     {
         Vector2 randomPosition = new Vector2
         (
@@ -94,12 +79,10 @@ public class ElementSpawner : MonoBehaviour
 
         Vector3 worldPosition = SpawnArea.rectTransform.TransformPoint(randomPosition);
 
-        //Debug.Log(worldPosition);
-
-        return SpawnElementAtPosition(type, isotopeNumber, worldPosition);
+        return SpawnElementAtPosition(data, isotopeNumber, worldPosition);
     }
 
-    public GameObject SpawnElementAtPosition(Element.ElementType type, int isotopeNumber, Vector3 position)
+    public GameObject SpawnElementAtPosition(ElementData data, int isotopeNumber, Vector3 position)
     {
         if (elementPrefab == null)
         {
@@ -111,7 +94,9 @@ public class ElementSpawner : MonoBehaviour
         Element elementComponent = newElement.GetComponent<Element>();
         if (elementComponent != null)
         {
-            elementComponent.SetElement(type, isotopeNumber);
+            elementComponent.data = data;
+            elementComponent.isotopeNumber = isotopeNumber < 0 ? data.defaultIsotopeNumber : isotopeNumber;
+            // Optionally refresh visuals if needed
         }
         else
         {
@@ -123,79 +108,66 @@ public class ElementSpawner : MonoBehaviour
         return newElement;
     }
 
-
-    public void SpawnHydrogen()   { SpawnElementAtRandomPosition(Element.ElementType.Hydrogen, 2); }
-    public void SpawnHelium()     { SpawnElementAtRandomPosition(Element.ElementType.Helium, 4); }
-    public void SpawnBeryllium()  { SpawnElementAtRandomPosition(Element.ElementType.Beryllium, 8); }
-    public void SpawnCarbon()     { SpawnElementAtRandomPosition(Element.ElementType.Carbon, 12); }
-    public void SpawnTitanium()   { SpawnElementAtRandomPosition(Element.ElementType.Titanium, -1); }
-    public void SpawnIron()       { SpawnElementAtRandomPosition(Element.ElementType.Iron, -1); }
-    public void SpawnCopper()     { SpawnElementAtRandomPosition(Element.ElementType.Copper, -1); }
-    public void SpawnCalcium()    { SpawnElementAtRandomPosition(Element.ElementType.Calcium, -1); }
-    public void SpawnBarium()     { SpawnElementAtRandomPosition(Element.ElementType.Barium, -1); }
-    public void SpawnSilicon()    { SpawnElementAtRandomPosition(Element.ElementType.Silicon, -1); }
-    public void SpawnAluminum()   { SpawnElementAtRandomPosition(Element.ElementType.Aluminum, -1); }
-    public void SpawnMagnesium()  { SpawnElementAtRandomPosition(Element.ElementType.Magnesium, -1); }
-
-    private void FirstHydrogen()
+    // Example spawn methods for each element, using the ScriptableObjects
+    public void SpawnHydrogen()
     {
-        _spawnButtons[0].interactable = true;
-        _spawnButtons[0].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[0];
+        if (_elementDataList.Length > 0 && _elementDataList[0] != null)
+            SpawnElementAtRandomPosition(_elementDataList[0], 2);
     }
-    private void FirstHelium()
+    public void SpawnHelium()
     {
-        _spawnButtons[1].interactable = true;
-        _spawnButtons[1].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[1];
+        if (_elementDataList.Length > 1 && _elementDataList[1] != null)
+            SpawnElementAtRandomPosition(_elementDataList[1], 4);
     }
-    private void FirstBeryllium()
+    public void SpawnBeryllium()
     {
-        _spawnButtons[2].interactable = true;
-        _spawnButtons[2].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[2];
+        if (_elementDataList.Length > 2 && _elementDataList[2] != null)
+            SpawnElementAtRandomPosition(_elementDataList[2], 8);
     }
-    private void FirstCarbon()
+    public void SpawnCarbon()
     {
-        _spawnButtons[3].interactable = true;
-        _spawnButtons[3].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[3];
+        if (_elementDataList.Length > 3 && _elementDataList[3] != null)
+            SpawnElementAtRandomPosition(_elementDataList[3], 12);
     }
-    private void FirstTitanium()
+    public void SpawnTitanium()
     {
-        _spawnButtons[4].interactable = true;
-        _spawnButtons[4].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[4];
+        if (_elementDataList.Length > 4 && _elementDataList[4] != null)
+            SpawnElementAtRandomPosition(_elementDataList[4]);
     }
-    private void FirstIron()
+    public void SpawnIron()
     {
-        _spawnButtons[5].interactable = true;
-        _spawnButtons[5].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[5];
+        if (_elementDataList.Length > 5 && _elementDataList[5] != null)
+            SpawnElementAtRandomPosition(_elementDataList[5]);
     }
-    private void FirstCopper()
+    public void SpawnCopper()
     {
-        _spawnButtons[6].interactable = true;
-        _spawnButtons[6].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[6];
+        if (_elementDataList.Length > 6 && _elementDataList[6] != null)
+            SpawnElementAtRandomPosition(_elementDataList[6]);
     }
-    private void FirstCalcium()
+    public void SpawnCalcium()
     {
-        _spawnButtons[7].interactable = true;
-        _spawnButtons[7].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[7];
+        if (_elementDataList.Length > 7 && _elementDataList[7] != null)
+            SpawnElementAtRandomPosition(_elementDataList[7]);
     }
-    private void FirstBarium()
+    public void SpawnBarium()
     {
-        _spawnButtons[8].interactable = true;
-        _spawnButtons[8].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[8];
+        if (_elementDataList.Length > 8 && _elementDataList[8] != null)
+            SpawnElementAtRandomPosition(_elementDataList[8]);
     }
-    private void FirstSilicon()
+    public void SpawnSilicon()
     {
-        _spawnButtons[9].interactable = true;
-        _spawnButtons[9].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[9];
+        if (_elementDataList.Length > 9 && _elementDataList[9] != null)
+            SpawnElementAtRandomPosition(_elementDataList[9]);
     }
-    private void FirstAluminum()
+    public void SpawnAluminum()
     {
-        _spawnButtons[10].interactable = true;
-        _spawnButtons[10].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[10];
+        if (_elementDataList.Length > 10 && _elementDataList[10] != null)
+            SpawnElementAtRandomPosition(_elementDataList[10]);
     }
-    private void FirstMagnesium()
+    public void SpawnMagnesium()
     {
-        _spawnButtons[11].interactable = true;
-        _spawnButtons[11].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[11];
+        if (_elementDataList.Length > 11 && _elementDataList[11] != null)
+            SpawnElementAtRandomPosition(_elementDataList[11]);
     }
 
     public void UnlockAllButtons()
