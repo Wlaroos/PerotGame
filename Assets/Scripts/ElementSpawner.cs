@@ -19,6 +19,7 @@ public class ElementSpawner : MonoBehaviour
     public Sprite HiddenButtonSprite => _hiddenButtonSprite;
 
     [SerializeField] private Vector2 _buffer = new Vector2(100,100); // Serialized buffer field to adjust in the Inspector
+    [SerializeField] private bool _unlockAllElements = false;
 
     private void OnDisable()
     {
@@ -77,7 +78,10 @@ public class ElementSpawner : MonoBehaviour
             CraftingManager.Instance.OnCarbon12Crafted.AddListener(FirstCarbon);
         }
 
-        UnlockAllButtons();
+        if (_unlockAllElements)
+        {
+            UnlockAllButtons();
+        }
     }
 
     public GameObject SpawnElementAtRandomPosition(Element.ElementType type, int isotopeNumber = 1)
@@ -120,18 +124,18 @@ public class ElementSpawner : MonoBehaviour
     }
 
 
-    public void SpawnHydrogen()   { SpawnElementAtRandomPosition(Element.ElementType.Hydrogen, 1); }
-    public void SpawnHelium()     { SpawnElementAtRandomPosition(Element.ElementType.Helium, 1); }
-    public void SpawnBeryllium()  { SpawnElementAtRandomPosition(Element.ElementType.Beryllium, 1); }
-    public void SpawnCarbon()     { SpawnElementAtRandomPosition(Element.ElementType.Carbon, 1); }
-    public void SpawnTitanium()   { SpawnElementAtRandomPosition(Element.ElementType.Titanium, 1); }
-    public void SpawnIron()       { SpawnElementAtRandomPosition(Element.ElementType.Iron, 1); }
-    public void SpawnCopper()     { SpawnElementAtRandomPosition(Element.ElementType.Copper, 1); }
-    public void SpawnCalcium()    { SpawnElementAtRandomPosition(Element.ElementType.Calcium, 1); }
-    public void SpawnBarium()     { SpawnElementAtRandomPosition(Element.ElementType.Barium, 1); }
-    public void SpawnSilicon()    { SpawnElementAtRandomPosition(Element.ElementType.Silicon, 1); }
-    public void SpawnAluminum()   { SpawnElementAtRandomPosition(Element.ElementType.Aluminum, 1); }
-    public void SpawnMagnesium()  { SpawnElementAtRandomPosition(Element.ElementType.Magnesium, 1); }
+    public void SpawnHydrogen()   { SpawnElementAtRandomPosition(Element.ElementType.Hydrogen, 2); }
+    public void SpawnHelium()     { SpawnElementAtRandomPosition(Element.ElementType.Helium, 4); }
+    public void SpawnBeryllium()  { SpawnElementAtRandomPosition(Element.ElementType.Beryllium, 8); }
+    public void SpawnCarbon()     { SpawnElementAtRandomPosition(Element.ElementType.Carbon, 12); }
+    public void SpawnTitanium()   { SpawnElementAtRandomPosition(Element.ElementType.Titanium, -1); }
+    public void SpawnIron()       { SpawnElementAtRandomPosition(Element.ElementType.Iron, -1); }
+    public void SpawnCopper()     { SpawnElementAtRandomPosition(Element.ElementType.Copper, -1); }
+    public void SpawnCalcium()    { SpawnElementAtRandomPosition(Element.ElementType.Calcium, -1); }
+    public void SpawnBarium()     { SpawnElementAtRandomPosition(Element.ElementType.Barium, -1); }
+    public void SpawnSilicon()    { SpawnElementAtRandomPosition(Element.ElementType.Silicon, -1); }
+    public void SpawnAluminum()   { SpawnElementAtRandomPosition(Element.ElementType.Aluminum, -1); }
+    public void SpawnMagnesium()  { SpawnElementAtRandomPosition(Element.ElementType.Magnesium, -1); }
 
     private void FirstHydrogen()
     {

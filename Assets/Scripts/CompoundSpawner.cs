@@ -20,6 +20,8 @@ public class CompoundSpawner : MonoBehaviour
 
     [SerializeField] private Vector2 _buffer = new Vector2(100, 100);
 
+    [SerializeField] private bool _unlockAllCompounds = false;
+
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -52,10 +54,13 @@ public class CompoundSpawner : MonoBehaviour
     }
 }
 
-private void Start()
-{
-    UnlockAllButtons();
-}
+    private void Start()
+    {
+        if (_unlockAllCompounds)
+        {
+            UnlockAllButtons();
+        }
+    }
 
 public GameObject SpawnCompoundAtRandomPosition(Compound.CompoundType type)
 {

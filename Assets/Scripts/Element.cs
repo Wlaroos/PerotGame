@@ -57,9 +57,18 @@ public class Element : MonoBehaviour
 
     private void SetNumberSprites(int number)
     {
+        if (number < 0)
+        {
+            // Hide both number sprites if isotope number is -1
+            _numberSprite.gameObject.SetActive(false);
+            _numberSprite2.gameObject.SetActive(false);
+            return;
+        }
+
         if (number < 10)
         {
             _numberSprite.sprite = _numberSprites[number];
+            _numberSprite.gameObject.SetActive(true);
             _numberSprite2.gameObject.SetActive(false); // Hide the second digit
         }
         else
@@ -69,6 +78,7 @@ public class Element : MonoBehaviour
 
             _numberSprite.sprite = _numberSprites[tens];
             _numberSprite2.sprite = _numberSprites[ones];
+            _numberSprite.gameObject.SetActive(true);
             _numberSprite2.gameObject.SetActive(true); // Show the second digit
         }
     }

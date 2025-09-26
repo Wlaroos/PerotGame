@@ -1659,6 +1659,7 @@ MonoBehaviour:
   - {fileID: 928395928}
   _hiddenButtonSprite: {fileID: 223053218, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
   _buffer: {x: 400, y: 150}
+  _unlockAllElements: 1
 --- !u!4 &937413474
 Transform:
   m_ObjectHideFlags: 0
@@ -2648,6 +2649,7 @@ MonoBehaviour:
   - {fileID: 146114331}
   _hiddenButtonSprite: {fileID: 223053218, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
   _buffer: {x: 400, y: 150}
+  _unlockAllCompounds: 1
 --- !u!4 &1206779054
 Transform:
   m_ObjectHideFlags: 0
