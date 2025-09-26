@@ -1,31 +1,34 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+// Spawns compound objects and manages compound spawn buttons
 public class CompoundSpawner : MonoBehaviour
 {
     private static CompoundSpawner _instance;
     public static CompoundSpawner Instance => _instance;
 
-    [SerializeField] private GameObject compoundPrefab;
+    [SerializeField] private GameObject compoundPrefab; // Prefab for spawning compounds
     public GameObject CompoundPrefab => compoundPrefab;
 
-    [SerializeField] private Image _spawnArea;
+    [SerializeField] private Image _spawnArea; // UI area where compounds can spawn
     public Image SpawnArea => _spawnArea;
 
-    [SerializeField] private Button[] _spawnButtons;
-    private Sprite[] _spawnButtonSprites;
+    [SerializeField] private Button[] _spawnButtons; // Buttons to spawn each compound
+    private Sprite[] _spawnButtonSprites; // Stores the normal sprites for each button
 
-    [SerializeField] private Sprite _hiddenButtonSprite;
+    [SerializeField] private Sprite _hiddenButtonSprite; // Sprite for locked/hidden buttons
     public Sprite HiddenButtonSprite => _hiddenButtonSprite;
 
-    [SerializeField] private Vector2 _buffer = new Vector2(100, 100);
+    [SerializeField] private Vector2 _buffer = new Vector2(100, 100); // Padding from spawn area edges
 
-    [SerializeField] private bool _unlockAllCompounds = false;
+    [SerializeField] private bool _unlockAllCompounds = false; // If true, unlock all buttons at start
 
-    [SerializeField] private CompoundData[] _compoundDataList;
+    [SerializeField] private CompoundData[] _compoundDataList; // List of compound data for each button
 
+    // Runs when the object is created
     private void Awake()
     {
+        // Set up singleton pattern
         if (_instance != null && _instance != this)
         {
             Destroy(this.gameObject);
@@ -35,6 +38,7 @@ public class CompoundSpawner : MonoBehaviour
             _instance = this;
         }
 
+        // Store the original sprites for each button and lock them
         _spawnButtonSprites = new Sprite[_spawnButtons.Length];
         for (int i = 0; i < _spawnButtons.Length; i++)
         {
@@ -48,6 +52,7 @@ public class CompoundSpawner : MonoBehaviour
         }
     }
 
+    // When this object is destroyed
     private void OnDestroy()
     {
         if (_instance == this)
@@ -56,15 +61,17 @@ public class CompoundSpawner : MonoBehaviour
         }
     }
 
+    // Runs at the start of the game
     private void Start()
     {
+        // Optionally unlock all buttons at the start
         if (_unlockAllCompounds)
         {
             UnlockAllButtons();
         }
     }
 
-    //Spawn a compound using CompoundData ScriptableObject
+    // Spawn a compound at a random position inside the spawn area
     public GameObject SpawnCompoundAtRandomPosition(CompoundData data)
     {
         Vector2 randomPosition = new Vector2
@@ -78,6 +85,7 @@ public class CompoundSpawner : MonoBehaviour
         return SpawnCompoundAtPosition(data, worldPosition);
     }
 
+    // Spawn a compound at a specific position
     public GameObject SpawnCompoundAtPosition(CompoundData data, Vector3 position)
     {
         if (compoundPrefab == null)
@@ -167,6 +175,7 @@ public class CompoundSpawner : MonoBehaviour
         _spawnButtons[4].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[4];
     }
 
+    // Draws the spawn area and buffer in the editor for debugging
     private void OnDrawGizmos()
     {
         if (_spawnArea != null)

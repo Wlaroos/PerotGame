@@ -1,94 +1,101 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
+// Lets you drag, drop, and combine objects in the game
 public class DragAndDrop : MonoBehaviour
 {
-    [SerializeField] private float _dragSpeed = 25f; // Speed of interpolation
-    private Vector2 _mouseOffset;
-    private Element _element;
-    private Compound _compound;
-    private Mineral _mineral;
-    private Collider2D _collider;
-    private SortingGroup _sg;
+    [SerializeField] private float _dragSpeed = 25f; // How fast the object follows the mouse
+    private Vector2 _mouseOffset; // Distance from mouse to object when dragging starts
+    private Element _element;     // Reference if this is an element
+    private Compound _compound;   // Reference if this is a compound
+    private Mineral _mineral;     // Reference if this is a mineral
+    private Collider2D _collider; // The collider we're overlapping with
+    private SortingGroup _sg;     // For controlling draw order
 
     [Header("Prefabs")]
-    [SerializeField] private GameObject elementPrefab;
-    [SerializeField] private GameObject compoundPrefab;
-    [SerializeField] private GameObject mineralPrefab;
+    [SerializeField] private GameObject elementPrefab;   // Prefab for new elements
+    [SerializeField] private GameObject compoundPrefab;  // Prefab for new compounds
+    [SerializeField] private GameObject mineralPrefab;   // Prefab for new minerals
 
     [Header("Effects")]
-    [SerializeField] private GameObject craftParticles;
-    [SerializeField] private GameObject failParticles;
+    [SerializeField] private GameObject craftParticles;  // Effect when crafting works
+    [SerializeField] private GameObject failParticles;   // Effect when crafting fails
 
+    // Runs when the object is created
     private void Awake()
     {
+        // Get references to possible components
         _element = GetComponent<Element>();
         _compound = GetComponent<Compound>();
         _mineral = GetComponent<Mineral>();
 
+        // Warn if none are found
         if (_element == null && _compound == null && _mineral == null)
         {
             Debug.LogError("DragAndDrop: Missing Element, Compound, or Mineral component");
         }
 
+        // Get sorting group for draw order
         _sg = GetComponent<SortingGroup>();
     }
 
+    // Gets the mouse position in world space
     private Vector2 GetMouseWorldPosition()
     {
-        // Convert screen position to world position in 2D
         return Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }
 
+    // When you click on the object
     private void OnMouseDown()
     {
-        // Calculate the offset between the object's position and the mouse position
+        // Remember how far the mouse is from the object's center
         _mouseOffset = (Vector2)transform.position - GetMouseWorldPosition();
+        // Bring object to front while dragging
         if (_sg != null)
             _sg.sortingLayerName = "Dragging";
     }
 
+    // While dragging the object
     private void OnMouseDrag()
     {
-        // Calculate the target position based on the mouse position and offset
+        // Move object smoothly to follow the mouse
         Vector2 targetPosition = GetMouseWorldPosition() + _mouseOffset;
-
-        // Smoothly interpolate the object's position towards the target position
         transform.position = Vector2.Lerp(transform.position, targetPosition, _dragSpeed * Time.deltaTime);
     }
 
+    // Gets the data (element, compound, or mineral) from another object
+    private ScriptableObject GetDataFromGameObject(GameObject obj)
+    {
+        var element = obj.GetComponent<Element>();
+        if (element != null) return element.data;
+        var compound = obj.GetComponent<Compound>();
+        if (compound != null) return compound.data;
+        var mineral = obj.GetComponent<Mineral>();
+        if (mineral != null) return mineral.data;
+        return null;
+    }
+
+    // When you let go of the mouse
     private void OnMouseUp()
     {
         if (_collider != null)
         {
             GameObject otherObj = _collider.gameObject;
 
-            // Get data ScriptableObjects for both objects
-            Element elementA = GetComponent<Element>();
-            Element elementB = otherObj.GetComponent<Element>();
-            Compound compoundA = GetComponent<Compound>();
-            Compound compoundB = otherObj.GetComponent<Compound>();
-            Mineral mineralA = GetComponent<Mineral>();
-            Mineral mineralB = otherObj.GetComponent<Mineral>();
+            // Get this object's data
+            ScriptableObject dataA = (ScriptableObject)_element?.data ?? (ScriptableObject)_compound?.data ?? (ScriptableObject)_mineral?.data;
+            // Get the other object's data
+            ScriptableObject dataB = GetDataFromGameObject(otherObj);
 
-            ScriptableObject dataA =
-                (ScriptableObject)elementA?.data ??
-                (ScriptableObject)compoundA?.data ??
-                (ScriptableObject)mineralA?.data;
-
-            ScriptableObject dataB =
-                (ScriptableObject)elementB?.data ??
-                (ScriptableObject)compoundB?.data ??
-                (ScriptableObject)mineralB?.data;
-
-            // Try crafting
+            // Try to craft a new object from the two
             ScriptableObject result = CraftingManager.Instance.TryCraft(dataA, dataB);
 
+            // Where to spawn the result (between the two objects)
             Vector3 spawnPosition = (transform.position + otherObj.transform.position) / 2f;
 
             if (result != null)
             {
-                // Instantiate the result prefab and assign the ScriptableObject data
+                // If crafting worked, spawn the right type of object
                 if (result is MineralData mineralData)
                 {
                     GameObject mineralObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity);
@@ -121,21 +128,23 @@ public class DragAndDrop : MonoBehaviour
                     }
                 }
 
-                // Crafting particle effect
+                // Play crafting effect
                 if (craftParticles != null)
                 {
                     Instantiate(craftParticles, spawnPosition, Quaternion.Euler(-90, 0, 0));
                 }
 
+                // Remove the old objects
                 Destroy(otherObj);
                 Destroy(gameObject);
             }
             else
             {
-                // Separation logic: always separate on failed craft
+                // If crafting failed, push the objects apart
                 Vector3 separationDirection = (otherObj.transform.position - transform.position);
                 if (separationDirection == Vector3.zero)
                 {
+                    // If they're on top of each other, pick a random direction
                     separationDirection = Random.insideUnitCircle.normalized;
                 }
                 else
@@ -143,14 +152,16 @@ public class DragAndDrop : MonoBehaviour
                     separationDirection = separationDirection.normalized;
                 }
                 float separationDistance = 0.33f;
+                // Make sure they don't overlap, based on their size
                 if (TryGetComponent(out Collider colA) && otherObj.TryGetComponent(out Collider colB))
                 {
                     separationDistance += (colA.bounds.size.magnitude + colB.bounds.size.magnitude) / 2;
                 }
+                // Move both objects away from each other
                 transform.position -= separationDirection * separationDistance;
                 otherObj.transform.position += separationDirection * separationDistance;
 
-                // Particle effect at midpoint
+                // Play fail effect at the midpoint
                 Vector3 failPosition = (transform.position + otherObj.transform.position) / 2f;
                 if (failParticles != null)
                 {
@@ -158,15 +169,18 @@ public class DragAndDrop : MonoBehaviour
                 }
             }
         }
+        // Put object back to normal draw order
         if (_sg != null)
             _sg.sortingLayerName = "Default";
     }
 
+    // When this object touches another collider
     private void OnTriggerEnter2D(Collider2D collision)
     {
         _collider = collision;
     }
 
+    // When this object stops touching a collider
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (_collider == collision)
@@ -175,12 +189,13 @@ public class DragAndDrop : MonoBehaviour
         }
     }
 
+    // Checks for right-click to delete this object
     private void Update()
     {
-        // Delete this GameObject on right mouse button click while mouse is over it
+        // If right mouse button is pressed
         if (Input.GetMouseButtonDown(1)) // 1 = right mouse button
         {
-            // Check if mouse is over this object using a raycast
+            // Check if mouse is over this object
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Collider2D hit = Physics2D.OverlapPoint(mousePos);
             if (hit != null && hit.gameObject == gameObject)

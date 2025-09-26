@@ -2,22 +2,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+// Handles all crafting logic in the game
 public class CraftingManager : MonoBehaviour
 {
-    public static CraftingManager Instance { get; private set; }
+    public static CraftingManager Instance { get; private set; } // Singleton
 
-    public List<CraftingRecipe> _recipes = new List<CraftingRecipe>();
+    public List<CraftingRecipe> _recipes = new List<CraftingRecipe>(); // All recipes
 
-    // Track which recipes have been crafted at least once
+    // Keeps track of recipes crafted at least once
     private HashSet<CraftingRecipe> _craftedRecipes = new HashSet<CraftingRecipe>();
 
-    // Event that fires the first time a recipe is crafted
+    // Event for when a recipe is crafted for the first time
     [System.Serializable]
     public class RecipeCraftedEvent : UnityEvent<CraftingRecipe> { }
     public RecipeCraftedEvent OnFirstTimeRecipeCrafted = new RecipeCraftedEvent();
 
     private void Awake()
     {
+        // Set up singleton
         if (Instance != null && Instance != this)
         {
             Destroy(this.gameObject);
@@ -27,27 +29,29 @@ public class CraftingManager : MonoBehaviour
             Instance = this;
         }
 
-        // Auto-fill recipes list from Resources/SOs/recipes
+        // Load all recipes from Resources/SOs/recipes
         _recipes.Clear();
         CraftingRecipe[] loadedRecipes = Resources.LoadAll<CraftingRecipe>("SOs/recipes");
         _recipes.AddRange(loadedRecipes);
     }
 
+    // Try to craft something from two ingredients
     public ScriptableObject TryCraft(ScriptableObject a, ScriptableObject b)
     {
         foreach (var recipe in _recipes)
         {
+            // Check if the two ingredients match (order doesn't matter)
             if ((recipe.inputA == a && recipe.inputB == b) || (recipe.inputA == b && recipe.inputB == a))
             {
-                // Fire first-time event if not already crafted
+                // If this is the first time, fire the event
                 if (!_craftedRecipes.Contains(recipe))
                 {
                     _craftedRecipes.Add(recipe);
                     OnFirstTimeRecipeCrafted.Invoke(recipe);
                 }
-                return recipe.output;
+                return recipe.output; // Return the result
             }
         }
-        return null;
+        return null; // No match found
     }
 }

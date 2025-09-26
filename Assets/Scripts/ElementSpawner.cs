@@ -2,31 +2,33 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
+// Spawns element objects and manages element spawn buttons
 public class ElementSpawner : MonoBehaviour
 {
     private static ElementSpawner _instance;
     public static ElementSpawner Instance => _instance;
 
-    [SerializeField] private GameObject elementPrefab;
+    [SerializeField] private GameObject elementPrefab; // Prefab for spawning elements
     public GameObject ElementPrefab => elementPrefab;
 
-    [SerializeField] private Image _spawnArea;
+    [SerializeField] private Image _spawnArea; // UI area where elements can spawn
     public Image SpawnArea => _spawnArea;
 
-    [SerializeField] private Button[] _spawnButtons;
-    private Sprite[] _spawnButtonSprites;
+    [SerializeField] private Button[] _spawnButtons; // Buttons to spawn each element
+    private Sprite[] _spawnButtonSprites; // Stores the normal sprites for each button
 
-    [SerializeField] private Sprite _hiddenButtonSprite;
+    [SerializeField] private Sprite _hiddenButtonSprite; // Sprite for locked/hidden buttons
     public Sprite HiddenButtonSprite => _hiddenButtonSprite;
 
-    [SerializeField] private Vector2 _buffer = new Vector2(100, 100);
-    [SerializeField] private bool _unlockAllElements = false;
+    [SerializeField] private Vector2 _buffer = new Vector2(100, 100); // Padding from spawn area edges
+    [SerializeField] private bool _unlockAllElements = false; // If true, unlock all buttons at start
 
-    // Changed from array to List
-    [SerializeField] private List<ElementData> _elementDataList = new List<ElementData>();
+    [SerializeField] private List<ElementData> _elementDataList = new List<ElementData>(); // List of element data for each button
 
+    // Runs when the object is created
     private void Awake()
     {
+        // Set up singleton pattern
         if (_instance != null && _instance != this)
         {
             Destroy(this.gameObject);
@@ -36,6 +38,7 @@ public class ElementSpawner : MonoBehaviour
             _instance = this;
         }
 
+        // Store the original sprites for each button and lock them
         _spawnButtonSprites = new Sprite[_spawnButtons.Length];
         for (int i = 0; i < _spawnButtons.Length; i++)
         {
@@ -48,12 +51,12 @@ public class ElementSpawner : MonoBehaviour
             _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite = _hiddenButtonSprite;
         }
 
-        // Auto-fill elements list from Resources/SOs/elements
+        // Load all element data from Resources and add to the list
         _elementDataList.Clear();
         ElementData[] loadedElements = Resources.LoadAll<ElementData>("SOs/Elements");
         _elementDataList.AddRange(loadedElements);
 
-        // Dynamically assign button listeners based on button name and element name
+        // Set up button listeners so each button spawns the right element
         for (int i = 0; i < _spawnButtons.Length; i++)
         {
             Button btn = _spawnButtons[i];
@@ -73,6 +76,7 @@ public class ElementSpawner : MonoBehaviour
         }
     }
 
+    // When this object is destroyed
     private void OnDestroy()
     {
         if (_instance == this)
@@ -81,6 +85,7 @@ public class ElementSpawner : MonoBehaviour
         }
     }
 
+    // Runs at the start of the game
     private void Start()
     {
         if (elementPrefab == null)
@@ -88,12 +93,14 @@ public class ElementSpawner : MonoBehaviour
             Debug.LogWarning("ElementSpawner: No element prefab assigned.");
         }
 
+        // Optionally unlock all buttons at the start
         if (_unlockAllElements)
         {
             UnlockAllButtons();
         }
     }
 
+    // Spawn an element at a random position inside the spawn area
     public GameObject SpawnElementAtRandomPosition(ElementData data, int isotopeNumber = -1)
     {
         Vector2 randomPosition = new Vector2
@@ -107,6 +114,7 @@ public class ElementSpawner : MonoBehaviour
         return SpawnElementAtPosition(data, isotopeNumber, worldPosition);
     }
 
+    // Spawn an element at a specific position
     public GameObject SpawnElementAtPosition(ElementData data, int isotopeNumber, Vector3 position)
     {
         if (elementPrefab == null)
@@ -195,6 +203,7 @@ public class ElementSpawner : MonoBehaviour
             SpawnElementAtRandomPosition(_elementDataList[11]);
     }
 
+    // Unlock all buttons at once (call from UI)
     public void UnlockAllButtons()
     {
         for (int i = 0; i < _spawnButtons.Length; i++)
@@ -204,6 +213,7 @@ public class ElementSpawner : MonoBehaviour
         }
     }
 
+    // Draws the spawn area and buffer in the editor for debugging
     private void OnDrawGizmos()
     {
         if (_spawnArea != null)

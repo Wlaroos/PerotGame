@@ -1,18 +1,21 @@
 using UnityEngine;
 
+// Controls how a mineral looks and stores its info
 public class Mineral : MonoBehaviour
 {
-    public MineralData data;
+    public MineralData data; // Info about this mineral
 
-    [SerializeField] private SpriteRenderer _mineralSprite;
-    [SerializeField] private SpriteRenderer _mineralBigSprite;
-    [SerializeField] private SpriteRenderer _backgroundSprite;
+    [SerializeField] private SpriteRenderer _mineralSprite;    // Main picture of the mineral
+    [SerializeField] private SpriteRenderer _mineralBigSprite; // Big version of the mineral sprite
+    [SerializeField] private SpriteRenderer _backgroundSprite; // Background behind the mineral
 
+    // Runs when the object is created
     private void Awake()
     {
-        UpdateDataVisuals();
+        UpdateDataVisuals(); // Set up how the mineral looks
     }
 
+    // Updates the mineral's appearance based on its data
     public void UpdateDataVisuals()
     {
         if (data != null)
@@ -27,7 +30,7 @@ public class Mineral : MonoBehaviour
                 _mineralBigSprite.sprite = data.mineralBigSprite;
             }
 
-                        // Dim the background color by multiplying each channel by 0.5f
+            // Make the background a dimmer version of the main color
             Color32 c = data.defaultColor;
             Color dimmed = new Color(c.r / 255f * 0.5f, c.g / 255f * 0.5f, c.b / 255f * 0.5f, c.a / 255f);
             _backgroundSprite.color = dimmed;

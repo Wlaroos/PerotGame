@@ -1,20 +1,23 @@
 using UnityEngine;
 
+// Handles the visual and data logic for an element object
 public class Element : MonoBehaviour
 {
-    public ElementData data;
-    public int isotopeNumber = 1;
+    public ElementData data; // Data for this element
+    public int isotopeNumber = 1; // Isotope number to display
 
-    [SerializeField] private SpriteRenderer _elementSprite;
-    [SerializeField] private SpriteRenderer _numberSprite;
-    [SerializeField] private SpriteRenderer _numberSprite2;
-    [SerializeField] private SpriteRenderer _backgroundSprite;
+    [SerializeField] private SpriteRenderer _elementSprite;    // Main element sprite
+    [SerializeField] private SpriteRenderer _numberSprite;     // Sprite for tens or single digit
+    [SerializeField] private SpriteRenderer _numberSprite2;    // Sprite for ones digit (if needed)
+    [SerializeField] private SpriteRenderer _backgroundSprite; // Background sprite
 
+    // Called when the object is created
     private void Awake()
     {
         UpdateDataVisuals();
     }
 
+    // Sets the number sprites based on the isotope number
     private void SetNumberSprites(int number)
     {
         if (number < 0)
@@ -40,6 +43,7 @@ public class Element : MonoBehaviour
         }
     }
 
+    // Updates the element's visuals based on its data
     public void UpdateDataVisuals()
     {
         if (data != null)
@@ -47,7 +51,7 @@ public class Element : MonoBehaviour
             _elementSprite.sprite = data.elementSprite;
             _elementSprite.color = data.defaultColor;
 
-            // Dim the background color by multiplying each channel by 0.5f
+            // Dim the background color
             Color32 c = data.defaultColor;
             Color dimmed = new Color(c.r / 255f * 0.5f, c.g / 255f * 0.5f, c.b / 255f * 0.5f, c.a / 255f);
             _backgroundSprite.color = dimmed;
