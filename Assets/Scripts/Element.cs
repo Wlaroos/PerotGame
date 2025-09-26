@@ -12,14 +12,10 @@ public class Element : MonoBehaviour
 
     private void Awake()
     {
-        if (data != null)
-        {
-            _elementSprite.sprite = data.elementSprite;
-            SetNumberSprites(isotopeNumber);
-        }
+        UpdateDataVisuals();
     }
 
-    public void SetNumberSprites(int number)
+    private void SetNumberSprites(int number)
     {
         if (number < 0)
         {
@@ -41,6 +37,15 @@ public class Element : MonoBehaviour
             _numberSprite2.sprite = data.numberSprites[ones];
             _numberSprite.gameObject.SetActive(true);
             _numberSprite2.gameObject.SetActive(true);
+        }
+    }
+
+    public void UpdateDataVisuals()
+    {
+        if (data != null)
+        {
+            _elementSprite.sprite = data.elementSprite;
+            SetNumberSprites(isotopeNumber);
         }
     }
 }

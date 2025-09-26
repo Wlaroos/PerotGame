@@ -279,31 +279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02b17c9033f0c8141b511d57ddfa18a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _elementType: 0
-  _elementSprites:
-  - {fileID: 6620621745411573659, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -256003546741158619, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: 238177201661318622, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: 9084407170249120912, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -4464969597253999955, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -7543061489181569089, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -3947773304791079134, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -7867266084347359734, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: 1178998370, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -1709758299, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -1718754075, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -425519968, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  _numberSprites:
-  - {fileID: 228940821244427079, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -240025357, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: 9094600903545770030, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -4532114073746202998, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -8346291274449466048, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -343943630576144839, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: 7301787903208175943, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: 1652299931923453484, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: 388057999756033245, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  - {fileID: -5481780447360278658, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
+  data: {fileID: 11400000, guid: c3ca056e1bac30e48975ac0dfaa521f9, type: 2}
   isotopeNumber: 1
   _elementSprite: {fileID: 431570445168085939}
   _numberSprite: {fileID: 8413940166419973516}
@@ -322,6 +298,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dragSpeed: 25
+  elementPrefab: {fileID: 3057944551080756754}
+  compoundPrefab: {fileID: 4317416459634423432, guid: 4fa2d9436c960ac4ca565953a2fda7e6, type: 3}
+  mineralPrefab: {fileID: 7641892725377117915, guid: ef9a045bdb040b94abdfd707dcc2ceff, type: 3}
+  craftParticles: {fileID: 2970486637206280725, guid: 3a40c2a63cb20c244832c466664a8742, type: 3}
+  failParticles: {fileID: 2970486637206280725, guid: 27a6165da772fc44693091533daf3823, type: 3}
 --- !u!1 &3868221493880809387
 GameObject:
   m_ObjectHideFlags: 0

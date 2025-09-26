@@ -9,10 +9,14 @@ public class Compound : MonoBehaviour
 
     private void Awake()
     {
+        UpdateDataVisuals();
+    }
+
+    public void UpdateDataVisuals()
+    {
         if (data != null)
         {
             _compoundSprite.sprite = data.compoundSprite;
-            // Set color or other visuals as needed
         }
     }
 }

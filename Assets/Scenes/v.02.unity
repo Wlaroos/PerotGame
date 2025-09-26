@@ -1660,6 +1660,19 @@ MonoBehaviour:
   _hiddenButtonSprite: {fileID: 223053218, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
   _buffer: {x: 400, y: 150}
   _unlockAllElements: 1
+  _elementDataList:
+  - {fileID: 11400000, guid: c3ca056e1bac30e48975ac0dfaa521f9, type: 2}
+  - {fileID: 11400000, guid: ec94a4e2b31d3584387361ac096fd5e3, type: 2}
+  - {fileID: 11400000, guid: 30682a9d8167de9419593553c08fc5db, type: 2}
+  - {fileID: 11400000, guid: 2ed1f5f94e061aa4bae9c088ab784f07, type: 2}
+  - {fileID: 11400000, guid: 5ac91380779cc674cab508359527471c, type: 2}
+  - {fileID: 11400000, guid: fdcfbbf0ec71194478af9394436406ad, type: 2}
+  - {fileID: 11400000, guid: d48942f851abfc64faa1478e6ffbdbb0, type: 2}
+  - {fileID: 11400000, guid: 33b09646649d0894a9d1c0d23a211377, type: 2}
+  - {fileID: 11400000, guid: 740f78047f55dcc40839c2bb30ce2fdb, type: 2}
+  - {fileID: 11400000, guid: b7da4fe5ba5b9574f80986009c200b52, type: 2}
+  - {fileID: 11400000, guid: 034e7aa0753695e42be508aa5bc6a528, type: 2}
+  - {fileID: 11400000, guid: 277d89c9567cfca41baefd6905ada13c, type: 2}
 --- !u!4 &937413474
 Transform:
   m_ObjectHideFlags: 0
@@ -1974,7 +1987,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1049363454
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1993,15 +2006,19 @@ MonoBehaviour:
   OnSilicateCrafted:
     m_PersistentCalls:
       m_Calls: []
+    m_CallsDirty: 1
   OnIronCarbonateCrafted:
     m_PersistentCalls:
       m_Calls: []
+    m_CallsDirty: 1
   OnIronPhosphateCrafted:
     m_PersistentCalls:
       m_Calls: []
+    m_CallsDirty: 1
   OnAluminumOxideCrafted:
     m_PersistentCalls:
       m_Calls: []
+    m_CallsDirty: 1
 --- !u!4 &1049363455
 Transform:
   m_ObjectHideFlags: 0
@@ -2650,6 +2667,12 @@ MonoBehaviour:
   _hiddenButtonSprite: {fileID: 223053218, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
   _buffer: {x: 400, y: 150}
   _unlockAllCompounds: 1
+  _compoundDataList:
+  - {fileID: 11400000, guid: e2ee35b40ba668c4e88cc71089a2d6d3, type: 2}
+  - {fileID: 11400000, guid: b93d19d564d428743bb2dd9d701928e2, type: 2}
+  - {fileID: 11400000, guid: 80d285f705172b647ba85a186eb95bc0, type: 2}
+  - {fileID: 11400000, guid: 9e88f262acc121449a567481f617d539, type: 2}
+  - {fileID: 11400000, guid: a649818ea19a40c4ca84e4b51694b688, type: 2}
 --- !u!4 &1206779054
 Transform:
   m_ObjectHideFlags: 0
@@ -4727,20 +4750,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cfa6f848bea7494ca86eb600c37a7bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _craftParticles: {fileID: 2970486637206280725, guid: 3a40c2a63cb20c244832c466664a8742, type: 3}
-  _failParticles: {fileID: 2970486637206280725, guid: 27a6165da772fc44693091533daf3823, type: 3}
-  OnHydrogen2Crafted:
-    m_PersistentCalls:
-      m_Calls: []
-  OnHelium4Crafted:
-    m_PersistentCalls:
-      m_Calls: []
-  OnBeryllium8Crafted:
-    m_PersistentCalls:
-      m_Calls: []
-  OnCarbon12Crafted:
-    m_PersistentCalls:
-      m_Calls: []
+  recipes:
+  - {fileID: 11400000, guid: 89216c57a116a094a96b2de685b07ff2, type: 2}
+  - {fileID: 11400000, guid: 6ed96b97a73fe294b95bb635d2aac4a4, type: 2}
+  - {fileID: 11400000, guid: c302beb93337fcd41b3f3cb5e94fe71c, type: 2}
+  - {fileID: 11400000, guid: 6d2a54780135b4649812e7cb96e330ed, type: 2}
+  - {fileID: 11400000, guid: 920389bf159e79f41b0c369f4684f82b, type: 2}
+  - {fileID: 11400000, guid: 8e9c22caf1ee6dc449fbc9f53af9790b, type: 2}
+  - {fileID: 11400000, guid: 79f25ef41c07dd747bf64e8b925165d5, type: 2}
 --- !u!4 &2084610659
 Transform:
   m_ObjectHideFlags: 0

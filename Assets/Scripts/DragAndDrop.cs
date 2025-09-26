@@ -17,6 +17,7 @@ public class DragAndDrop : MonoBehaviour
     [SerializeField] private GameObject mineralPrefab;
 
     [Header("Effects")]
+    [SerializeField] private GameObject craftParticles;
     [SerializeField] private GameObject failParticles;
 
     private void Awake()
@@ -83,11 +84,11 @@ public class DragAndDrop : MonoBehaviour
             // Try crafting
             ScriptableObject result = CraftingManager.Instance.TryCraft(dataA, dataB);
 
+            Vector3 spawnPosition = (transform.position + otherObj.transform.position) / 2f;
+
             if (result != null)
             {
                 // Instantiate the result prefab and assign the ScriptableObject data
-                Vector3 spawnPosition = (transform.position + otherObj.transform.position) / 2f;
-
                 if (result is MineralData mineralData)
                 {
                     GameObject mineralObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity);
@@ -95,6 +96,7 @@ public class DragAndDrop : MonoBehaviour
                     if (mineralComponent != null)
                     {
                         mineralComponent.data = mineralData;
+                        mineralComponent.UpdateDataVisuals();
                     }
                 }
                 else if (result is CompoundData compoundData)
@@ -104,6 +106,7 @@ public class DragAndDrop : MonoBehaviour
                     if (compoundComponent != null)
                     {
                         compoundComponent.data = compoundData;
+                        compoundComponent.UpdateDataVisuals();
                     }
                 }
                 else if (result is ElementData elementData)
@@ -114,8 +117,14 @@ public class DragAndDrop : MonoBehaviour
                     {
                         elementComponent.data = elementData;
                         elementComponent.isotopeNumber = elementData.defaultIsotopeNumber;
-                        elementComponent.SetNumberSprites(elementComponent.isotopeNumber);
+                        elementComponent.UpdateDataVisuals();
                     }
+                }
+
+                // Crafting particle effect
+                if (craftParticles != null)
+                {
+                    Instantiate(craftParticles, spawnPosition, Quaternion.Euler(-90, 0, 0));
                 }
 
                 Destroy(otherObj);
@@ -145,7 +154,7 @@ public class DragAndDrop : MonoBehaviour
                 Vector3 failPosition = (transform.position + otherObj.transform.position) / 2f;
                 if (failParticles != null)
                 {
-                    Instantiate(failParticles, failPosition, Quaternion.identity);
+                    Instantiate(failParticles, failPosition, Quaternion.Euler(-90, 0, 0));
                 }
             }
         }

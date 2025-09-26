@@ -96,7 +96,7 @@ public class ElementSpawner : MonoBehaviour
         {
             elementComponent.data = data;
             elementComponent.isotopeNumber = isotopeNumber < 0 ? data.defaultIsotopeNumber : isotopeNumber;
-            // Optionally refresh visuals if needed
+            elementComponent.UpdateDataVisuals();
         }
         else
         {

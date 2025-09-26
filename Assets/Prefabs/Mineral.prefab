@@ -365,20 +365,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c4adf42ebb76ed499399be97cfb7184, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _mineralType: 0
-  _mineralSprites:
-  - {fileID: -5732747483443466111, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
-  - {fileID: 3001957441537787673, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
-  - {fileID: 1980142279973535832, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
-  - {fileID: 7033898093529213802, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
-  _bigMineralSprites:
-  - {fileID: -8679966155197468166, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
-  - {fileID: 3335794136032191816, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
-  - {fileID: 7860488438020181885, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
-  - {fileID: -7020369629327794792, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
+  data: {fileID: 0}
   _mineralSprite: {fileID: 4840574312373783160}
-  _bigMineralSprite: {fileID: 5941345405222065971}
-  _backgroundSprite: {fileID: 3940589358172123659}
 --- !u!114 &302516988093121141
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -392,3 +380,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dragSpeed: 25
+  elementPrefab: {fileID: 3057944551080756754, guid: 0517a3ac504d30c47a512dbf45255cc4, type: 3}
+  compoundPrefab: {fileID: 4317416459634423432, guid: 4fa2d9436c960ac4ca565953a2fda7e6, type: 3}
+  mineralPrefab: {fileID: 7641892725377117915}
+  craftParticles: {fileID: 2970486637206280725, guid: 3a40c2a63cb20c244832c466664a8742, type: 3}
+  failParticles: {fileID: 2970486637206280725, guid: 27a6165da772fc44693091533daf3823, type: 3}

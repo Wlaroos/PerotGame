@@ -22,7 +22,6 @@ public class CompoundSpawner : MonoBehaviour
 
     [SerializeField] private bool _unlockAllCompounds = false;
 
-    // NEW: Assign these in the inspector, one for each button/type
     [SerializeField] private CompoundData[] _compoundDataList;
 
     private void Awake()
@@ -65,7 +64,7 @@ public class CompoundSpawner : MonoBehaviour
         }
     }
 
-    // NEW: Spawn a compound using CompoundData ScriptableObject
+    //Spawn a compound using CompoundData ScriptableObject
     public GameObject SpawnCompoundAtRandomPosition(CompoundData data)
     {
         Vector2 randomPosition = new Vector2
@@ -92,8 +91,7 @@ public class CompoundSpawner : MonoBehaviour
         if (compoundComponent != null)
         {
             compoundComponent.data = data;
-            // Optionally call Awake() or a custom Init() if you need to refresh visuals
-            // compoundComponent.RefreshVisuals();
+            compoundComponent.UpdateDataVisuals();
         }
         else
         {

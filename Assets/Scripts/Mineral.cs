@@ -8,6 +8,11 @@ public class Mineral : MonoBehaviour
 
     private void Awake()
     {
+        UpdateDataVisuals();
+    }
+
+    public void UpdateDataVisuals()
+    {
         if (data != null)
         {
             _mineralSprite.sprite = data.mineralSprite;
