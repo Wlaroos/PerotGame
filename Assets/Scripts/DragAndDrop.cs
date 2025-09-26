@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.InputSystem; // Add this at the top
 
 // Lets you drag, drop, and combine objects in the game
 public class DragAndDrop : MonoBehaviour
@@ -11,6 +12,8 @@ public class DragAndDrop : MonoBehaviour
     private Mineral _mineral;     // Reference if this is a mineral
     private Collider2D _collider; // The collider we're overlapping with
     private SortingGroup _sg;     // For controlling draw order
+
+    private InputSystem_Actions _inputActions;
 
     [Header("Prefabs")]
     [SerializeField] private GameObject elementPrefab;   // Prefab for new elements
@@ -33,6 +36,17 @@ public class DragAndDrop : MonoBehaviour
 
         // Get sorting group for draw order
         _sg = GetComponent<SortingGroup>();
+    }
+
+    private void OnEnable()
+    {
+        _inputActions = new InputSystem_Actions();
+        _inputActions.Enable();
+    }
+
+    private void OnDisable()
+    {
+        _inputActions.Disable();
     }
 
     // Gets the mouse position in world space
@@ -189,11 +203,10 @@ public class DragAndDrop : MonoBehaviour
     // Checks for right-click to delete this object
     private void Update()
     {
-        // If right mouse button is pressed
-        if (Input.GetMouseButtonDown(1)) // 1 = right mouse button
+        // Checking for right mouse button using the new input system
+        if (_inputActions.UI.RightClick.WasPressedThisFrame())
         {
-            // Check if mouse is over this object
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
             Collider2D hit = Physics2D.OverlapPoint(mousePos);
             if (hit != null && hit.gameObject == gameObject)
             {
