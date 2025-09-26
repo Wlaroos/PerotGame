@@ -89,19 +89,28 @@ public class CraftingManager : MonoBehaviour
 
         Debug.Log("Crafting failed: No matching recipe.");
 
-        // Calculate the separation direction
-        Vector3 separationDirection = (element2.transform.position - element1.transform.position).normalized;
+        // Calculate the separation direction (match MineralCraftingManager logic)
+        Vector3 separationDirection = (element2.transform.position - element1.transform.position);
+        if (separationDirection == Vector3.zero)
+        {
+            // Pick a random direction if objects are perfectly overlapped
+            separationDirection = Random.insideUnitCircle.normalized;
+        }
+        else
+        {
+            separationDirection = separationDirection.normalized;
+        }
 
         // Define a dynamic separation distance based on the element sizes or a base distance
         float separationDistance = 0.33f; // Base distance
-        if (element1.TryGetComponent(out Collider element1Collider) && element2.TryGetComponent(out Collider element2Collider))
+        if (element1.TryGetComponent(out Collider colA) && element2.TryGetComponent(out Collider colB))
         {
-            separationDistance += (element1Collider.bounds.size.magnitude + element2Collider.bounds.size.magnitude) / 2;
+            separationDistance += (colA.bounds.size.magnitude + colB.bounds.size.magnitude) / 2;
         }
 
         // Apply the separation
-        element2.transform.position += separationDirection * separationDistance;
         element1.transform.position -= separationDirection * separationDistance;
+        element2.transform.position += separationDirection * separationDistance;
 
         // Instantiate fail particle effect at the midpoint
         Vector3 failPosition = (element1.transform.position + element2.transform.position) / 2;

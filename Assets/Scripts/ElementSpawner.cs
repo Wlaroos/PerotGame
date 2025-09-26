@@ -76,6 +76,8 @@ public class ElementSpawner : MonoBehaviour
             CraftingManager.Instance.OnBeryllium8Crafted.AddListener(FirstBeryllium);
             CraftingManager.Instance.OnCarbon12Crafted.AddListener(FirstCarbon);
         }
+
+        UnlockAllButtons();
     }
 
     public GameObject SpawnElementAtRandomPosition(Element.ElementType type, int isotopeNumber = 1)
@@ -118,22 +120,18 @@ public class ElementSpawner : MonoBehaviour
     }
 
 
-    public void SpawnHydrogen()
-    {
-        SpawnElementAtRandomPosition(Element.ElementType.Hydrogen, 2);
-    }
-    public void SpawnHelium()
-    {
-        SpawnElementAtRandomPosition(Element.ElementType.Helium, 4);
-    }
-    public void SpawnBeryllium()
-    {
-        SpawnElementAtRandomPosition(Element.ElementType.Beryllium, 8);
-    }
-    public void SpawnCarbon()
-    {
-        SpawnElementAtRandomPosition(Element.ElementType.Carbon, 12);
-    }
+    public void SpawnHydrogen()   { SpawnElementAtRandomPosition(Element.ElementType.Hydrogen, 1); }
+    public void SpawnHelium()     { SpawnElementAtRandomPosition(Element.ElementType.Helium, 1); }
+    public void SpawnBeryllium()  { SpawnElementAtRandomPosition(Element.ElementType.Beryllium, 1); }
+    public void SpawnCarbon()     { SpawnElementAtRandomPosition(Element.ElementType.Carbon, 1); }
+    public void SpawnTitanium()   { SpawnElementAtRandomPosition(Element.ElementType.Titanium, 1); }
+    public void SpawnIron()       { SpawnElementAtRandomPosition(Element.ElementType.Iron, 1); }
+    public void SpawnCopper()     { SpawnElementAtRandomPosition(Element.ElementType.Copper, 1); }
+    public void SpawnCalcium()    { SpawnElementAtRandomPosition(Element.ElementType.Calcium, 1); }
+    public void SpawnBarium()     { SpawnElementAtRandomPosition(Element.ElementType.Barium, 1); }
+    public void SpawnSilicon()    { SpawnElementAtRandomPosition(Element.ElementType.Silicon, 1); }
+    public void SpawnAluminum()   { SpawnElementAtRandomPosition(Element.ElementType.Aluminum, 1); }
+    public void SpawnMagnesium()  { SpawnElementAtRandomPosition(Element.ElementType.Magnesium, 1); }
 
     private void FirstHydrogen()
     {
@@ -154,6 +152,55 @@ public class ElementSpawner : MonoBehaviour
     {
         _spawnButtons[3].interactable = true;
         _spawnButtons[3].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[3];
+    }
+    private void FirstTitanium()
+    {
+        _spawnButtons[4].interactable = true;
+        _spawnButtons[4].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[4];
+    }
+    private void FirstIron()
+    {
+        _spawnButtons[5].interactable = true;
+        _spawnButtons[5].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[5];
+    }
+    private void FirstCopper()
+    {
+        _spawnButtons[6].interactable = true;
+        _spawnButtons[6].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[6];
+    }
+    private void FirstCalcium()
+    {
+        _spawnButtons[7].interactable = true;
+        _spawnButtons[7].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[7];
+    }
+    private void FirstBarium()
+    {
+        _spawnButtons[8].interactable = true;
+        _spawnButtons[8].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[8];
+    }
+    private void FirstSilicon()
+    {
+        _spawnButtons[9].interactable = true;
+        _spawnButtons[9].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[9];
+    }
+    private void FirstAluminum()
+    {
+        _spawnButtons[10].interactable = true;
+        _spawnButtons[10].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[10];
+    }
+    private void FirstMagnesium()
+    {
+        _spawnButtons[11].interactable = true;
+        _spawnButtons[11].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[11];
+    }
+
+    public void UnlockAllButtons()
+    {
+        for (int i = 0; i < _spawnButtons.Length; i++)
+        {
+            _spawnButtons[i].interactable = true;
+            _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[i];
+        }
     }
 
     private void OnDrawGizmos()

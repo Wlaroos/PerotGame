@@ -1,21 +1,25 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-[RequireComponent(typeof(Element))]
 public class DragAndDrop : MonoBehaviour
 {
     [SerializeField] private float _dragSpeed = 25f; // Speed of interpolation
     private Vector2 _mouseOffset;
     private Element _element;
+    private Compound _compound;
+    private Mineral _mineral;
     private Collider2D _collider;
     private SortingGroup _sg;
 
     private void Awake()
     {
         _element = GetComponent<Element>();
-        if (_element == null)
+        _compound = GetComponent<Compound>();
+        _mineral = GetComponent<Mineral>();
+
+        if (_element == null && _compound == null && _mineral == null)
         {
-            Debug.LogError("DragAndDrop: Missing Element component.");
+            Debug.LogError("DragAndDrop: Missing Element, Compound, or Mineral component");
         }
 
         _sg = GetComponent<SortingGroup>();
@@ -31,7 +35,8 @@ public class DragAndDrop : MonoBehaviour
     {
         // Calculate the offset between the object's position and the mouse position
         _mouseOffset = (Vector2)transform.position - GetMouseWorldPosition();
-        _sg.sortingLayerName = "Dragging";
+        if (_sg != null)
+            _sg.sortingLayerName = "Dragging";
     }
 
     private void OnMouseDrag()
@@ -47,20 +52,30 @@ public class DragAndDrop : MonoBehaviour
     {
         if (_collider != null)
         {
-            Element otherElement = _collider.GetComponent<Element>();
-            if (otherElement != null)
+            GameObject otherObj = _collider.gameObject;
+            bool crafted = false;
+
+            // Try element crafting
+            if (_element != null && otherObj.GetComponent<Element>() != null && CraftingManager.Instance != null)
             {
-                // Attempt to craft a new element
-                bool crafted = CraftingManager.Instance.TryCraft(_element, otherElement);
-                if (crafted)
-                {
-                    Destroy(gameObject);
-                    Destroy(otherElement.gameObject);
-                }
+                crafted = CraftingManager.Instance.TryCraft(_element, otherObj.GetComponent<Element>());
+            }
+            // Try mineral crafting (generalized: any two objects)
+            else if (MineralCraftingManager.Instance != null)
+            {
+                crafted = MineralCraftingManager.Instance.TryCraft(gameObject, otherObj);
+            }
+
+            if (crafted)
+            {
+                _collider = null; // Clear reference before destroying
+                Destroy(otherObj);
+                Destroy(gameObject); // Destroy this object last
             }
         }
 
-        _sg.sortingLayerName = "Default";
+        if (_sg != null)
+            _sg.sortingLayerName = "Default";
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -73,6 +88,21 @@ public class DragAndDrop : MonoBehaviour
         if (_collider == collision)
         {
             _collider = null;
+        }
+    }
+
+    private void Update()
+    {
+        // Delete this GameObject on right mouse button click while mouse is over it
+        if (Input.GetMouseButtonDown(1)) // 1 = right mouse button
+        {
+            // Check if mouse is over this object using a raycast
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Collider2D hit = Physics2D.OverlapPoint(mousePos);
+            if (hit != null && hit.gameObject == gameObject)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }
