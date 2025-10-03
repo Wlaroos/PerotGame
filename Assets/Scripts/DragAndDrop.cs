@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.InputSystem; // Add this at the top
+using UnityEngine.InputSystem;
 
 // Lets you drag, drop, and combine objects in the game
 public class DragAndDrop : MonoBehaviour
@@ -14,11 +14,6 @@ public class DragAndDrop : MonoBehaviour
     private SortingGroup _sg;     // For controlling draw order
 
     private InputSystem_Actions _inputActions;
-
-    [Header("Prefabs")]
-    [SerializeField] private GameObject elementPrefab;   // Prefab for new elements
-    [SerializeField] private GameObject compoundPrefab;  // Prefab for new compounds
-    [SerializeField] private GameObject mineralPrefab;   // Prefab for new minerals
 
     // Runs when the object is created
     private void Awake()
@@ -98,56 +93,11 @@ public class DragAndDrop : MonoBehaviour
             ScriptableObject dataB = GetDataFromGameObject(otherObj);
 
             // Try to craft a new object from the two
-            ScriptableObject result = CraftingManager.Instance.TryCraft(dataA, dataB);
-
-            // Where to spawn the result (between the two objects)
             Vector3 spawnPosition = (transform.position + otherObj.transform.position) / 2f;
+            GameObject craftedObj = CraftingManager.Instance.TryCraft(dataA, dataB, spawnPosition);
 
-            if (result != null)
+            if (craftedObj != null)
             {
-                GameObject craftedObj = null;
-
-                if (result is MineralData mineralData)
-                {
-                    craftedObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity);
-                    Mineral mineralComponent = craftedObj.GetComponent<Mineral>();
-                    if (mineralComponent != null)
-                    {
-                        mineralComponent.data = mineralData;
-                        mineralComponent.UpdateDataVisuals();
-                    }
-                }
-                else if (result is CompoundData compoundData)
-                {
-                    craftedObj = Instantiate(compoundPrefab, spawnPosition, Quaternion.identity);
-                    Compound compoundComponent = craftedObj.GetComponent<Compound>();
-                    if (compoundComponent != null)
-                    {
-                        compoundComponent.data = compoundData;
-                        compoundComponent.UpdateDataVisuals();
-                    }
-                }
-                else if (result is ElementData elementData)
-                {
-                    craftedObj = Instantiate(elementPrefab, spawnPosition, Quaternion.identity);
-                    Element elementComponent = craftedObj.GetComponent<Element>();
-                    if (elementComponent != null)
-                    {
-                        elementComponent.data = elementData;
-                        elementComponent.isotopeNumber = elementData.defaultIsotopeNumber;
-                        elementComponent.UpdateDataVisuals();
-                    }
-                }
-
-                // Play crafting effect using the crafted object's color
-                Color color = Color.white;
-                if (craftedObj != null)
-                {
-                    var sr = craftedObj.GetComponent<SpriteRenderer>();
-                    if (sr != null) color = sr.color;
-                }
-                EffectManager.Instance.PlayCraftEffect(spawnPosition, color);
-
                 // Remove the old objects
                 Destroy(otherObj);
                 Destroy(gameObject);

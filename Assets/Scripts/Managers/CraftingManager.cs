@@ -17,6 +17,11 @@ public class CraftingManager : MonoBehaviour
     public class RecipeCraftedEvent : UnityEvent<CraftingRecipe> { }
     public RecipeCraftedEvent OnFirstTimeRecipeCrafted = new RecipeCraftedEvent();
 
+    [Header("Prefabs")]
+    [SerializeField] private GameObject elementPrefab;   // Prefab for new elements
+    [SerializeField] private GameObject compoundPrefab;  // Prefab for new compounds
+    [SerializeField] private GameObject mineralPrefab;   // Prefab for new minerals
+
     private void Awake()
     {
         // Set up singleton
@@ -36,7 +41,7 @@ public class CraftingManager : MonoBehaviour
     }
 
     // Try to craft something from two ingredients
-    public ScriptableObject TryCraft(ScriptableObject a, ScriptableObject b)
+    public GameObject TryCraft(ScriptableObject a, ScriptableObject b, Vector3 spawnPosition)
     {
         foreach (var recipe in _recipes)
         {
@@ -49,9 +54,60 @@ public class CraftingManager : MonoBehaviour
                     _craftedRecipes.Add(recipe);
                     OnFirstTimeRecipeCrafted.Invoke(recipe);
                 }
-                return recipe.output; // Return the result
+
+                // Instantiate the crafted object
+                return CreateCraftedObject(recipe.output, spawnPosition);
             }
         }
         return null; // No match found
+    }
+
+    // Creates the crafted object based on the recipe output
+    private GameObject CreateCraftedObject(ScriptableObject result, Vector3 spawnPosition)
+    {
+        GameObject craftedObj = null;
+
+        if (result is MineralData mineralData)
+        {
+            craftedObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity);
+            Mineral mineralComponent = craftedObj.GetComponent<Mineral>();
+            if (mineralComponent != null)
+            {
+                mineralComponent.data = mineralData;
+                mineralComponent.UpdateDataVisuals();
+            }
+        }
+        else if (result is CompoundData compoundData)
+        {
+            craftedObj = Instantiate(compoundPrefab, spawnPosition, Quaternion.identity);
+            Compound compoundComponent = craftedObj.GetComponent<Compound>();
+            if (compoundComponent != null)
+            {
+                compoundComponent.data = compoundData;
+                compoundComponent.UpdateDataVisuals();
+            }
+        }
+        else if (result is ElementData elementData)
+        {
+            craftedObj = Instantiate(elementPrefab, spawnPosition, Quaternion.identity);
+            Element elementComponent = craftedObj.GetComponent<Element>();
+            if (elementComponent != null)
+            {
+                elementComponent.data = elementData;
+                elementComponent.isotopeNumber = elementData.defaultIsotopeNumber;
+                elementComponent.UpdateDataVisuals();
+            }
+        }
+
+        // Play crafting effect using the crafted object's color
+        Color color = Color.white;
+        if (craftedObj != null)
+        {
+            var sr = craftedObj.GetComponent<SpriteRenderer>();
+            if (sr != null) color = sr.color;
+        }
+        EffectManager.Instance.PlayCraftEffect(spawnPosition, color);
+
+        return craftedObj;
     }
 }
