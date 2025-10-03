@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8957768a3b0dc29408328652609a4081, type: 3}
-  m_Name: C_SiliconOxide
+  m_Name: C_Phosphate
   m_EditorClassIdentifier: 
-  inputA: {fileID: 11400000, guid: b7da4fe5ba5b9574f80986009c200b52, type: 2}
+  inputA: {fileID: 11400000, guid: b41c61cce5b1da2419f2475f91625c8f, type: 2}
   inputB: {fileID: 11400000, guid: e2ee35b40ba668c4e88cc71089a2d6d3, type: 2}
   inputC: {fileID: 11400000, guid: e2ee35b40ba668c4e88cc71089a2d6d3, type: 2}
-  inputD: {fileID: 0}
-  inputE: {fileID: 0}
-  output: {fileID: 11400000, guid: 46cbcef2e8be51f408689e9d12d3b304, type: 2}
+  inputD: {fileID: 11400000, guid: e2ee35b40ba668c4e88cc71089a2d6d3, type: 2}
+  inputE: {fileID: 11400000, guid: e2ee35b40ba668c4e88cc71089a2d6d3, type: 2}
+  output: {fileID: 11400000, guid: 80d285f705172b647ba85a186eb95bc0, type: 2}

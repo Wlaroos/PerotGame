@@ -13,5 +13,8 @@ MonoBehaviour:
   m_Name: C_AluminumOxide
   m_EditorClassIdentifier: 
   inputA: {fileID: 11400000, guid: 034e7aa0753695e42be508aa5bc6a528, type: 2}
-  inputB: {fileID: 11400000, guid: e2ee35b40ba668c4e88cc71089a2d6d3, type: 2}
+  inputB: {fileID: 11400000, guid: 034e7aa0753695e42be508aa5bc6a528, type: 2}
+  inputC: {fileID: 11400000, guid: e2ee35b40ba668c4e88cc71089a2d6d3, type: 2}
+  inputD: {fileID: 11400000, guid: e2ee35b40ba668c4e88cc71089a2d6d3, type: 2}
+  inputE: {fileID: 11400000, guid: e2ee35b40ba668c4e88cc71089a2d6d3, type: 2}
   output: {fileID: 11400000, guid: e895898767fab2c44a81ef914df451e3, type: 2}
