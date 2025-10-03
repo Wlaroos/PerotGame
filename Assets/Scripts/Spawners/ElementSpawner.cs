@@ -203,6 +203,12 @@ public class ElementSpawner : MonoBehaviour
             SpawnElementAtRandomPosition(_elementDataList[11]);
     }
 
+    public void SpawnHeat()
+    {
+        if (_elementDataList.Count > 12 && _elementDataList[12] != null)
+            SpawnElementAtRandomPosition(_elementDataList[12]);
+    }
+
     // Unlock all buttons at once (call from UI)
     public void UnlockAllButtons()
     {

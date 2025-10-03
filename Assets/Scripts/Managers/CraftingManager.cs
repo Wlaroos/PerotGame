@@ -71,8 +71,26 @@ public class CraftingManager : MonoBehaviour
             .Where(ingredient => ingredient != null)
             .ToList();
 
-        // Ensure the number of ingredients matches and all recipe ingredients are present
-        return recipeIngredients.Count == ingredients.Count && !recipeIngredients.Except(ingredients).Any();
+        // Check if the counts of each ingredient match
+        if (recipeIngredients.Count != ingredients.Count)
+            return false;
+
+        // Group and count occurrences of each ingredient in the recipe
+        var recipeCounts = recipeIngredients.GroupBy(i => i).ToDictionary(g => g.Key, g => g.Count());
+
+        // Group and count occurrences of each ingredient in the provided ingredients
+        var ingredientCounts = ingredients.GroupBy(i => i).ToDictionary(g => g.Key, g => g.Count());
+
+        // Compare the counts for each ingredient
+        foreach (var kvp in recipeCounts)
+        {
+            if (!ingredientCounts.TryGetValue(kvp.Key, out int count) || count != kvp.Value)
+            {
+                return false; // Mismatch in ingredient counts
+            }
+        }
+
+        return true; // All ingredients match
     }
 
     private GameObject CreateCraftedObject(ScriptableObject result, Vector3 spawnPosition)

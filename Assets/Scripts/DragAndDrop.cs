@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using System.Linq;
 
 // Lets you drag, drop, and combine objects in the game
 public class DragAndDrop : MonoBehaviour
@@ -93,7 +94,15 @@ public class DragAndDrop : MonoBehaviour
             // Get the other object's data
             ScriptableObject dataB = GetDataFromGameObject(otherObj);
 
+            if (dataB == null)
+            {
+                // The other object has no valid data, so do nothing
+                return;
+            }
+
             List<ScriptableObject> ingredients = new List<ScriptableObject> { dataA, dataB };
+
+            //Debug.Log($"Ingredients passed: {string.Join(", ", ingredients.Select(i => i.name))}");
 
             // Try to craft a new object from the two
             Vector3 spawnPosition = (transform.position + otherObj.transform.position) / 2f;
