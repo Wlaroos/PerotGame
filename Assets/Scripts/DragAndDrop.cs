@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 // Lets you drag, drop, and combine objects in the game
 public class DragAndDrop : MonoBehaviour
@@ -92,9 +93,12 @@ public class DragAndDrop : MonoBehaviour
             // Get the other object's data
             ScriptableObject dataB = GetDataFromGameObject(otherObj);
 
+            List<ScriptableObject> ingredients = new List<ScriptableObject> { dataA, dataB };
+
             // Try to craft a new object from the two
             Vector3 spawnPosition = (transform.position + otherObj.transform.position) / 2f;
-            GameObject craftedObj = CraftingManager.Instance.TryCraft(dataA, dataB, spawnPosition);
+
+            GameObject craftedObj = CraftingManager.Instance.TryCraft(ingredients, spawnPosition);
 
             if (craftedObj != null)
             {
@@ -104,30 +108,33 @@ public class DragAndDrop : MonoBehaviour
             }
             else
             {
-                // If crafting failed, push the objects apart
-                Vector3 separationDirection = (otherObj.transform.position - transform.position);
-                if (separationDirection == Vector3.zero)
+                if (otherObj.TryGetComponent<DragAndDrop>(out _))
                 {
-                    // If they're on top of each other, pick a random direction
-                    separationDirection = Random.insideUnitCircle.normalized;
-                }
-                else
-                {
-                    separationDirection = separationDirection.normalized;
-                }
-                float separationDistance = 0.33f;
-                // Make sure they don't overlap, based on their size
-                if (TryGetComponent(out Collider colA) && otherObj.TryGetComponent(out Collider colB))
-                {
-                    separationDistance += (colA.bounds.size.magnitude + colB.bounds.size.magnitude) / 2;
-                }
-                // Move both objects away from each other
-                transform.position -= separationDirection * separationDistance;
-                otherObj.transform.position += separationDirection * separationDistance;
+                    // If crafting failed, push the objects apart
+                    Vector3 separationDirection = (otherObj.transform.position - transform.position);
+                    if (separationDirection == Vector3.zero)
+                    {
+                        // If they're on top of each other, pick a random direction
+                        separationDirection = Random.insideUnitCircle.normalized;
+                    }
+                    else
+                    {
+                        separationDirection = separationDirection.normalized;
+                    }
+                    float separationDistance = 0.33f;
+                    // Make sure they don't overlap, based on their size
+                    if (TryGetComponent(out Collider colA) && otherObj.TryGetComponent(out Collider colB))
+                    {
+                        separationDistance += (colA.bounds.size.magnitude + colB.bounds.size.magnitude) / 2;
+                    }
+                    // Move both objects away from each other
+                    transform.position -= separationDirection * separationDistance;
+                    otherObj.transform.position += separationDirection * separationDistance;
 
-                // Play fail effect at the midpoint
-                Vector3 failPosition = (transform.position + otherObj.transform.position) / 2f;
-                EffectManager.Instance.PlayFailEffect(failPosition);
+                    // Play fail effect at the midpoint
+                    Vector3 failPosition = (transform.position + otherObj.transform.position) / 2f;
+                    EffectManager.Instance.PlayFailEffect(failPosition);
+                }
             }
         }
         // Put object back to normal draw order

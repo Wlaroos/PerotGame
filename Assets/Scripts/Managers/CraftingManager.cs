@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -40,13 +41,13 @@ public class CraftingManager : MonoBehaviour
         _recipes.AddRange(loadedRecipes);
     }
 
-    // Try to craft something from two ingredients
-    public GameObject TryCraft(ScriptableObject a, ScriptableObject b, Vector3 spawnPosition)
+    // Try to craft something from a list of ingredients
+    public GameObject TryCraft(List<ScriptableObject> ingredients, Vector3 spawnPosition)
     {
         foreach (var recipe in _recipes)
         {
-            // Check if the two ingredients match (order doesn't matter)
-            if ((recipe.inputA == a && recipe.inputB == b) || (recipe.inputA == b && recipe.inputB == a))
+            // Check if the recipe matches the ingredients (ignoring order)
+            if (MatchIngredients(recipe, ingredients))
             {
                 // If this is the first time, fire the event
                 if (!_craftedRecipes.Contains(recipe))
@@ -59,10 +60,21 @@ public class CraftingManager : MonoBehaviour
                 return CreateCraftedObject(recipe.output, spawnPosition);
             }
         }
-        return null; // No match found
+        return null;
     }
 
-    // Creates the crafted object based on the recipe output
+    // Check if the recipe matches the given ingredients
+    private bool MatchIngredients(CraftingRecipe recipe, List<ScriptableObject> ingredients)
+    {
+        // Filter out null values from the recipe's ingredients
+        var recipeIngredients = new List<ScriptableObject> { recipe.inputA, recipe.inputB, recipe.inputC, recipe.inputD }
+            .Where(ingredient => ingredient != null)
+            .ToList();
+
+        // Ensure the number of ingredients matches and all recipe ingredients are present
+        return recipeIngredients.Count == ingredients.Count && !recipeIngredients.Except(ingredients).Any();
+    }
+
     private GameObject CreateCraftedObject(ScriptableObject result, Vector3 spawnPosition)
     {
         GameObject craftedObj = null;
