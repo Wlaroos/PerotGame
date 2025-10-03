@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Heat
   m_EditorClassIdentifier: 
   elementName: Heat
-  elementSprite: {fileID: 0}
+  elementSprite: {fileID: -8679966155197468166, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
   numberSprites:
   - {fileID: -6629531029891648246, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
   - {fileID: -4217592887472625829, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
@@ -25,7 +25,7 @@ MonoBehaviour:
   - {fileID: -519400735672398794, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
   - {fileID: -1344653293438560547, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
   - {fileID: 849386610096671516, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
-  defaultIsotopeNumber: 1
+  defaultIsotopeNumber: -1
   defaultColor:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4278190335
