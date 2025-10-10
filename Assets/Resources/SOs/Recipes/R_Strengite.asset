@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8957768a3b0dc29408328652609a4081, type: 3}
+  m_Name: R_Strengite
+  m_EditorClassIdentifier: 
+  inputA: {fileID: 11400000, guid: fdcfbbf0ec71194478af9394436406ad, type: 2}
+  inputB: {fileID: 11400000, guid: 80d285f705172b647ba85a186eb95bc0, type: 2}
+  inputC: {fileID: 0}
+  inputD: {fileID: 0}
+  inputE: {fileID: 0}
+  output: {fileID: 11400000, guid: 52f9e0d08bd1d4545a9673173234a518, type: 2}

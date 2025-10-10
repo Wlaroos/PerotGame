@@ -50,6 +50,40 @@ public class CompoundSpawner : MonoBehaviour
             _spawnButtons[i].interactable = false;
             _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite = _hiddenButtonSprite;
         }
+
+        // Load compound data from Resources (if not assigned in inspector)
+        if (_compoundDataList == null || _compoundDataList.Length == 0)
+        {
+            CompoundData[] loadedCompounds = Resources.LoadAll<CompoundData>("SOs/Compounds");
+            if (loadedCompounds != null && loadedCompounds.Length > 0)
+                _compoundDataList = loadedCompounds;
+        }
+
+        // Set up button listeners so each button spawns the right compound
+        for (int i = 0; i < _spawnButtons.Length; i++)
+        {
+            Button btn = _spawnButtons[i];
+            string btnName = btn.name;
+
+            CompoundData matchedData = null;
+            if (_compoundDataList != null)
+            {
+                matchedData = System.Array.Find(_compoundDataList, c => c != null
+                    && !string.IsNullOrEmpty(btnName)
+                    && btnName.IndexOf(GetCompoundBaseName(c.name), System.StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+
+            if (matchedData != null)
+            {
+                btn.onClick.RemoveAllListeners();
+                CompoundData dataCopy = matchedData; // capture local for closure safety
+                btn.onClick.AddListener(() => SpawnCompoundAtRandomPosition(dataCopy));
+            }
+            else
+            {
+                Debug.LogWarning($"CompoundSpawner: No CompoundData found matching button name '{btnName}'.");
+            }
+        }
     }
 
     // When this object is destroyed
@@ -201,5 +235,15 @@ public class CompoundSpawner : MonoBehaviour
             Gizmos.DrawLine(new Vector3(bufferedMax.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMax.y, 0));
             Gizmos.DrawLine(new Vector3(bufferedMin.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMin.y, 0));
         }
+    }
+
+    // Extracts the base name of a compound from its SO name (e.g., "C_Carbonate" -> "Carbonate")
+    private string GetCompoundBaseName(string soName)
+    {
+        if (string.IsNullOrEmpty(soName))
+            return soName;
+
+        int underscoreIndex = soName.IndexOf('_');
+        return underscoreIndex >= 0 ? soName.Substring(underscoreIndex + 1) : soName;
     }
 }

@@ -62,8 +62,11 @@ public class ElementSpawner : MonoBehaviour
             Button btn = _spawnButtons[i];
             string btnName = btn.name;
 
-            // Find the matching element by name
-            ElementData matchedData = _elementDataList.Find(e => e != null && btnName.Contains(e.name));
+            // Find the matching element by name (use the part after the first underscore in SO names)
+            ElementData matchedData = _elementDataList.Find(e => e != null
+                && btnName != null
+                && btnName.IndexOf(GetElementBaseName(e.name), System.StringComparison.OrdinalIgnoreCase) >= 0);
+
             if (matchedData != null)
             {
                 btn.onClick.RemoveAllListeners();
@@ -259,5 +262,15 @@ public class ElementSpawner : MonoBehaviour
             Gizmos.DrawLine(new Vector3(bufferedMax.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMax.y, 0));
             Gizmos.DrawLine(new Vector3(bufferedMin.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMin.y, 0));
         }
+    }
+
+    // Extracts the base name of an element from its SO name (e.g., "H_Hydrogen" -> "Hydrogen")
+    private string GetElementBaseName(string soName)
+    {
+        if (string.IsNullOrEmpty(soName))
+            return soName;
+
+        int underscoreIndex = soName.IndexOf('_');
+        return underscoreIndex >= 0 ? soName.Substring(underscoreIndex + 1) : soName;
     }
 }

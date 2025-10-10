@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c5c8fa5a194af541a97053d1b5a4487, type: 3}
+  m_Name: E_Magnesium
+  m_EditorClassIdentifier: 
+  elementName: Magnesium
+  elementSprite: {fileID: -425519968, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
+  numberSprites:
+  - {fileID: -6629531029891648246, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -4217592887472625829, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -4412911677491635961, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -6395529614303463221, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -4417143251372694878, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: 728446850243192315, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: 5108088467900000851, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -519400735672398794, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -1344653293438560547, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: 849386610096671516, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  defaultIsotopeNumber: -1

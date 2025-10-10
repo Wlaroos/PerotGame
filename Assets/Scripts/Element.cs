@@ -46,17 +46,23 @@ public class Element : MonoBehaviour
     // Updates the element's visuals based on its data
     public void UpdateDataVisuals()
     {
-        if (data != null)
+        if (data == null)
+            return;
+
+        // ensure editor-safe lazy load (avoid OnEnable loads)
+        data.EnsureNumberSpritesLoaded();
+
+        if (_elementSprite != null)
         {
             _elementSprite.sprite = data.elementSprite;
             _elementSprite.color = data.defaultColor;
-
-            // Dim the background color
-            Color32 c = data.defaultColor;
-            Color dimmed = new Color(c.r / 255f * 0.5f, c.g / 255f * 0.5f, c.b / 255f * 0.5f, c.a / 255f);
-            _backgroundSprite.color = dimmed;
-
-            SetNumberSprites(isotopeNumber);
         }
+
+        // Dim the background color
+        Color32 c = data.defaultColor;
+        Color dimmed = new Color(c.r / 255f * 0.5f, c.g / 255f * 0.5f, c.b / 255f * 0.5f, c.a / 255f);
+        _backgroundSprite.color = dimmed;
+
+        SetNumberSprites(isotopeNumber);
     }
 }

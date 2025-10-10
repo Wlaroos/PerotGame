@@ -12,13 +12,14 @@ public class ElementData : ScriptableObject
 
     private void OnEnable()
     {
-        // Load number sprites if not set
+        elementName = this.name;
+    }
+
+    public void EnsureNumberSpritesLoaded()
+    {
         if (numberSprites == null || numberSprites.Length == 0)
         {
             numberSprites = Resources.LoadAll<Sprite>("Sprites/Numbers");
         }
-
-        // Set the element name to the asset's name
-        elementName = this.name;
     }
 }
