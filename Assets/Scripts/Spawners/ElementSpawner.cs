@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 // Spawns element objects and manages element spawn buttons
 public class ElementSpawner : MonoBehaviour
@@ -24,6 +25,11 @@ public class ElementSpawner : MonoBehaviour
     [SerializeField] private bool _unlockAllElements = false; // If true, unlock all buttons at start
 
     [SerializeField] private List<ElementData> _elementDataList = new List<ElementData>(); // List of element data for each button
+
+    // Track whether the player is currently dragging a spawned object (to suppress click-spawns)
+    private bool _isDragging = false;
+    public bool IsDragging => _isDragging;
+    public void SetDragging(bool value) => _isDragging = value;
 
     // Runs when the object is created
     private void Awake()
@@ -69,14 +75,27 @@ public class ElementSpawner : MonoBehaviour
 
             if (matchedData != null)
             {
+                // Use wrapper so we can suppress click if a drag is happening
+                ElementData dataForClosure = matchedData;
                 btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(() => SpawnElementAtRandomPosition(matchedData));
+                btn.onClick.AddListener(() => OnSpawnButtonClicked(dataForClosure));
+
+                // Ensure a drag handler is attached so the player can drag to spawn and place manually
+                SpawnDragHandler dragHandler = btn.gameObject.GetComponent<SpawnDragHandler>() ?? btn.gameObject.AddComponent<SpawnDragHandler>();
+                dragHandler.Init(this, dataForClosure);
             }
             else
             {
                 Debug.LogWarning($"ElementSpawner: No ElementData found matching button name '{btnName}'.");
             }
         }
+    }
+
+    // suppress click-spawn when a drag is in progress
+    private void OnSpawnButtonClicked(ElementData data)
+    {
+        if (_isDragging) return;
+        SpawnElementAtRandomPosition(data);
     }
 
     // When this object is destroyed

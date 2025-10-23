@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems; // added
 
 // Spawns compound objects and manages compound spawn buttons
 public class CompoundSpawner : MonoBehaviour
@@ -24,6 +25,11 @@ public class CompoundSpawner : MonoBehaviour
     [SerializeField] private bool _unlockAllCompounds = false; // If true, unlock all buttons at start
 
     [SerializeField] private CompoundData[] _compoundDataList; // List of compound data for each button
+
+    // Track whether the player is currently dragging a spawned compound (to suppress click-spawns)
+    private bool _isDragging = false;
+    public bool IsDragging => _isDragging;
+    public void SetDragging(bool value) => _isDragging = value;
 
     // Runs when the object is created
     private void Awake()
@@ -77,13 +83,24 @@ public class CompoundSpawner : MonoBehaviour
             {
                 btn.onClick.RemoveAllListeners();
                 CompoundData dataCopy = matchedData; // capture local for closure safety
-                btn.onClick.AddListener(() => SpawnCompoundAtRandomPosition(dataCopy));
+                btn.onClick.AddListener(() => OnSpawnButtonClicked(dataCopy));
+
+                // Ensure a drag handler is attached so the player can drag to spawn and place manually
+                SpawnDragHandler dragHandler = btn.gameObject.GetComponent<SpawnDragHandler>() ?? btn.gameObject.AddComponent<SpawnDragHandler>();
+                dragHandler.Init(this, dataCopy);
             }
             else
             {
                 Debug.LogWarning($"CompoundSpawner: No CompoundData found matching button name '{btnName}'.");
             }
         }
+    }
+
+    // suppress click-spawn when a drag is in progress
+    private void OnSpawnButtonClicked(CompoundData data)
+    {
+        if (_isDragging) return;
+        SpawnCompoundAtRandomPosition(data);
     }
 
     // When this object is destroyed
