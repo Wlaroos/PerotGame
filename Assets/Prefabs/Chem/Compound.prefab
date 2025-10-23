@@ -131,7 +131,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.5, y: 0.4375}
+    oldSize: {x: 0.59375, y: 0.4375}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -206,11 +206,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dragSpeed: 25
-  elementPrefab: {fileID: 3057944551080756754, guid: 0517a3ac504d30c47a512dbf45255cc4, type: 3}
-  compoundPrefab: {fileID: 4317416459634423432}
-  mineralPrefab: {fileID: 7641892725377117915, guid: ef9a045bdb040b94abdfd707dcc2ceff, type: 3}
-  craftParticles: {fileID: 2970486637206280725, guid: 3a40c2a63cb20c244832c466664a8742, type: 3}
-  failParticles: {fileID: 2970486637206280725, guid: 27a6165da772fc44693091533daf3823, type: 3}
 --- !u!1 &5221161688068368614
 GameObject:
   m_ObjectHideFlags: 0
@@ -227,7 +222,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8804938035161819201
 Transform:
   m_ObjectHideFlags: 0

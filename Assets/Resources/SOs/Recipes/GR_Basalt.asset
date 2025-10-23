@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8957768a3b0dc29408328652609a4081, type: 3}
+  m_Name: GR_Basalt
+  m_EditorClassIdentifier: 
+  inputA: {fileID: 11400000, guid: a2b756d5d71abcf49ade7a9ad65c79fa, type: 2}
+  inputB: {fileID: 11400000, guid: 086feb865b06161469f51870be3a594a, type: 2}
+  inputC: {fileID: 0}
+  inputD: {fileID: 0}
+  inputE: {fileID: 0}
+  output: {fileID: 11400000, guid: 743768913f1ca92419d9ffd61d1acf0a, type: 2}

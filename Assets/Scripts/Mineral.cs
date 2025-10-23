@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 // Controls how a mineral looks and stores its info
@@ -8,6 +9,7 @@ public class Mineral : MonoBehaviour
     [SerializeField] private SpriteRenderer _mineralSprite;    // Main picture of the mineral
     [SerializeField] private SpriteRenderer _mineralBigSprite; // Big version of the mineral sprite
     [SerializeField] private SpriteRenderer _backgroundSprite; // Background behind the mineral
+    [SerializeField] private TextMeshPro _mineralNameText; // Text showing the mineral's name
 
     // Runs when the object is created
     private void Awake()
@@ -28,6 +30,20 @@ public class Mineral : MonoBehaviour
             if (_mineralBigSprite != null)
             {
                 _mineralBigSprite.sprite = data.mineralBigSprite;
+            }
+            if (_mineralNameText != null)
+            {
+                string temp = data.mineralName;
+
+                // Remove any prefix before an underscore
+                int idx = temp.IndexOf('_');
+                if (idx >= 0)
+                {
+                    temp = (idx + 1 < temp.Length) ? temp.Substring(idx + 1) : string.Empty;
+                }
+
+                _mineralNameText.text = temp;
+                _mineralNameText.color = data.defaultColor;
             }
 
             // Make the background a dimmer version of the main color

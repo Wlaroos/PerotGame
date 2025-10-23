@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b3eedd000852a048a63aed441be3f01, type: 3}
   m_Name: M_Vivianite
   m_EditorClassIdentifier: 
-  mineralName: IronPhosphate
+  mineralName: M_Vivianite
   mineralSprite: {fileID: 1980142279973535832, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
   mineralBigSprite: {fileID: 7860488438020181885, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
   defaultColor:

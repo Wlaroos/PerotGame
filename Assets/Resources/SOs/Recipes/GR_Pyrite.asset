@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8957768a3b0dc29408328652609a4081, type: 3}
+  m_Name: GR_Pyrite
+  m_EditorClassIdentifier: 
+  inputA: {fileID: 11400000, guid: 4442c2f5ccd8ddb4484048695fc97453, type: 2}
+  inputB: {fileID: 11400000, guid: dc3b2751a618d0f41811048e63d982fe, type: 2}
+  inputC: {fileID: 0}
+  inputD: {fileID: 0}
+  inputE: {fileID: 0}
+  output: {fileID: 11400000, guid: 596c6a64cfcbb6d4fbfa89d5888d1f8c, type: 2}

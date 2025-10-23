@@ -298,11 +298,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dragSpeed: 25
-  elementPrefab: {fileID: 3057944551080756754}
-  compoundPrefab: {fileID: 4317416459634423432, guid: 4fa2d9436c960ac4ca565953a2fda7e6, type: 3}
-  mineralPrefab: {fileID: 7641892725377117915, guid: ef9a045bdb040b94abdfd707dcc2ceff, type: 3}
-  craftParticles: {fileID: 2970486637206280725, guid: 3a40c2a63cb20c244832c466664a8742, type: 3}
-  failParticles: {fileID: 2970486637206280725, guid: 27a6165da772fc44693091533daf3823, type: 3}
 --- !u!1 &3868221493880809387
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,7 +401,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6733600772997289725
 Transform:
   m_ObjectHideFlags: 0

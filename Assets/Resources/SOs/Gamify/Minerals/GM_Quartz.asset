@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b3eedd000852a048a63aed441be3f01, type: 3}
-  m_Name: M_Calcite
+  m_Name: GM_Quartz
   m_EditorClassIdentifier: 
-  mineralName: M_Calcite
-  mineralSprite: {fileID: 1980142279973535832, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
-  mineralBigSprite: {fileID: 7860488438020181885, guid: 7aa4f2abcda590445a7981a6bcbe5101, type: 3}
+  mineralName: GM_Quartz
+  mineralSprite: {fileID: 223053218, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
+  mineralBigSprite: {fileID: 0}
   defaultColor:
     serializedVersion: 2
-    rgba: 4291100482
+    rgba: 4294967295

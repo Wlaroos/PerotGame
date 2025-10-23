@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8957768a3b0dc29408328652609a4081, type: 3}
+  m_Name: GR_Quartz
+  m_EditorClassIdentifier: 
+  inputA: {fileID: 11400000, guid: a2b756d5d71abcf49ade7a9ad65c79fa, type: 2}
+  inputB: {fileID: 11400000, guid: d03417d52355404488aec0078d1f8f17, type: 2}
+  inputC: {fileID: 0}
+  inputD: {fileID: 0}
+  inputE: {fileID: 0}
+  output: {fileID: 11400000, guid: 91fdb2bd50c05214fa2bde6e3f2d8f55, type: 2}
