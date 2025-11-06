@@ -2382,6 +2382,14 @@ PrefabInstance:
       value: CompundSpawner
       objectReference: {fileID: 0}
     - target: {fileID: 5929444023277544585, guid: 8af09d480ddc61e40bd00c1151dbce14, type: 3}
+      propertyPath: _buffer.x
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 5929444023277544585, guid: 8af09d480ddc61e40bd00c1151dbce14, type: 3}
+      propertyPath: _buffer.y
+      value: 275
+      objectReference: {fileID: 0}
+    - target: {fileID: 5929444023277544585, guid: 8af09d480ddc61e40bd00c1151dbce14, type: 3}
       propertyPath: _spawnArea
       value: 
       objectReference: {fileID: 1546428849}
