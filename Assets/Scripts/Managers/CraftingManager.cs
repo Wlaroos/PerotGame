@@ -41,26 +41,33 @@ public class CraftingManager : MonoBehaviour
         _recipes.AddRange(loadedRecipes);
     }
 
-    // Try to craft something from a list of ingredients
-    public GameObject TryCraft(List<ScriptableObject> ingredients, Vector3 spawnPosition)
+    // Find a matching recipe for given ingredients without creating/ registering the craft
+    public CraftingRecipe FindMatchingRecipe(List<ScriptableObject> ingredients)
     {
+        if (ingredients == null) return null;
         foreach (var recipe in _recipes)
         {
-            // Check if the recipe matches the ingredients (ignoring order)
             if (MatchIngredients(recipe, ingredients))
-            {
-                // If this is the first time, fire the event
-                if (!_craftedRecipes.Contains(recipe))
-                {
-                    _craftedRecipes.Add(recipe);
-                    OnFirstTimeRecipeCrafted.Invoke(recipe);
-                }
-
-                // Instantiate the crafted object
-                return CreateCraftedObject(recipe.output, spawnPosition);
-            }
+                return recipe;
         }
         return null;
+    }
+
+    // Try to craft something from a list of ingredients (performs creation and registers first-time events)
+    public GameObject TryCraft(List<ScriptableObject> ingredients, Vector3 spawnPosition)
+    {
+        var recipe = FindMatchingRecipe(ingredients);
+        if (recipe == null) return null;
+
+        // If this is the first time, fire the event
+        if (!_craftedRecipes.Contains(recipe))
+        {
+            _craftedRecipes.Add(recipe);
+            OnFirstTimeRecipeCrafted.Invoke(recipe);
+        }
+
+        // Instantiate the crafted object
+        return CreateCraftedObject(recipe.output, spawnPosition);
     }
 
     // Check if the recipe matches the given ingredients

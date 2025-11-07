@@ -7,7 +7,7 @@ public class CraftingZone : MonoBehaviour
 
     // multi-press crafting state
     private bool _craftingInProgress = false;
-    [SerializeField] private int _requiredPresses = 0;
+    private int _requiredPresses = 0;
     private int _currentPresses = 0;
     private List<GameObject> _objectsSnapshot = null;
     private List<ScriptableObject> _snapshotIngredients = null;
@@ -61,16 +61,14 @@ public class CraftingZone : MonoBehaviour
         // If we are not already in a multi-press sequence, probe whether these ingredients form a valid recipe.
         if (!_craftingInProgress)
         {
-            // Probe craft by calling TryCraft at an offscreen position and immediately destroying the result.
-            Vector3 probePos = transform.position + Vector3.up * 1000f;
-            GameObject probe = CraftingManager.Instance.TryCraft(ingredients, probePos);
-            if (probe != null)
+            // Probe craft by asking the manager for a matching recipe (no side effects)
+            var probeRecipe = CraftingManager.Instance != null ? CraftingManager.Instance.FindMatchingRecipe(ingredients) : null;
+            if (probeRecipe != null)
             {
                 // Valid recipe found -> start multi-press sequence
-                Destroy(probe);
-
                 _craftingInProgress = true;
                 _currentPresses = 1;
+                _requiredPresses = 5;
                 _objectsSnapshot = new List<GameObject>(_objectsInZone);
                 _snapshotIngredients = new List<ScriptableObject>(ingredients);
 
@@ -78,10 +76,6 @@ public class CraftingZone : MonoBehaviour
                 if (_currentPresses >= _requiredPresses)
                 {
                     FinalizeCraft(_snapshotIngredients, _objectsSnapshot);
-                }
-                else
-                {
-                    //Debug.Log($"Crafting started: press {_requiredPresses - _currentPresses} more time(s).");
                 }
             }
             else
@@ -109,7 +103,7 @@ public class CraftingZone : MonoBehaviour
             }
             else
             {
-                Debug.Log($"Crafting in progress: press {_requiredPresses - _currentPresses} more time(s).");
+                //Debug.Log($"Crafting in progress: press {_requiredPresses - _currentPresses} more time(s).");
             }
         }
     }
@@ -144,7 +138,7 @@ public class CraftingZone : MonoBehaviour
     private void FinalizeCraft(List<ScriptableObject> ingredients, List<GameObject> objectsToConsume)
     {
         Vector3 spawnPosition = ComputeCenterOf(objectsToConsume) ?? transform.position;
-        GameObject craftedObj = CraftingManager.Instance.TryCraft(ingredients, spawnPosition);
+        GameObject craftedObj = CraftingManager.Instance != null ? CraftingManager.Instance.TryCraft(ingredients, spawnPosition) : null;
 
         if (craftedObj != null)
         {
