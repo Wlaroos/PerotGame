@@ -601,6 +601,7 @@ public class RecipeTrackerUI : MonoBehaviour
             {"Phosphate", "PO4"},
             {"Silicate", "SiO4"},
             {"Oxide", "O2-"},
+            {"Heat", "Heat"},
 
         };
 
