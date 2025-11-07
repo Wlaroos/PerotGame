@@ -7,7 +7,7 @@ public class CraftingZone : MonoBehaviour
 
     // multi-press crafting state
     private bool _craftingInProgress = false;
-    private int _requiredPresses = 0;
+    [SerializeField] private int _requiredPresses = 0;
     private int _currentPresses = 0;
     private List<GameObject> _objectsSnapshot = null;
     private List<ScriptableObject> _snapshotIngredients = null;
@@ -70,8 +70,7 @@ public class CraftingZone : MonoBehaviour
                 Destroy(probe);
 
                 _craftingInProgress = true;
-                _requiredPresses = Random.Range(3, 8); // 3..7 presses
-                _currentPresses = 1; // this press counts as the first
+                _currentPresses = 1;
                 _objectsSnapshot = new List<GameObject>(_objectsInZone);
                 _snapshotIngredients = new List<ScriptableObject>(ingredients);
 
