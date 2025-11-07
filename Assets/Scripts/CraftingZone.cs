@@ -81,7 +81,7 @@ public class CraftingZone : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log($"Crafting started: press {_requiredPresses - _currentPresses} more time(s).");
+                    //Debug.Log($"Crafting started: press {_requiredPresses - _currentPresses} more time(s).");
                 }
             }
             else
