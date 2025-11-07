@@ -61,11 +61,11 @@ public class CraftingManager : MonoBehaviour
 
         // Determine if this is the first time this recipe was crafted
         bool isFirstTime = !_craftedRecipes.Contains(recipe);
-        if (isFirstTime)
-        {
-            _craftedRecipes.Add(recipe);
-            OnFirstTimeRecipeCrafted.Invoke(recipe);
-        }
+                if (isFirstTime)
+                {
+                    _craftedRecipes.Add(recipe);
+                    OnFirstTimeRecipeCrafted.Invoke(recipe);
+                }
 
         // Instantiate the crafted object
         var crafted = CreateCraftedObject(recipe.output, spawnPosition);
@@ -81,7 +81,7 @@ public class CraftingManager : MonoBehaviour
                 // First-time: show persistent big popup (stays until clicked)
                 if (CraftedPopupManager.Instance != null)
                 {
-                    CraftedPopupManager.Instance.ShowPersistentCraftedPopup(mineralData);
+                    CraftedPopupManager.Instance.ShowPersistentCraftedPopup(mineralData, recipe);
                 }
             }
             else
@@ -89,7 +89,7 @@ public class CraftingManager : MonoBehaviour
                 // Subsequent crafts: show the small transient popup near the object
                 if (CraftedPopupManager.Instance != null)
                 {
-                    CraftedPopupManager.Instance.ShowCraftedPopup(mineralData, pos);
+                    CraftedPopupManager.Instance.ShowCraftedPopup(mineralData, pos, recipe);
                 }
             }
         }

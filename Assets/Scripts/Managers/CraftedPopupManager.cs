@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -39,7 +41,8 @@ public class CraftedPopupManager : MonoBehaviour
     }
 
     // Show a popup for a mineral at world position
-    public void ShowCraftedPopup(MineralData data, Vector3 worldPosition)
+    // Optional: pass the CraftingRecipe that produced the mineral so we can build a compact formula string
+    public void ShowCraftedPopup(MineralData data, Vector3 worldPosition, CraftingRecipe recipe = null)
     {
         Debug.Log($"CraftedPopupManager: ShowCraftedPopup called for '{(data!=null?data.name:"<null>")}' at {worldPosition}");
         if (data == null) return;
@@ -101,6 +104,15 @@ public class CraftedPopupManager : MonoBehaviour
             string temp = data.mineralName ?? data.name;
             int idx = temp.IndexOf('_');
             if (idx >= 0 && idx + 1 < temp.Length) temp = temp.Substring(idx + 1);
+
+            // If we have a recipe, build a compact formula and append in parentheses
+            if (recipe != null)
+            {
+                // Use the title's font to decide whether to use Unicode subscripts or TMP rich-text fallback
+                string formula = BuildFormulaForTitle(title, recipe);
+                if (!string.IsNullOrEmpty(formula)) temp = string.Format("{0} ({1})", temp, formula);
+            }
+
             title.text = temp;
             title.color = data.defaultColor;
         }
@@ -118,9 +130,9 @@ public class CraftedPopupManager : MonoBehaviour
     }
 
         // Show a fullscreen/persistent popup that stays until the player clicks to dismiss
-        public void ShowPersistentCraftedPopup(MineralData data)
+    public void ShowPersistentCraftedPopup(MineralData data, CraftingRecipe recipe = null)
         {
-            Debug.Log($"CraftedPopupManager: ShowPersistentCraftedPopup called for '{(data!=null?data.name:"<null>")}'");
+            //Debug.Log($"CraftedPopupManager: ShowPersistentCraftedPopup called for '{(data!=null?data.name:"<null>")}'");
             if (data == null) return;
             if (_uiCanvas == null)
             {
@@ -137,7 +149,7 @@ public class CraftedPopupManager : MonoBehaviour
                 Debug.LogWarning("CraftedPopupManager: persistentPopupPrefab not assigned — falling back to transient popup.");
                 // fallback to the small popup (center of screen)
                 Vector3 centerWorld = Camera.main != null ? Camera.main.transform.position + Camera.main.transform.forward * 2f : Vector3.zero;
-                ShowCraftedPopup(data, centerWorld);
+                ShowCraftedPopup(data, centerWorld, recipe);
                 return;
             }
 
@@ -156,7 +168,7 @@ public class CraftedPopupManager : MonoBehaviour
             if (icon != null)
             {
                 icon.sprite = data.mineralBigSprite != null ? data.mineralBigSprite : data.mineralSprite;
-                icon.color = data.defaultColor;
+                //icon.color = data.defaultColor;
             }
 
             if (title != null)
@@ -164,6 +176,13 @@ public class CraftedPopupManager : MonoBehaviour
                 string temp = data.mineralName ?? data.name;
                 int idx = temp.IndexOf('_');
                 if (idx >= 0 && idx + 1 < temp.Length) temp = temp.Substring(idx + 1);
+
+                if (recipe != null)
+                {
+                    string formula = BuildFormulaForTitle(title, recipe);
+                    if (!string.IsNullOrEmpty(formula)) temp = string.Format("{0} ({1})", temp, formula);
+                }
+
                 title.text = temp;
                 title.color = data.defaultColor;
             }
@@ -280,5 +299,210 @@ public class CraftedPopupManager : MonoBehaviour
             if (c.gameObject.name.ToLower().Contains(childName.ToLower())) return c;
         }
         return null;
+    }
+
+    // Build a compact formula string (e.g. 2Al3CO3) from a recipe's ingredients
+    private string BuildFormulaFromRecipe(CraftingRecipe recipe)
+    {
+        if (recipe == null) return string.Empty;
+
+        var ingredients = new List<ScriptableObject> { recipe.inputA, recipe.inputB, recipe.inputC, recipe.inputD, recipe.inputE }
+            .Where(x => x != null)
+            .ToList();
+
+        if (ingredients.Count == 0) return string.Empty;
+
+        // Map ingredients to their symbol strings
+        var symbols = ingredients.Select(i => GetSymbolForScriptableObject(i)).ToList();
+
+        // Preserve first-seen order for symbols
+        var ordered = new List<string>();
+        foreach (var s in symbols) if (!ordered.Contains(s)) ordered.Add(s);
+
+        var counts = symbols.GroupBy(s => s).ToDictionary(g => g.Key, g => g.Count());
+
+        var sb = new StringBuilder();
+        foreach (var s in ordered)
+        {
+            int c = counts.TryGetValue(s, out var v) ? v : 0;
+            if (c <= 1)
+            {
+                sb.Append(s);
+            }
+            else
+            {
+                // If the symbol itself contains digits (e.g. CO3), treat it as a polyatomic group and parenthesize
+                bool hasDigit = s.Any(ch => char.IsDigit(ch));
+                if (hasDigit)
+                {
+                    sb.Append('(').Append(s).Append(')');
+                }
+                else
+                {
+                    sb.Append(s);
+                }
+
+                sb.Append(ToSubscript(c));
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    // Build a formula string appropriate for the provided TextMeshProUGUI title.
+    // If the title's font asset contains Unicode subscript digits, use them; otherwise produce TMP rich-text subscripts.
+    private string BuildFormulaForTitle(TextMeshProUGUI title, CraftingRecipe recipe)
+    {
+        if (recipe == null) return string.Empty;
+
+        bool useUnicodeSubscripts = false;
+        if (title != null && title.font != null)
+        {
+            // Check for at least one subscript digit glyph in the font asset
+            try
+            {
+                var fontAsset = title.font;
+                useUnicodeSubscripts = fontAsset.HasCharacter('\u2081');
+            }
+            catch
+            {
+                useUnicodeSubscripts = false;
+            }
+        }
+
+        // Build the basic ordered symbols and counts (preserve first-seen order)
+        var ingredients = new List<ScriptableObject> { recipe.inputA, recipe.inputB, recipe.inputC, recipe.inputD, recipe.inputE }
+            .Where(x => x != null)
+            .ToList();
+        if (ingredients.Count == 0) return string.Empty;
+
+        var symbols = ingredients.Select(i => GetSymbolForScriptableObject(i)).ToList();
+        var ordered = new List<string>();
+        foreach (var s in symbols) if (!ordered.Contains(s)) ordered.Add(s);
+        var counts = symbols.GroupBy(s => s).ToDictionary(g => g.Key, g => g.Count());
+
+        var sb = new StringBuilder();
+        foreach (var s in ordered)
+        {
+            int c = counts.TryGetValue(s, out var v) ? v : 0;
+            if (c <= 1)
+            {
+                sb.Append(s);
+            }
+            else
+            {
+                bool hasDigit = s.Any(ch => char.IsDigit(ch));
+                if (useUnicodeSubscripts)
+                {
+                    if (hasDigit)
+                        sb.Append('(').Append(s).Append(')');
+                    else
+                        sb.Append(s);
+
+                    sb.Append(ToSubscript(c));
+                }
+                else
+                {
+                    // Rich-text fallback using TMP tags to simulate subscripts
+                    if (hasDigit)
+                        sb.Append('(').Append(s).Append(')');
+                    else
+                        sb.Append(s);
+
+                    sb.Append(MakeSubscriptTMP(c.ToString()));
+                }
+            }
+        }
+
+        // Ensure rich-text is enabled if we emitted TMP tags
+        if (!useUnicodeSubscripts && title != null)
+        {
+            title.richText = true;
+        }
+
+        return sb.ToString();
+    }
+
+    // Create a TMP rich-text fragment that uses TextMeshPro's <sub> tag for subscripts
+    private string MakeSubscriptTMP(string number)
+    {
+        // <sub> is a built-in TMP tag that lowers and scales text to look like a subscript
+        return $"<sub>{number}</sub>";
+    }
+
+    // Convert an integer to Unicode subscript digits (e.g. 12 -> ₁₂)
+    private string ToSubscript(int value)
+    {
+        if (value <= 0) return "";
+        var s = value.ToString();
+        var sb = new StringBuilder();
+        foreach (var ch in s)
+        {
+            switch (ch)
+            {
+                case '0': sb.Append('\u2080'); break;
+                case '1': sb.Append('\u2081'); break;
+                case '2': sb.Append('\u2082'); break;
+                case '3': sb.Append('\u2083'); break;
+                case '4': sb.Append('\u2084'); break;
+                case '5': sb.Append('\u2085'); break;
+                case '6': sb.Append('\u2086'); break;
+                case '7': sb.Append('\u2087'); break;
+                case '8': sb.Append('\u2088'); break;
+                case '9': sb.Append('\u2089'); break;
+                default: sb.Append(ch); break;
+            }
+        }
+        return sb.ToString();
+    }
+
+    // Reuse the same symbol mapping used elsewhere (keeps formula consistent with recipe UI)
+    private string GetSymbolForScriptableObject(ScriptableObject so)
+    {
+        if (so == null) return "?";
+        string name = StripCommonPrefix(so.name);
+
+        var map = new Dictionary<string, string>(System.StringComparer.OrdinalIgnoreCase)
+        {
+            {"Hydrogen", "H"},
+            {"Helium", "He"},
+            {"Beryllium", "Be"},
+            {"Carbon", "C"},
+            {"Magnesium", "Mg"},
+            {"Aluminum", "Al"},
+            {"Silicon", "Si"},
+            {"Phosphorus", "P"},
+            {"Sulphur", "S"},
+            {"Sulfur", "S"},
+            {"Calcium", "Ca"},
+            {"Titanium", "Ti"},
+            {"Iron", "Fe"},
+            {"Copper", "Cu"},
+            {"Barium", "Ba"},
+            {"Oxygen", "O"},
+            {"Carbonate", "CO3"},
+            {"Sulfate", "SO4"},
+            {"Nitrate", "NO3"},
+            {"Phosphate", "PO4"},
+            {"Silicate", "SiO4"},
+            {"Oxide", "O"},
+        };
+
+        if (map.TryGetValue(name, out var sym)) return sym;
+
+        if (name.Length == 1) return name.ToUpper();
+        return char.ToUpper(name[0]) + name.Substring(1).ToLower();
+    }
+
+    // Helper to strip common asset prefixes (E_, R_, M_, C_)
+    private string StripCommonPrefix(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return name;
+        string[] prefixes = new[] { "E_", "R_", "M_", "C_" };
+        foreach (var p in prefixes)
+        {
+            if (name.StartsWith(p)) return name.Substring(p.Length);
+        }
+        return name;
     }
 }
