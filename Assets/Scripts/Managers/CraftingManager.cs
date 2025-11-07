@@ -59,11 +59,10 @@ public class CraftingManager : MonoBehaviour
         var recipe = FindMatchingRecipe(ingredients);
         if (recipe == null) return null;
 
-        // Determine whether this is the first time this recipe was crafted
-        bool wasFirstTime = false;
-        if (!_craftedRecipes.Contains(recipe))
+        // Determine if this is the first time this recipe was crafted
+        bool isFirstTime = !_craftedRecipes.Contains(recipe);
+        if (isFirstTime)
         {
-            wasFirstTime = true;
             _craftedRecipes.Add(recipe);
             OnFirstTimeRecipeCrafted.Invoke(recipe);
         }
@@ -71,12 +70,27 @@ public class CraftingManager : MonoBehaviour
         // Instantiate the crafted object
         var crafted = CreateCraftedObject(recipe.output, spawnPosition);
 
-        // If this was the first-time craft and the result is a mineral, show a popup
-        if (wasFirstTime && recipe.output is MineralData miniData)
+        // If the output is a Mineral, show UI feedback.
+        if (crafted != null && recipe.output is MineralData mineralData)
         {
-            if (CraftedPopupManager.Instance != null)
+            // Prefer using the spawned object's position if available for transient popups
+            Vector3 pos = crafted.transform != null ? crafted.transform.position : spawnPosition;
+
+            if (isFirstTime)
             {
-                CraftedPopupManager.Instance.ShowCraftedPopup(miniData, spawnPosition);
+                // First-time: show persistent big popup (stays until clicked)
+                if (CraftedPopupManager.Instance != null)
+                {
+                    CraftedPopupManager.Instance.ShowPersistentCraftedPopup(mineralData);
+                }
+            }
+            else
+            {
+                // Subsequent crafts: show the small transient popup near the object
+                if (CraftedPopupManager.Instance != null)
+                {
+                    CraftedPopupManager.Instance.ShowCraftedPopup(mineralData, pos);
+                }
             }
         }
 
