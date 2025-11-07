@@ -59,15 +59,28 @@ public class CraftingManager : MonoBehaviour
         var recipe = FindMatchingRecipe(ingredients);
         if (recipe == null) return null;
 
-        // If this is the first time, fire the event
+        // Determine whether this is the first time this recipe was crafted
+        bool wasFirstTime = false;
         if (!_craftedRecipes.Contains(recipe))
         {
+            wasFirstTime = true;
             _craftedRecipes.Add(recipe);
             OnFirstTimeRecipeCrafted.Invoke(recipe);
         }
 
         // Instantiate the crafted object
-        return CreateCraftedObject(recipe.output, spawnPosition);
+        var crafted = CreateCraftedObject(recipe.output, spawnPosition);
+
+        // If this was the first-time craft and the result is a mineral, show a popup
+        if (wasFirstTime && recipe.output is MineralData miniData)
+        {
+            if (CraftedPopupManager.Instance != null)
+            {
+                CraftedPopupManager.Instance.ShowCraftedPopup(miniData, spawnPosition);
+            }
+        }
+
+        return crafted;
     }
 
     // Check if the recipe matches the given ingredients

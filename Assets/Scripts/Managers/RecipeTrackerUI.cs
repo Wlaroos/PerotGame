@@ -11,6 +11,7 @@ public class RecipeTrackerUI : MonoBehaviour
     public GameObject recipeItemPrefab;
     public TextMeshProUGUI selectedTitleText;
     public TextMeshProUGUI selectedDetailsText;
+    public Image selectedImage; // optional image shown for the selected recipe's output (when discovered)
 
     // tint colors
     public Color undiscoveredColor = Color.white;
@@ -43,6 +44,8 @@ public class RecipeTrackerUI : MonoBehaviour
 
         // subscribe for first-time crafted events (expects CraftingManager to only fire this when craft actually occurs)
         CraftingManager.Instance.OnFirstTimeRecipeCrafted.AddListener(OnFirstTimeRecipeCrafted);
+
+        SelectRecipe(null);
     }
 
     private void OnDestroy()
@@ -119,6 +122,7 @@ public class RecipeTrackerUI : MonoBehaviour
         {
             if (selectedTitleText != null) selectedTitleText.text = "";
             if (selectedDetailsText != null) selectedDetailsText.text = "";
+            if (selectedImage != null) { selectedImage.sprite = null; selectedImage.enabled = false; }
             return;
         }
 
@@ -140,10 +144,30 @@ public class RecipeTrackerUI : MonoBehaviour
             {
                 string output = StripCommonPrefix(GetDisplayName(recipe.output, discovered));
                 selectedDetailsText.text = string.Format("Ingredients: {0}\nOutput: {1}", ingList, output);
+                // If the output is a MineralData, show its sprite in the selected image (prefer big sprite)
+                if (selectedImage != null)
+                {
+                    if (recipe.output is MineralData md && md.mineralBigSprite != null)
+                    {
+                        selectedImage.sprite = md.mineralBigSprite;
+                        selectedImage.enabled = true;
+                    }
+                    else if (recipe.output is MineralData md2 && md2.mineralSprite != null)
+                    {
+                        selectedImage.sprite = md2.mineralSprite;
+                        selectedImage.enabled = true;
+                    }
+                    else
+                    {
+                        selectedImage.sprite = null;
+                        selectedImage.enabled = false;
+                    }
+                }
             }
             else
             {
                 selectedDetailsText.text = string.Format("Ingredients: {0}", ingList);
+                if (selectedImage != null) { selectedImage.sprite = null; selectedImage.enabled = false; }
             }
         }
     }
