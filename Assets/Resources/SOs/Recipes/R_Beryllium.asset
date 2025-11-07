@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8957768a3b0dc29408328652609a4081, type: 3}
-  m_Name: R_Beryliulm
+  m_Name: R_Beryllium
   m_EditorClassIdentifier: 
   inputA: {fileID: 11400000, guid: ec94a4e2b31d3584387361ac096fd5e3, type: 2}
   inputB: {fileID: 11400000, guid: ec94a4e2b31d3584387361ac096fd5e3, type: 2}

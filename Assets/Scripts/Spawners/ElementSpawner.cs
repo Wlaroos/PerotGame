@@ -21,7 +21,10 @@ public class ElementSpawner : MonoBehaviour
     [SerializeField] private Sprite _hiddenButtonSprite; // Sprite for locked/hidden buttons
     public Sprite HiddenButtonSprite => _hiddenButtonSprite;
 
-    [SerializeField] private Vector2 _buffer = new Vector2(100, 100); // Padding from spawn area edges
+    [SerializeField] private Vector2 _spawnAreaSize = new Vector2(100, 100); // Width/Height of the allowed spawn area (centered inside the SpawnArea)
+    public Vector2 SpawnAreaSize => _spawnAreaSize;
+    [SerializeField] private Vector2 _spawnAreaCenter = Vector2.zero; // Local offset (in rect local space) from the SpawnArea center
+    public Vector2 SpawnAreaCenter => _spawnAreaCenter;
     [SerializeField] private bool _unlockAllElements = false; // If true, unlock all buttons at start
 
     [SerializeField] private List<ElementData> _elementDataList = new List<ElementData>(); // List of element data for each button
@@ -125,10 +128,19 @@ public class ElementSpawner : MonoBehaviour
     // Spawn an element at a random position inside the spawn area
     public GameObject SpawnElementAtRandomPosition(ElementData data, int isotopeNumber = -1)
     {
-        Vector2 randomPosition = new Vector2
-        (
-            Random.Range(SpawnArea.rectTransform.rect.xMin + _buffer.x, SpawnArea.rectTransform.rect.xMax - _buffer.x),
-            Random.Range(SpawnArea.rectTransform.rect.yMin + _buffer.y, SpawnArea.rectTransform.rect.yMax - _buffer.y)
+        // Compute spawn rect centered inside the SpawnArea rect using the explicit _spawnAreaSize.
+        Rect rect = SpawnArea.rectTransform.rect;
+
+        // Clamp the requested spawn area size so it never exceeds the SpawnArea rect
+        float halfWidth = Mathf.Min(_spawnAreaSize.x * 0.5f, rect.width * 0.5f);
+        float halfHeight = Mathf.Min(_spawnAreaSize.y * 0.5f, rect.height * 0.5f);
+
+        // Apply the optional local-space center offset (in the rect's coordinate space)
+        Vector2 rectCenter = rect.center + _spawnAreaCenter;
+
+        Vector2 randomPosition = new Vector2(
+            Random.Range(rectCenter.x - halfWidth, rectCenter.x + halfWidth),
+            Random.Range(rectCenter.y - halfHeight, rectCenter.y + halfHeight)
         );
 
         Vector3 worldPosition = SpawnArea.rectTransform.TransformPoint(randomPosition);
@@ -269,17 +281,24 @@ public class ElementSpawner : MonoBehaviour
                 Gizmos.DrawLine(corners[i], corners[(i + 1) % 4]);
             }
 
-            // Calculate and draw the buffered spawn area
+            // Calculate and draw the exact spawn area centered inside the spawn rect
             Vector3 center = rectTransform.position;
             Vector2 size = rectTransform.rect.size;
-            Vector3 bufferedMin = rectTransform.TransformPoint(new Vector3(-size.x / 2 + _buffer.x, -size.y / 2 + _buffer.y, 0));
-            Vector3 bufferedMax = rectTransform.TransformPoint(new Vector3(size.x / 2 - _buffer.x, size.y / 2 - _buffer.y, 0));
+
+            // Clamp half-sizes so the visualized area never exceeds the parent rect
+            float halfWidth = Mathf.Min(_spawnAreaSize.x * 0.5f, size.x * 0.5f);
+            float halfHeight = Mathf.Min(_spawnAreaSize.y * 0.5f, size.y * 0.5f);
+
+            // Compute the local-space center offset and apply it when transforming to world
+            Vector3 centerLocal = new Vector3(_spawnAreaCenter.x, _spawnAreaCenter.y, 0);
+            Vector3 min = rectTransform.TransformPoint(centerLocal + new Vector3(-halfWidth, -halfHeight, 0));
+            Vector3 max = rectTransform.TransformPoint(centerLocal + new Vector3(halfWidth, halfHeight, 0));
 
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(new Vector3(bufferedMin.x, bufferedMin.y, 0), new Vector3(bufferedMax.x, bufferedMin.y, 0));
-            Gizmos.DrawLine(new Vector3(bufferedMax.x, bufferedMin.y, 0), new Vector3(bufferedMax.x, bufferedMax.y, 0));
-            Gizmos.DrawLine(new Vector3(bufferedMax.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMax.y, 0));
-            Gizmos.DrawLine(new Vector3(bufferedMin.x, bufferedMax.y, 0), new Vector3(bufferedMin.x, bufferedMin.y, 0));
+            Gizmos.DrawLine(new Vector3(min.x, min.y, 0), new Vector3(max.x, min.y, 0));
+            Gizmos.DrawLine(new Vector3(max.x, min.y, 0), new Vector3(max.x, max.y, 0));
+            Gizmos.DrawLine(new Vector3(max.x, max.y, 0), new Vector3(min.x, max.y, 0));
+            Gizmos.DrawLine(new Vector3(min.x, max.y, 0), new Vector3(min.x, min.y, 0));
         }
     }
 

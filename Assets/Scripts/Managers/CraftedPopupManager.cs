@@ -12,20 +12,14 @@ public class CraftedPopupManager : MonoBehaviour
     [Header("Prefab & Timing")] 
     [Tooltip("A UI prefab that contains an Image named 'icon' and a TextMeshProUGUI named 'titleText'. It should be a simple root GameObject (no required components).")]
     [SerializeField] private GameObject popupPrefab;
+    [Tooltip("A fullscreen/persistent popup prefab that stays until clicked. If assigned, use this for first-time big popups.")]
+    [SerializeField] private GameObject persistentPopupPrefab;
     [Tooltip("How long the popup remains visible (seconds)")]
     [SerializeField] private float popupDuration = 1.6f;
     [Tooltip("Vertical offset in pixels the popup will move up during the animation")]
     [SerializeField] private float moveUp = 40f;
-
-    [Header("Debug / Test")]
-    [Tooltip("If true, popups will be shown for every mineral craft")]
-    public bool debugAlwaysShow = false;
-
-    // new serialized fields near the top
     [SerializeField] private Canvas overrideCanvas;      // assign the correct Canvas in Inspector
 
-    [Tooltip("A fullscreen/persistent popup prefab that stays until clicked. If assigned, use this for first-time big popups.")]
-    [SerializeField] private GameObject persistentPopupPrefab;
 
     private Canvas _uiCanvas;
 
@@ -66,8 +60,14 @@ public class CraftedPopupManager : MonoBehaviour
             }
         }
 
-        // Instantiate under the UI canvas
-        var go = Instantiate(popupPrefab, _uiCanvas.transform, false);
+    // Instantiate under the UI canvas
+    var go = Instantiate(popupPrefab, _uiCanvas.transform, false);
+    // Give transient popups their own Canvas with override sorting so they appear above world sprites
+    var transientCanvas = go.GetComponent<Canvas>();
+    if (transientCanvas == null) transientCanvas = go.AddComponent<Canvas>();
+    transientCanvas.overrideSorting = true;
+    transientCanvas.sortingOrder = 500;
+    if (go.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null) go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
         // Position it near the world point by converting to screen space
         Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(Camera.main, worldPosition);
@@ -142,6 +142,12 @@ public class CraftedPopupManager : MonoBehaviour
             }
 
             var go = Instantiate(persistentPopupPrefab, _uiCanvas.transform, false);
+            // Ensure this popup draws above world sprites by giving it its own Canvas with overrideSorting
+            var popupCanvas = go.GetComponent<Canvas>();
+            if (popupCanvas == null) popupCanvas = go.AddComponent<Canvas>();
+            popupCanvas.overrideSorting = true;
+            popupCanvas.sortingOrder = 1000;
+            if (go.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null) go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
             // Try to populate icon/title similarly to the transient popup
             Image icon = FindChildComponentByName<Image>(go, "icon");
