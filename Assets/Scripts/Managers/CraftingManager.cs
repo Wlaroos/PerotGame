@@ -133,7 +133,11 @@ public class CraftingManager : MonoBehaviour
 
         if (result is MineralData mineralData)
         {
-            craftedObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity);
+            if (DraggableHolder.Instance != null)
+                craftedObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity, DraggableHolder.Instance.transform);
+            else
+                craftedObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity);
+
             Mineral mineralComponent = craftedObj.GetComponent<Mineral>();
             if (mineralComponent != null)
             {
@@ -143,7 +147,11 @@ public class CraftingManager : MonoBehaviour
         }
         else if (result is CompoundData compoundData)
         {
-            craftedObj = Instantiate(compoundPrefab, spawnPosition, Quaternion.identity);
+            if (DraggableHolder.Instance != null)
+                craftedObj = Instantiate(compoundPrefab, spawnPosition, Quaternion.identity, DraggableHolder.Instance.transform);
+            else
+                craftedObj = Instantiate(compoundPrefab, spawnPosition, Quaternion.identity);
+
             Compound compoundComponent = craftedObj.GetComponent<Compound>();
             if (compoundComponent != null)
             {
@@ -153,7 +161,11 @@ public class CraftingManager : MonoBehaviour
         }
         else if (result is ElementData elementData)
         {
-            craftedObj = Instantiate(elementPrefab, spawnPosition, Quaternion.identity);
+            if (DraggableHolder.Instance != null)
+                craftedObj = Instantiate(elementPrefab, spawnPosition, Quaternion.identity, DraggableHolder.Instance.transform);
+            else
+                craftedObj = Instantiate(elementPrefab, spawnPosition, Quaternion.identity);
+
             Element elementComponent = craftedObj.GetComponent<Element>();
             if (elementComponent != null)
             {

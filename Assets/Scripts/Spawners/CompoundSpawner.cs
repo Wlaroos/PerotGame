@@ -158,7 +158,12 @@ public class CompoundSpawner : MonoBehaviour
             return null;
         }
 
-        GameObject newCompound = Instantiate(compoundPrefab, position, Quaternion.identity);
+        GameObject newCompound;
+        if (DraggableHolder.Instance != null)
+            newCompound = Instantiate(compoundPrefab, position, Quaternion.identity, DraggableHolder.Instance.transform);
+        else
+            newCompound = Instantiate(compoundPrefab, position, Quaternion.identity);
+
         Compound compoundComponent = newCompound.GetComponent<Compound>();
         if (compoundComponent != null)
         {

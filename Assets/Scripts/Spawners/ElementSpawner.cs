@@ -157,7 +157,12 @@ public class ElementSpawner : MonoBehaviour
             return null;
         }
 
-        GameObject newElement = Instantiate(elementPrefab, position, Quaternion.identity);
+        GameObject newElement;
+        if (DraggableHolder.Instance != null)
+            newElement = Instantiate(elementPrefab, position, Quaternion.identity, DraggableHolder.Instance.transform);
+        else
+            newElement = Instantiate(elementPrefab, position, Quaternion.identity);
+
         Element elementComponent = newElement.GetComponent<Element>();
         if (elementComponent != null)
         {
