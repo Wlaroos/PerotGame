@@ -157,6 +157,12 @@ public class CompoundSpawner : MonoBehaviour
             Debug.LogError("CompoundSpawner: Cannot spawn compound, prefab is not assigned.");
             return null;
         }
+        // If there's a DraggableHolder and it's full, show the full popup and do not create anything.
+        if (DraggableHolder.Instance != null && DraggableHolder.Instance.IsFull)
+        {
+            DraggableHolder.Instance.FullPopup();
+            return null;
+        }
 
         GameObject newCompound;
         if (DraggableHolder.Instance != null)

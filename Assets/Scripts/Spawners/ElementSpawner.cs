@@ -156,6 +156,12 @@ public class ElementSpawner : MonoBehaviour
             Debug.LogError("ElementSpawner: Cannot spawn element, prefab is not assigned.");
             return null;
         }
+        // If there's a DraggableHolder and it's full, show the full popup and do not create anything.
+        if (DraggableHolder.Instance != null && DraggableHolder.Instance.IsFull)
+        {
+            DraggableHolder.Instance.FullPopup();
+            return null;
+        }
 
         GameObject newElement;
         if (DraggableHolder.Instance != null)

@@ -138,11 +138,24 @@ public class CraftingZone : MonoBehaviour
     private void FinalizeCraft(List<ScriptableObject> ingredients, List<GameObject> objectsToConsume)
     {
         Vector3 spawnPosition = ComputeCenterOf(objectsToConsume) ?? transform.position;
+        // Unparent the objects first so they no longer count toward the DraggableHolder child count.
+        // Preserve original parents so we can restore them if crafting fails.
+        List<Transform> originalParents = new List<Transform>();
+        foreach (var obj in objectsToConsume)
+        {
+            originalParents.Add(obj != null ? obj.transform.parent : null);
+            if (obj != null)
+            {
+                obj.transform.SetParent(null);
+            }
+        }
+
+        // Now attempt to craft the result. DraggableHolder will receive the instantiated object if available.
         GameObject craftedObj = CraftingManager.Instance != null ? CraftingManager.Instance.TryCraft(ingredients, spawnPosition) : null;
 
         if (craftedObj != null)
         {
-            // Destroy the used objects (use snapshot to avoid modifying original while iterating)
+            // Successful craft -> remove the consumed objects
             foreach (var obj in objectsToConsume)
             {
                 if (obj != null)
@@ -156,6 +169,17 @@ public class CraftingZone : MonoBehaviour
         }
         else
         {
+            // Craft failed -> restore original parenting so objects remain in the same logical place
+            for (int i = 0; i < objectsToConsume.Count; i++)
+            {
+                var obj = objectsToConsume[i];
+                var parent = originalParents[i];
+                if (obj != null)
+                {
+                    obj.transform.SetParent(parent);
+                }
+            }
+
             Debug.Log("Crafting failed at finalization: No matching recipe.");
             ResetCraftingState();
         }

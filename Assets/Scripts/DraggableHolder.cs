@@ -4,6 +4,11 @@ public class DraggableHolder : MonoBehaviour
 {
     public static DraggableHolder Instance { get; private set; }
 
+    [SerializeField] private int _maxDraggables = 10;
+    public int MaxDraggables => _maxDraggables;
+
+    public bool IsFull => transform.childCount >= _maxDraggables;
+
     private void Awake()
     {
         // Set up singleton pattern
@@ -27,5 +32,11 @@ public class DraggableHolder : MonoBehaviour
             else
                 Destroy(child);
         }
+    }
+
+    public void FullPopup()
+    {
+        // Implement UI popup logic here
+        Debug.Log("DraggableHolder is full!");
     }
 }

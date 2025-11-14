@@ -104,20 +104,35 @@ public class DragAndDrop : MonoBehaviour
 
             //Debug.Log($"Ingredients passed: {string.Join(", ", ingredients.Select(i => i.name))}");
 
-            // Try to craft a new object from the two
+            // Compute spawn position first
             Vector3 spawnPosition = (transform.position + otherObj.transform.position) / 2f;
 
-            GameObject craftedObj = CraftingManager.Instance.TryCraft(ingredients, spawnPosition);
+            var manager = CraftingManager.Instance;
+
+            // Preserve original parents so we can restore them if crafting fails
+            Transform originalParentA = transform.parent;
+            Transform originalParentB = otherObj != null ? otherObj.transform.parent : null;
+
+            // Unparent both objects so they no longer count toward the DraggableHolder
+            transform.SetParent(null);
+            if (otherObj != null) otherObj.transform.SetParent(null);
+
+            // Attempt to craft
+            GameObject craftedObj = manager != null ? manager.TryCraft(ingredients, spawnPosition) : null;
 
             if (craftedObj != null)
             {
-                // Remove the old objects
-                Destroy(otherObj);
+                // Successful craft -> remove the consumed objects
+                if (otherObj != null) Destroy(otherObj);
                 Destroy(gameObject);
             }
             else
             {
-                if (otherObj.TryGetComponent<DragAndDrop>(out _))
+                // Craft failed -> restore original parents and run original failure behavior
+                transform.SetParent(originalParentA);
+                if (otherObj != null) otherObj.transform.SetParent(originalParentB);
+
+                if (otherObj != null && otherObj.TryGetComponent<DragAndDrop>(out _))
                 {
                     // If crafting failed, push the objects apart
                     Vector3 separationDirection = (otherObj.transform.position - transform.position);

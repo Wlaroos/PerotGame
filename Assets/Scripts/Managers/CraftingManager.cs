@@ -136,6 +136,13 @@ public class CraftingManager : MonoBehaviour
 
     private GameObject CreateCraftedObject(ScriptableObject result, Vector3 spawnPosition)
     {
+        // If there's a DraggableHolder and it's full, show the full popup and do not create anything.
+        if (DraggableHolder.Instance != null && DraggableHolder.Instance.IsFull)
+        {
+            DraggableHolder.Instance.FullPopup();
+            return null;
+        }
+
         GameObject craftedObj = null;
 
         if (result is MineralData mineralData)
