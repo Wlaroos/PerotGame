@@ -61,36 +61,43 @@ public class CraftingManager : MonoBehaviour
 
         // Determine if this is the first time this recipe was crafted
         bool isFirstTime = !_craftedRecipes.Contains(recipe);
-                if (isFirstTime)
-                {
-                    _craftedRecipes.Add(recipe);
-                    OnFirstTimeRecipeCrafted.Invoke(recipe);
-                }
+        if (isFirstTime)
+        {
+            _craftedRecipes.Add(recipe);
+            OnFirstTimeRecipeCrafted.Invoke(recipe);
+        }
 
         // Instantiate the crafted object
         var crafted = CreateCraftedObject(recipe.output, spawnPosition);
 
-        // If the output is a Mineral, show UI feedback.
-        if (crafted != null && recipe.output is MineralData mineralData)
+        // If crafted object exists, show appropriate popup depending on output type.
+        if (crafted != null && CraftedPopupManager.Instance != null)
         {
-            // Prefer using the spawned object's position if available for transient popups
             Vector3 pos = crafted.transform != null ? crafted.transform.position : spawnPosition;
 
-            if (isFirstTime)
+            // Minerals -> normal big/transient popups (existing behavior)
+            if (recipe.output is MineralData mineralData)
             {
-                // First-time: show persistent big popup (stays until clicked)
-                if (CraftedPopupManager.Instance != null)
-                {
+                if (isFirstTime)
                     CraftedPopupManager.Instance.ShowPersistentCraftedPopup(mineralData, recipe);
-                }
-            }
-            else
-            {
-                // Subsequent crafts: show the small transient popup near the object
-                if (CraftedPopupManager.Instance != null)
-                {
+                else
                     CraftedPopupManager.Instance.ShowCraftedPopup(mineralData, pos, recipe);
-                }
+            }
+            // Elements -> use small popups (persistent on first time, transient otherwise)
+            else if (recipe.output is ElementData elementData)
+            {
+                if (isFirstTime)
+                    CraftedPopupManager.Instance.ShowPersistentCraftedPopup(elementData, recipe);
+                else
+                    CraftedPopupManager.Instance.ShowCraftedPopup(elementData, pos, recipe);
+            }
+            // Compounds -> use small popups (persistent on first time, transient otherwise)
+            else if (recipe.output is CompoundData compoundData)
+            {
+                if (isFirstTime)
+                    CraftedPopupManager.Instance.ShowPersistentCraftedPopup(compoundData, recipe);
+                else
+                    CraftedPopupManager.Instance.ShowCraftedPopup(compoundData, pos, recipe);
             }
         }
 

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -22,6 +23,11 @@ public class CraftedPopupManager : MonoBehaviour
     [SerializeField] private float moveUp = 40f;
     [SerializeField] private Canvas overrideCanvas;      // assign the correct Canvas in Inspector
 
+    [Header("Small Popups")]
+    [Tooltip("A UI prefab for elements/compounds that contains a TextMeshProUGUI named 'titleText'.")]
+    [SerializeField] private GameObject smallPopupPrefab;
+    [Tooltip("A fullscreen/persistent popup prefab for elements/compounds that stays until clicked.")]
+    [SerializeField] private GameObject smallPersistentPopupPrefab;
 
     private Canvas _uiCanvas;
 
@@ -40,16 +46,18 @@ public class CraftedPopupManager : MonoBehaviour
             Debug.LogWarning("CraftedPopupManager: No Canvas found in scene. Popups will not be visible until a Canvas exists.");
     }
 
-    // Show a popup for a mineral at world position
-    // Optional: pass the CraftingRecipe that produced the mineral so we can build a compact formula string
-    public void ShowCraftedPopup(MineralData data, Vector3 worldPosition, CraftingRecipe recipe = null)
+    // Show a popup for a mineral/element/compound at world position
+    // Optional: pass the CraftingRecipe that produced the item so we can build a compact formula string
+    public void ShowCraftedPopup(ScriptableObject data, Vector3 worldPosition, CraftingRecipe recipe = null)
     {
         Debug.Log($"CraftedPopupManager: ShowCraftedPopup called for '{(data!=null?data.name:"<null>")}' at {worldPosition}");
         if (data == null) return;
-        if (popupPrefab == null)
+
+        // choose appropriate prefab (elements/compounds -> small popups; minerals -> normal)
+        var chosenPrefab = ChoosePopupPrefab(data, persistent: false);
+        if (chosenPrefab == null)
         {
-            Debug.LogWarning("CraftedPopupManager: popupPrefab not assigned — cannot show popup.");
-            Debug.LogWarning("CraftedPopupManager: popupPrefab not assigned.");
+            Debug.LogWarning("CraftedPopupManager: chosen transient popup prefab not assigned — cannot show popup.");
             return;
         }
 
@@ -63,21 +71,21 @@ public class CraftedPopupManager : MonoBehaviour
             }
         }
 
-    // Instantiate under the UI canvas
-    var go = Instantiate(popupPrefab, _uiCanvas.transform, false);
-    // Give transient popups their own Canvas with override sorting so they appear above world sprites
-    var transientCanvas = go.GetComponent<Canvas>();
-    if (transientCanvas == null) transientCanvas = go.AddComponent<Canvas>();
-    transientCanvas.overrideSorting = true;
-    transientCanvas.sortingOrder = 500;
-    if (go.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null) go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+        // Instantiate under the UI canvas
+        var go = Instantiate(chosenPrefab, _uiCanvas.transform, false);
+
+        // Give transient popups their own Canvas with override sorting so they appear above world sprites
+        var transientCanvas = go.GetComponent<Canvas>();
+        if (transientCanvas == null) transientCanvas = go.AddComponent<Canvas>();
+        transientCanvas.overrideSorting = true;
+        transientCanvas.sortingOrder = 500;
+        if (go.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null) go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
         // Position it near the world point by converting to screen space
-        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(Camera.main, worldPosition);
         var rt = go.GetComponent<RectTransform>();
         if (rt != null)
         {
-            // Convert screen point to canvas local point
+            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(Camera.main, worldPosition);
             Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(_uiCanvas.transform as RectTransform, screenPos, _uiCanvas.worldCamera, out localPoint);
             rt.anchoredPosition = localPoint;
@@ -87,13 +95,16 @@ public class CraftedPopupManager : MonoBehaviour
         Image icon = FindChildComponentByName<Image>(go, "icon");
         TextMeshProUGUI title = FindChildComponentByName<TextMeshProUGUI>(go, "titleText");
 
+        // Populate icon (if present) using best available sprite fields on the ScriptableObject
         if (icon != null)
         {
-            icon.sprite = data.mineralBigSprite != null ? data.mineralBigSprite : data.mineralSprite;
-            icon.color = data.defaultColor;
+            var big = GetBigSpriteFromData(data);
+            var primary = GetPrimarySpriteFromData(data);
+            icon.sprite = big != null ? big : primary;
+            icon.color = GetColorFromData(data, Color.white);
         }
 
-        if (icon == null)
+        if (icon == null && chosenPrefab != smallPopupPrefab)
         {
             Debug.LogWarning("CraftedPopupManager: popup prefab does not contain an Image child named 'icon' (or similar). The icon will be missing.");
         }
@@ -101,12 +112,18 @@ public class CraftedPopupManager : MonoBehaviour
         if (title != null)
         {
             // Display a tidy name (remove prefix before underscore if present)
-            string temp = data.mineralName ?? data.name;
+            string temp = GetDisplayNameFromData(data);
             int idx = temp.IndexOf('_');
             if (idx >= 0 && idx + 1 < temp.Length) temp = temp.Substring(idx + 1);
 
-            // If we have a recipe, build a compact formula and append in parentheses
-            if (recipe != null)
+            // If we have a recipe, build a compact formula and append in parentheses.
+            // For Elements, prefer deriving a formula/symbol from their name instead of the recipe.
+            if (data is ElementData)
+            {
+                string formula = GetSymbolForScriptableObject(data);
+                if (!string.IsNullOrEmpty(formula)) temp = string.Format("{0} ({1})", temp, formula);
+            }
+            else if (recipe != null)
             {
                 // Use the title's font to decide whether to use Unicode subscripts or TMP rich-text fallback
                 string formula = BuildFormulaForTitle(title, recipe);
@@ -114,14 +131,15 @@ public class CraftedPopupManager : MonoBehaviour
             }
 
             title.text = temp;
-            title.color = data.defaultColor;
+            title.color = GetColorFromData(data, Color.white);
         }
         else
         {
-            Debug.LogWarning("CraftedPopupManager: popup prefab does not contain a TextMeshProUGUI child named 'titleText' (or similar). The title will be missing.");
+            if (chosenPrefab != smallPopupPrefab)
+                Debug.LogWarning("CraftedPopupManager: popup prefab does not contain a TextMeshProUGUI child named 'titleText' (or similar). The title will be missing.");
         }
 
-        // Ensure a CanvasGroup exists for fade/alpha animation
+        // Ensure a CanvasGroup exists for fade/alpha animation (transient only)
         var cg = go.GetComponent<CanvasGroup>();
         if (cg == null) cg = go.AddComponent<CanvasGroup>();
 
@@ -129,94 +147,121 @@ public class CraftedPopupManager : MonoBehaviour
         StartCoroutine(AnimateAndDestroy(go, cg, popupDuration));
     }
 
-        // Show a fullscreen/persistent popup that stays until the player clicks to dismiss
-    public void ShowPersistentCraftedPopup(MineralData data, CraftingRecipe recipe = null)
+    // Show a fullscreen/persistent popup that stays until the player clicks to dismiss
+    public void ShowPersistentCraftedPopup(ScriptableObject data, CraftingRecipe recipe = null)
+    {
+        if (data == null) return;
+
+        if (_uiCanvas == null)
         {
-            //Debug.Log($"CraftedPopupManager: ShowPersistentCraftedPopup called for '{(data!=null?data.name:"<null>")}'");
-            if (data == null) return;
+            _uiCanvas = GetAnyCanvas();
             if (_uiCanvas == null)
             {
-                _uiCanvas = GetAnyCanvas();
-                if (_uiCanvas == null)
-                {
-                    Debug.LogWarning("CraftedPopupManager: No Canvas in scene to show persistent popup.");
-                    return;
-                }
-            }
-
-            if (persistentPopupPrefab == null)
-            {
-                Debug.LogWarning("CraftedPopupManager: persistentPopupPrefab not assigned — falling back to transient popup.");
-                // fallback to the small popup (center of screen)
-                Vector3 centerWorld = Camera.main != null ? Camera.main.transform.position + Camera.main.transform.forward * 2f : Vector3.zero;
-                ShowCraftedPopup(data, centerWorld, recipe);
+                Debug.LogWarning("CraftedPopupManager: No Canvas in scene to show persistent popup.");
                 return;
             }
-
-            var go = Instantiate(persistentPopupPrefab, _uiCanvas.transform, false);
-            // Ensure this popup draws above world sprites by giving it its own Canvas with overrideSorting
-            var popupCanvas = go.GetComponent<Canvas>();
-            if (popupCanvas == null) popupCanvas = go.AddComponent<Canvas>();
-            popupCanvas.overrideSorting = true;
-            popupCanvas.sortingOrder = 1000;
-            if (go.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null) go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
-
-            // Try to populate icon/title similarly to the transient popup
-            Image icon = FindChildComponentByName<Image>(go, "icon");
-            TextMeshProUGUI title = FindChildComponentByName<TextMeshProUGUI>(go, "titleText");
-
-            if (icon != null)
-            {
-                icon.sprite = data.mineralBigSprite != null ? data.mineralBigSprite : data.mineralSprite;
-                //icon.color = data.defaultColor;
-            }
-
-            if (title != null)
-            {
-                string temp = data.mineralName ?? data.name;
-                int idx = temp.IndexOf('_');
-                if (idx >= 0 && idx + 1 < temp.Length) temp = temp.Substring(idx + 1);
-
-                if (recipe != null)
-                {
-                    string formula = BuildFormulaForTitle(title, recipe);
-                    if (!string.IsNullOrEmpty(formula)) temp = string.Format("{0} ({1})", temp, formula);
-                }
-
-                title.text = temp;
-                title.color = data.defaultColor;
-            }
-
-            // Ensure it blocks raycasts
-            var bgCg = go.GetComponent<CanvasGroup>();
-            if (bgCg == null) bgCg = go.AddComponent<CanvasGroup>();
-            bgCg.blocksRaycasts = true;
-
-            // Wire any existing buttons in the prefab to dismiss this specific instance
-            var existingButtons = go.GetComponentsInChildren<UnityEngine.UI.Button>(true);
-            foreach (var b in existingButtons)
-            {
-                b.onClick.RemoveAllListeners();
-                b.onClick.AddListener(() => { if (Application.isPlaying) UnityEngine.Object.Destroy(go); else UnityEngine.Object.DestroyImmediate(go); });
-            }
-
-            // Create a full-screen transparent overlay that captures clicks anywhere and dismisses the popup
-            var overlay = new GameObject("DismissOverlay");
-            overlay.transform.SetParent(go.transform, false);
-            var rtOverlay = overlay.AddComponent<RectTransform>();
-            rtOverlay.anchorMin = Vector2.zero;
-            rtOverlay.anchorMax = Vector2.one;
-            rtOverlay.offsetMin = Vector2.zero;
-            rtOverlay.offsetMax = Vector2.zero;
-            var overlayImg = overlay.AddComponent<Image>();
-            // Transparent but still receives raycasts
-            overlayImg.color = new Color(0f, 0f, 0f, 0f);
-            overlayImg.raycastTarget = true;
-            var overlayBtn = overlay.AddComponent<UnityEngine.UI.Button>();
-            overlayBtn.onClick.AddListener(() => { if (Application.isPlaying) UnityEngine.Object.Destroy(go); else UnityEngine.Object.DestroyImmediate(go); });
-            // Ensure overlay is on top so any click dismisses the popup
-            overlay.transform.SetAsLastSibling();
         }
+
+        // choose appropriate prefab (elements/compounds -> small persistent; minerals -> normal persistent)
+        var chosenPrefab = ChoosePopupPrefab(data, persistent: true);
+        if (chosenPrefab == null)
+        {
+            Debug.LogWarning("CraftedPopupManager: chosen persistent popup prefab not assigned — falling back to transient popup.");
+            // fallback to the transient variant placed slightly in front of camera
+            Vector3 centerWorld = Camera.main != null ? Camera.main.transform.position + Camera.main.transform.forward * 2f : Vector3.zero;
+            ShowCraftedPopup(data, centerWorld, recipe);
+            return;
+        }
+
+        var go = Instantiate(chosenPrefab, _uiCanvas.transform, false);
+        // Ensure this popup draws above world sprites by giving it its own Canvas with overrideSorting
+        var popupCanvas = go.GetComponent<Canvas>();
+        if (popupCanvas == null) popupCanvas = go.AddComponent<Canvas>();
+        popupCanvas.overrideSorting = true;
+        popupCanvas.sortingOrder = 1000;
+        if (go.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null) go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
+        // Try to populate icon/title similarly to the transient popup
+        Image icon = FindChildComponentByName<Image>(go, "icon");
+        TextMeshProUGUI title = FindChildComponentByName<TextMeshProUGUI>(go, "titleText");
+
+        if (icon != null)
+        {
+            var big = GetBigSpriteFromData(data);
+            var primary = GetPrimarySpriteFromData(data);
+            icon.sprite = big != null ? big : primary;
+        }
+
+        if (title != null)
+        {
+            string temp = GetDisplayNameFromData(data);
+            int idx = temp.IndexOf('_');
+            if (idx >= 0 && idx + 1 < temp.Length) temp = temp.Substring(idx + 1);
+
+            if (data is ElementData)
+            {
+                string formula = GetSymbolForScriptableObject(data);
+                if (!string.IsNullOrEmpty(formula)) temp = string.Format("{0} ({1})", temp, formula);
+            }
+            else if (recipe != null)
+            {
+                string formula = BuildFormulaForTitle(title, recipe);
+                if (!string.IsNullOrEmpty(formula)) temp = string.Format("{0} ({1})", temp, formula);
+            }
+
+            title.text = temp;
+            title.color = GetColorFromData(data, Color.white);
+        }
+
+        // Update the 'discovery' text child if present to reflect element/compound/mineral
+        var discoveryTmp = FindChildComponentByName<TextMeshProUGUI>(go, "discovery");
+        if (discoveryTmp != null)
+        {
+            if (data is ElementData) discoveryTmp.text = "You discovered a new element!";
+            else if (data is CompoundData) discoveryTmp.text = "You discovered a new compound!";
+            else discoveryTmp.text = "You discovered a new mineral!";
+        }
+        else
+        {
+            var discoveryText = FindChildComponentByName<Text>(go, "discovery");
+            if (discoveryText != null)
+            {
+                if (data is ElementData) discoveryText.text = "You discovered a new element!";
+                else if (data is CompoundData) discoveryText.text = "You discovered a new compound!";
+                else discoveryText.text = "You discovered a new mineral!";
+            }
+        }
+
+        // Ensure it blocks raycasts
+        var bgCg = go.GetComponent<CanvasGroup>();
+        if (bgCg == null) bgCg = go.AddComponent<CanvasGroup>();
+        bgCg.blocksRaycasts = true;
+
+        // Wire any existing buttons in the prefab to dismiss this specific instance
+        var existingButtons = go.GetComponentsInChildren<UnityEngine.UI.Button>(true);
+        foreach (var b in existingButtons)
+        {
+            b.onClick.RemoveAllListeners();
+            b.onClick.AddListener(() => { if (Application.isPlaying) UnityEngine.Object.Destroy(go); else UnityEngine.Object.DestroyImmediate(go); });
+        }
+
+        // Create a full-screen transparent overlay that captures clicks anywhere and dismisses the popup
+        var overlay = new GameObject("DismissOverlay");
+        overlay.transform.SetParent(go.transform, false);
+        var rtOverlay = overlay.AddComponent<RectTransform>();
+        rtOverlay.anchorMin = Vector2.zero;
+        rtOverlay.anchorMax = Vector2.one;
+        rtOverlay.offsetMin = Vector2.zero;
+        rtOverlay.offsetMax = Vector2.zero;
+        var overlayImg = overlay.AddComponent<Image>();
+        // Transparent but still receives raycasts
+        overlayImg.color = new Color(0f, 0f, 0f, 0f);
+        overlayImg.raycastTarget = true;
+        var overlayBtn = overlay.AddComponent<UnityEngine.UI.Button>();
+        overlayBtn.onClick.AddListener(() => { if (Application.isPlaying) UnityEngine.Object.Destroy(go); else UnityEngine.Object.DestroyImmediate(go); });
+        // Ensure overlay is on top so any click dismisses the popup
+        overlay.transform.SetAsLastSibling();
+    }
 
     private Canvas GetAnyCanvas()
     {
@@ -301,53 +346,8 @@ public class CraftedPopupManager : MonoBehaviour
         return null;
     }
 
-    // Build a compact formula string (e.g. 2Al3CO3) from a recipe's ingredients
-    private string BuildFormulaFromRecipe(CraftingRecipe recipe)
-    {
-        if (recipe == null) return string.Empty;
-
-        var ingredients = new List<ScriptableObject> { recipe.inputA, recipe.inputB, recipe.inputC, recipe.inputD, recipe.inputE }
-            .Where(x => x != null)
-            .ToList();
-
-        if (ingredients.Count == 0) return string.Empty;
-
-        // Map ingredients to their symbol strings
-        var symbols = ingredients.Select(i => GetSymbolForScriptableObject(i)).ToList();
-
-        // Preserve first-seen order for symbols
-        var ordered = new List<string>();
-        foreach (var s in symbols) if (!ordered.Contains(s)) ordered.Add(s);
-
-        var counts = symbols.GroupBy(s => s).ToDictionary(g => g.Key, g => g.Count());
-
-        var sb = new StringBuilder();
-        foreach (var s in ordered)
-        {
-            int c = counts.TryGetValue(s, out var v) ? v : 0;
-            if (c <= 1)
-            {
-                sb.Append(s);
-            }
-            else
-            {
-                // If the symbol itself contains digits (e.g. CO3), treat it as a polyatomic group and parenthesize
-                bool hasDigit = s.Any(ch => char.IsDigit(ch));
-                if (hasDigit)
-                {
-                    sb.Append('(').Append(s).Append(')');
-                }
-                else
-                {
-                    sb.Append(s);
-                }
-
-                sb.Append(ToSubscript(c));
-            }
-        }
-
-        return sb.ToString();
-    }
+    // NOTE: formula construction is handled by BuildFormulaForTitle which formats for TMP/font support.
+    // The older BuildFormulaFromRecipe implementation was removed to reduce duplication.
 
     // Build a formula string appropriate for the provided TextMeshProUGUI title.
     // If the title's font asset contains Unicode subscript digits, use them; otherwise produce TMP rich-text subscripts.
@@ -504,5 +504,92 @@ public class CraftedPopupManager : MonoBehaviour
             if (name.StartsWith(p)) return name.Substring(p.Length);
         }
         return name;
+    }
+
+    // Helper: determine whether this data represents an element or compound (by type name heuristic)
+    private bool IsElementOrCompound(ScriptableObject data)
+    {
+        if (data == null) return false;
+        var typeName = data.GetType().Name;
+        if (string.IsNullOrEmpty(typeName)) return false;
+        var lower = typeName.ToLower();
+        return lower.Contains("element") || lower.Contains("compound");
+    }
+
+    // Helper: pick the appropriate prefab based on type and whether persistent is requested
+    private GameObject ChoosePopupPrefab(ScriptableObject data, bool persistent)
+    {
+        bool small = IsElementOrCompound(data);
+        if (small)
+            return persistent ? smallPersistentPopupPrefab : smallPopupPrefab;
+        else
+            return persistent ? persistentPopupPrefab : popupPrefab;
+    }
+
+    // Reflection helpers to extract common fields/properties from different Data ScriptableObjects
+
+    private Sprite GetPrimarySpriteFromData(ScriptableObject so)
+    {
+        if (so == null) return null;
+        var candidates = new[] { "mineralSprite", "elementSprite", "compoundSprite", "sprite", "icon" };
+        foreach (var name in candidates)
+        {
+            var v = GetFieldOrPropertyValue(so, name);
+            if (v is Sprite sp) return sp;
+        }
+        return null;
+    }
+
+    private Sprite GetBigSpriteFromData(ScriptableObject so)
+    {
+        if (so == null) return null;
+        var candidates = new[] { "mineralBigSprite", "bigSprite", "largeSprite" };
+        foreach (var name in candidates)
+        {
+            var v = GetFieldOrPropertyValue(so, name);
+            if (v is Sprite sp) return sp;
+        }
+        return null;
+    }
+
+    private Color GetColorFromData(ScriptableObject so, Color fallback)
+    {
+        if (so == null) return fallback;
+        var v = GetFieldOrPropertyValue(so, "defaultColor");
+        if (v is Color c) return c;
+        if (v is Color32 c32) return (Color)c32;
+        return fallback;
+    }
+
+    private string GetDisplayNameFromData(ScriptableObject so)
+    {
+        if (so == null) return string.Empty;
+        var candidates = new[] { "mineralName", "elementName", "compoundName", "displayName", "title" };
+        foreach (var name in candidates)
+        {
+            var v = GetFieldOrPropertyValue(so, name);
+            if (v is string s && !string.IsNullOrEmpty(s)) return s;
+        }
+        // fallback to asset name (strip prefixes)
+        return StripCommonPrefix(so.name);
+    }
+
+    private object GetFieldOrPropertyValue(ScriptableObject so, string name)
+    {
+        if (so == null) return null;
+        var type = so.GetType();
+        // try field
+        var field = type.GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        if (field != null) return field.GetValue(so);
+        // try property
+        var prop = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        if (prop != null) return prop.GetValue(so, null);
+        // try PascalCase variant
+        var pascal = char.ToUpperInvariant(name[0]) + name.Substring(1);
+        field = type.GetField(pascal, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        if (field != null) return field.GetValue(so);
+        prop = type.GetProperty(pascal, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        if (prop != null) return prop.GetValue(so, null);
+        return null;
     }
 }
