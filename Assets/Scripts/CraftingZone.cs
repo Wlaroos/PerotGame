@@ -12,6 +12,10 @@ public class CraftingZone : MonoBehaviour
     private List<GameObject> _objectsSnapshot = null;
     private List<ScriptableObject> _snapshotIngredients = null;
 
+    [SerializeField] private GameObject[] __dotIndicators; // Visual indicators for crafting progress
+
+    [SerializeField] private int _pressesForCrafting = 5; // Number of presses required to craft an item 
+
     // Called when an object enters the zone
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -68,9 +72,11 @@ public class CraftingZone : MonoBehaviour
                 // Valid recipe found -> start multi-press sequence
                 _craftingInProgress = true;
                 _currentPresses = 1;
-                _requiredPresses = 5;
+                _requiredPresses = _pressesForCrafting;
                 _objectsSnapshot = new List<GameObject>(_objectsInZone);
                 _snapshotIngredients = new List<ScriptableObject>(ingredients);
+
+                UpdateDotIndicators();
 
                 MoveObjectsCloser(_objectsSnapshot);
                 if (_currentPresses >= _requiredPresses)
@@ -88,6 +94,7 @@ public class CraftingZone : MonoBehaviour
         {
             // Already in a multi-press sequence
             _currentPresses++;
+            UpdateDotIndicators();
             // Use the snapshot so players cannot change ingredients mid-way
             if (_objectsSnapshot == null || _objectsSnapshot.Count == 0)
             {
@@ -209,5 +216,35 @@ public class CraftingZone : MonoBehaviour
         _currentPresses = 0;
         _objectsSnapshot = null;
         _snapshotIngredients = null;
+
+        Invoke(nameof(ResetDotIndicators), 0.75f); // slight delay
+    }
+
+    private void UpdateDotIndicators()
+    {
+        if (__dotIndicators == null || __dotIndicators.Length == 0) return;
+
+        for (int i = 0; i < __dotIndicators.Length; i++)
+        {
+            if (__dotIndicators[i] != null)
+            {
+                __dotIndicators[i].GetComponent<SpriteRenderer>().color = (i < _currentPresses) ? new Color32(13, 134, 0, 255) : new Color32(98, 0, 8, 255);
+                __dotIndicators[i].transform.GetChild(0).GetComponent<SpriteRenderer>().color = (i < _currentPresses) ? Color.green : Color.red;
+            }
+        }
+    }
+
+    private void ResetDotIndicators()
+    {
+        if (__dotIndicators == null || __dotIndicators.Length == 0) return;
+
+        for (int i = 0; i < __dotIndicators.Length; i++)
+        {
+            if (__dotIndicators[i] != null)
+            {
+                __dotIndicators[i].GetComponent<SpriteRenderer>().color = new Color32(98, 0, 8, 255);
+                __dotIndicators[i].transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.red;
+            }
+        }
     }
 }

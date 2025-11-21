@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems; // added
+using UnityEngine.EventSystems;
+using System.Text.RegularExpressions;
+using System.Collections.Generic; // for Dictionary
+using TMPro; // support TMP_Dropdown if used in scene
 
 // Spawns compound objects and manages compound spawn buttons
 public class CompoundSpawner : MonoBehaviour
@@ -29,10 +32,20 @@ public class CompoundSpawner : MonoBehaviour
 
     [SerializeField] private CompoundData[] _compoundDataList; // List of compound data for each button
 
+    [SerializeField] private GameObject _silicateDropDown;
+
     // Track whether the player is currently dragging a spawned compound (to suppress click-spawns)
     private bool _isDragging = false;
     public bool IsDragging => _isDragging;
     public void SetDragging(bool value) => _isDragging = value;
+
+    // silicate dropdown
+    private Dropdown _silicateDropdownComp;
+    private TMP_Dropdown _silicateTmpDropdown; // TMP support
+    private Sprite[] _silicateOptionSprites;
+    private int _silicateButtonIndex = -1;
+    // currently selected silicate variant (set by dropdown)
+    private CompoundData _currentSilicateVariant;
 
     // Runs when the object is created
     private void Awake()
@@ -48,16 +61,22 @@ public class CompoundSpawner : MonoBehaviour
         }
 
         // Store the original sprites for each button and lock them
+        if (_spawnButtons == null) _spawnButtons = new Button[0];
         _spawnButtonSprites = new Sprite[_spawnButtons.Length];
         for (int i = 0; i < _spawnButtons.Length; i++)
         {
-            _spawnButtonSprites[i] = _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite;
+            var img = _spawnButtons[i].targetGraphic?.GetComponent<Image>();
+            _spawnButtonSprites[i] = img != null ? img.sprite : null;
             if (_spawnButtonSprites[i] == null)
             {
                 Debug.LogError($"CompoundSpawner: Button at index {i} does not have a sprite.");
             }
-            _spawnButtons[i].interactable = false;
-            _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite = _hiddenButtonSprite;
+            if (_spawnButtons[i] != null)
+            {
+                _spawnButtons[i].interactable = false;
+                if (img != null)
+                    img.sprite = _hiddenButtonSprite;
+            }
         }
 
         // Load compound data from Resources (if not assigned in inspector)
@@ -68,10 +87,18 @@ public class CompoundSpawner : MonoBehaviour
                 _compoundDataList = loadedCompounds;
         }
 
+        // default current silicate variant to the first Silicate found (so SpawnSilicate() works even without a dropdown)
+        if (_compoundDataList != null && _compoundDataList.Length > 0)
+        {
+            var firstSil = System.Array.Find(_compoundDataList, c => c != null && c.name.IndexOf("Silicate", System.StringComparison.OrdinalIgnoreCase) >= 0);
+            if (firstSil != null) _currentSilicateVariant = firstSil;
+        }
+
         // Set up button listeners so each button spawns the right compound
         for (int i = 0; i < _spawnButtons.Length; i++)
         {
             Button btn = _spawnButtons[i];
+            if (btn == null) continue;
             string btnName = btn.name;
 
             CompoundData matchedData = null;
@@ -95,6 +122,39 @@ public class CompoundSpawner : MonoBehaviour
             else
             {
                 Debug.LogWarning($"CompoundSpawner: No CompoundData found matching button name '{btnName}'.");
+            }
+        }
+
+        // Find silicate button index (used when dropdown changes)
+        _silicateButtonIndex = System.Array.FindIndex(_spawnButtons, b => b != null && b.name.IndexOf("Silicate", System.StringComparison.OrdinalIgnoreCase) >= 0);
+
+        // Hook up silicate dropdown (if provided). Support both Unity UI Dropdown and TMP_Dropdown.
+        if (_silicateDropDown != null)
+        {
+            // try standard Dropdown first
+            _silicateDropdownComp = _silicateDropDown.GetComponent<Dropdown>();
+            if (_silicateDropdownComp != null && _silicateDropdownComp.options != null && _silicateDropdownComp.options.Count > 0)
+            {
+                _silicateOptionSprites = new Sprite[_silicateDropdownComp.options.Count];
+                for (int i = 0; i < _silicateDropdownComp.options.Count; i++)
+                    _silicateOptionSprites[i] = _silicateDropdownComp.options[i].image;
+
+                _silicateDropdownComp.onValueChanged.AddListener(OnSilicateDropdownChanged);
+                OnSilicateDropdownChanged(_silicateDropdownComp.value);
+            }
+            else
+            {
+                // try TMP_Dropdown
+                _silicateTmpDropdown = _silicateDropDown.GetComponent<TMP_Dropdown>();
+                if (_silicateTmpDropdown != null && _silicateTmpDropdown.options != null && _silicateTmpDropdown.options.Count > 0)
+                {
+                    _silicateOptionSprites = new Sprite[_silicateTmpDropdown.options.Count];
+                    for (int i = 0; i < _silicateTmpDropdown.options.Count; i++)
+                        _silicateOptionSprites[i] = _silicateTmpDropdown.options[i].image;
+
+                    _silicateTmpDropdown.onValueChanged.AddListener(OnSilicateDropdownChanged);
+                    OnSilicateDropdownChanged(_silicateTmpDropdown.value);
+                }
             }
         }
     }
@@ -202,15 +262,57 @@ public class CompoundSpawner : MonoBehaviour
         if (_compoundDataList.Length > 2 && _compoundDataList[2] != null)
             SpawnCompoundAtRandomPosition(_compoundDataList[2]);
     }
-    public void SpawnSilicate()
+    public void SpawnSulfate()
     {
         if (_compoundDataList.Length > 3 && _compoundDataList[3] != null)
             SpawnCompoundAtRandomPosition(_compoundDataList[3]);
     }
-    public void SpawnSulfate()
+
+    public void SpawnSilicate()
+    {
+        // spawn the currently-selected silicate variant if available
+        if (_currentSilicateVariant != null)
+        {
+            SpawnCompoundAtRandomPosition(_currentSilicateVariant);
+            return;
+        }
+
+        // fallback: try the previous fixed index logic (first silicate in list)
+        if (_compoundDataList != null)
+        {
+            var firstSil = System.Array.Find(_compoundDataList, c => c != null && c.name.IndexOf("Silicate", System.StringComparison.OrdinalIgnoreCase) >= 0);
+            if (firstSil != null)
+            {
+                SpawnCompoundAtRandomPosition(firstSil);
+                return;
+            }
+        }
+    }
+
+    public void SpawnSilicate0()
     {
         if (_compoundDataList.Length > 4 && _compoundDataList[4] != null)
             SpawnCompoundAtRandomPosition(_compoundDataList[4]);
+    }
+    public void SpawnSilicate1()
+    {
+        if (_compoundDataList.Length > 5 && _compoundDataList[5] != null)
+            SpawnCompoundAtRandomPosition(_compoundDataList[5]);
+    }
+    public void SpawnSilicate2()
+    {
+        if (_compoundDataList.Length > 6 && _compoundDataList[6] != null)
+            SpawnCompoundAtRandomPosition(_compoundDataList[6]);
+    }
+    public void SpawnSilicate3()
+    {
+        if (_compoundDataList.Length > 7 && _compoundDataList[7] != null)
+            SpawnCompoundAtRandomPosition(_compoundDataList[7]);
+    }
+    public void SpawnSilicate4()
+    {
+        if (_compoundDataList.Length > 8 && _compoundDataList[8] != null)
+            SpawnCompoundAtRandomPosition(_compoundDataList[8]);
     }
 
     // Unlock all buttons at once (call from UI)
@@ -218,8 +320,11 @@ public class CompoundSpawner : MonoBehaviour
     {
         for (int i = 0; i < _spawnButtons.Length; i++)
         {
+            if (_spawnButtons[i] == null) continue;
             _spawnButtons[i].interactable = true;
-            _spawnButtons[i].targetGraphic.GetComponent<Image>().sprite = _spawnButtonSprites[i];
+            var img = _spawnButtons[i].targetGraphic?.GetComponent<Image>();
+            if (img != null && _spawnButtonSprites != null && i < _spawnButtonSprites.Length && _spawnButtonSprites[i] != null)
+                img.sprite = _spawnButtonSprites[i];
         }
     }
 
@@ -285,13 +390,128 @@ public class CompoundSpawner : MonoBehaviour
         }
     }
 
-    // Extracts the base name of a compound from its SO name (e.g., "C_Carbonate" -> "Carbonate")
+    // Extracts the base name of a compound from its SO name (e.g., "C_Carbonate" -> "Carbonate", "C_Silicate_0" -> "Silicate")
     private string GetCompoundBaseName(string soName)
     {
         if (string.IsNullOrEmpty(soName))
             return soName;
 
-        int underscoreIndex = soName.IndexOf('_');
-        return underscoreIndex >= 0 ? soName.Substring(underscoreIndex + 1) : soName;
+        // Remove leading prefix up to first underscore (C_ etc.)
+        int firstUnderscore = soName.IndexOf('_');
+        string basePart = firstUnderscore >= 0 ? soName.Substring(firstUnderscore + 1) : soName;
+
+        // Remove trailing numeric suffix like _0, _1 etc.
+        var m = Regex.Match(basePart, @"^(.*?)(?:_[0-9]+)?$");
+        if (m.Success && m.Groups.Count > 1)
+            return m.Groups[1].Value;
+
+        return basePart;
+    }
+
+    // Returns nullable variant index if the SO name ends with _N
+    private int? GetVariantSuffixIndex(string soName)
+    {
+        if (string.IsNullOrEmpty(soName)) return null;
+        var m = Regex.Match(soName, @"_([0-9]+)$");
+        if (m.Success)
+        {
+            if (int.TryParse(m.Groups[1].Value, out int v)) return v;
+        }
+        return null;
+    }
+
+    // Called when the silicate dropdown selection changes (uses Dropdown.OptionData.image as sprite)
+    private void OnSilicateDropdownChanged(int optionIndex)
+    {
+        if (_compoundDataList == null || _spawnButtons == null || _spawnButtons.Length == 0)
+            return;
+
+        // collect available silicate variants from the compound data list
+        CompoundData[] silicates = System.Array.FindAll(_compoundDataList, c => c != null && c.name.IndexOf("Silicate", System.StringComparison.OrdinalIgnoreCase) >= 0);
+        if (silicates == null || silicates.Length == 0)
+            return;
+
+        // Map variants by their numeric suffix when present (so dropdown index 0 => _0, etc.)
+        var variantMap = new Dictionary<int, CompoundData>();
+        for (int i = 0; i < silicates.Length; i++)
+        {
+            var sd = silicates[i];
+            int? idx = GetVariantSuffixIndex(sd.name);
+            if (idx.HasValue)
+            {
+                // prefer explicit mapping
+                variantMap[idx.Value] = sd;
+            }
+            else
+            {
+                // no suffix: place into first available slot if nothing else maps to 0
+                if (!variantMap.ContainsKey(0))
+                    variantMap[0] = sd;
+            }
+        }
+
+        // Choose the selected variant by optionIndex if present, otherwise fallback to same-order or first
+        CompoundData selectedData = null;
+        if (!variantMap.TryGetValue(optionIndex, out selectedData))
+        {
+            // try to pick by index in the silicates array if possible
+            int chosen = Mathf.Clamp(optionIndex, 0, silicates.Length - 1);
+            selectedData = silicates[chosen];
+        }
+
+        // set current variant so SpawnSilicate() and other callers use the selection
+        if (selectedData != null)
+            _currentSilicateVariant = selectedData;
+
+        if (selectedData == null)
+        {
+            Debug.LogWarning($"CompoundSpawner: Silicate variant for dropdown index {optionIndex} not found.");
+            return;
+        }
+
+        // find the silicate button (either cached index or search by name)
+        int btnIndex = _silicateButtonIndex;
+        if (btnIndex < 0 || btnIndex >= _spawnButtons.Length)
+        {
+            btnIndex = System.Array.FindIndex(_spawnButtons, b => b != null && b.name.IndexOf("Silicate", System.StringComparison.OrdinalIgnoreCase) >= 0);
+            _silicateButtonIndex = btnIndex;
+            if (btnIndex < 0) return;
+        }
+
+        Button silicateButton = _spawnButtons[btnIndex];
+        if (silicateButton == null) return;
+
+        // update button sprite from dropdown option image if available
+        Sprite optionSprite = (_silicateOptionSprites != null && optionIndex >= 0 && optionIndex < _silicateOptionSprites.Length)
+            ? _silicateOptionSprites[optionIndex]
+            : null;
+
+        // Use Button.image when available (safer) and fall back to targetGraphic
+        Image buttonImage = silicateButton.image ?? silicateButton.targetGraphic as Image;
+        if (optionSprite != null && buttonImage != null)
+        {
+            buttonImage.sprite = optionSprite;
+            if (_spawnButtonSprites != null && btnIndex >= 0 && btnIndex < _spawnButtonSprites.Length)
+                _spawnButtonSprites[btnIndex] = optionSprite; // keep spawn-button's stored sprite in sync
+        }
+        else if (optionSprite == null)
+        {
+            Debug.LogWarning($"CompoundSpawner: Dropdown option {optionIndex} has no image assigned.");
+        }
+
+        // update click listeners to spawn the selected variant
+        silicateButton.onClick.RemoveAllListeners();
+        CompoundData dataCopy = selectedData;
+        silicateButton.onClick.AddListener(() => OnSpawnButtonClicked(dataCopy));
+
+        // update the SpawnDragHandler attached to the button so dragging produces the selected variant
+        SpawnDragHandler dragHandler = silicateButton.gameObject.GetComponent<SpawnDragHandler>();
+        if (dragHandler != null)
+        {
+            dragHandler.Init(this, selectedData);
+        }
+
+        // small debug trace (remove/comment out when stable)
+        Debug.Log($"CompoundSpawner: Silicate variant set to '{selectedData.name}' for dropdown index {optionIndex}.");
     }
 }

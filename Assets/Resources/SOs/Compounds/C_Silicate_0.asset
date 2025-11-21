@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80979eae9e30b4d4ea075d565c20a3e4, type: 3}
+  m_Name: C_Silicate_0
+  m_EditorClassIdentifier: 
+  compoundName: C_Silicate_0
+  compoundSprite: {fileID: 3661986174613673984, guid: ff42a6cbaa625d0428ac7b94399e9c69, type: 3}
+  defaultColor:
+    serializedVersion: 2
+    rgba: 4284308991

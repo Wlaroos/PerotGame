@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80979eae9e30b4d4ea075d565c20a3e4, type: 3}
-  m_Name: C_Silicate
+  m_Name: C_Silicate_3
   m_EditorClassIdentifier: 
-  compoundName: Silicate
-  compoundSprite: {fileID: 1240634885, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
+  compoundName: C_Silicate 3
+  compoundSprite: {fileID: -4525682949422155351, guid: ff42a6cbaa625d0428ac7b94399e9c69, type: 3}
   defaultColor:
     serializedVersion: 2
     rgba: 4284308991
