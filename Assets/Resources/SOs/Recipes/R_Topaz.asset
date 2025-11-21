@@ -16,7 +16,7 @@ MonoBehaviour:
   inputB: {fileID: 11400000, guid: 034e7aa0753695e42be508aa5bc6a528, type: 2}
   inputC: {fileID: 11400000, guid: 9e88f262acc121449a567481f617d539, type: 2}
   inputD: {fileID: 11400000, guid: 19d65fc43f6a6dd45a4ab78c1c1c6dde, type: 2}
-  inputE: {fileID: 0}
+  inputE: {fileID: 11400000, guid: 19d65fc43f6a6dd45a4ab78c1c1c6dde, type: 2}
   inputF: {fileID: 0}
   inputG: {fileID: 0}
   inputH: {fileID: 0}

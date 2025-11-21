@@ -300,23 +300,23 @@ public class RecipeTrackerUI : MonoBehaviour
 
             if (sortByOutputType)
             {
-                ordered = sorted.OrderBy(r => GetOutputTypeOrder(r)).ThenBy(r => StripCommonPrefix(r.name));
+                ordered = sorted.OrderBy(r => GetOutputTypeOrder(r)).ThenBy(r => GetRecipeSortKey(r));
             }
 
             if (sortByIngredientCount)
             {
                 if (ordered != null) ordered = ordered.ThenBy(r => CountIngredients(r));
-                else ordered = sorted.OrderBy(r => CountIngredients(r)).ThenBy(r => StripCommonPrefix(r.name));
+                else ordered = sorted.OrderBy(r => CountIngredients(r)).ThenBy(r => GetRecipeSortKey(r));
             }
 
             if (sortAlphabetical)
             {
-                if (ordered != null) ordered = ordered.ThenBy(r => StripCommonPrefix(r.name));
-                else ordered = sorted.OrderBy(r => StripCommonPrefix(r.name));
+                if (ordered != null) ordered = ordered.ThenBy(r => GetRecipeSortKey(r));
+                else ordered = sorted.OrderBy(r => GetRecipeSortKey(r));
             }
 
             if (ordered != null) sorted = ordered;
-            else sorted = sorted.OrderBy(r => StripCommonPrefix(r.name));
+            else sorted = sorted.OrderBy(r => GetRecipeSortKey(r));
 
             if (reverseSort) sorted = sorted.Reverse();
 
@@ -441,7 +441,7 @@ public class RecipeTrackerUI : MonoBehaviour
         }
         else if (sortAlphabetical)
         {
-            string name = StripCommonPrefix(recipe.name);
+            string name = GetBaseName(recipe.name); // use base name so variants group under same letter
             if (string.IsNullOrEmpty(name)) return "";
             return name.Substring(0, 1).ToUpper();
         }
@@ -452,7 +452,7 @@ public class RecipeTrackerUI : MonoBehaviour
     private int CountIngredients(CraftingRecipe recipe)
     {
         if (recipe == null) return 0;
-        return new List<ScriptableObject> { recipe.inputA, recipe.inputB, recipe.inputC, recipe.inputD, recipe.inputE }
+        return new List<ScriptableObject> { recipe.inputA, recipe.inputB, recipe.inputC, recipe.inputD, recipe.inputE, recipe.inputF, recipe.inputG, recipe.inputH }
             .Where(x => x != null).Count();
     }
 
@@ -502,18 +502,7 @@ public class RecipeTrackerUI : MonoBehaviour
         SelectRecipe(recipe);
     }
     
-    // Helper: remove common asset prefixes (E_, R_, M_, C_)
-    private string StripCommonPrefix(string name)
-    {
-        if (string.IsNullOrEmpty(name)) return name;
-        string[] prefixes = new[] { "E_", "R_", "M_", "C_" };
-        foreach (var p in prefixes)
-        {
-            if (name.StartsWith(p)) return name.Substring(p.Length);
-        }
-        return name;
-    }
-    
+    // Replace internal helper implementations with SOHelpers calls
     public void SelectRecipe(CraftingRecipe recipe)
     {
         if (recipe == null)
@@ -527,32 +516,31 @@ public class RecipeTrackerUI : MonoBehaviour
         bool discovered = IsRecipeDiscovered(recipe);
 
         if (selectedTitleText != null)
-            selectedTitleText.text = discovered ? StripCommonPrefix(recipe.name) : "Undiscovered Recipe";
+            selectedTitleText.text = discovered ? SOHelpers.StripCommonPrefix(recipe.name) : "Undiscovered Recipe";
 
-        // Build details: ingredients -> output (output only shown if recipe is discovered)
-        var ingredients = new List<ScriptableObject> { recipe.inputA, recipe.inputB, recipe.inputC, recipe.inputD, recipe.inputE }
+        var ingredients = new List<ScriptableObject> { recipe.inputA, recipe.inputB, recipe.inputC, recipe.inputD, recipe.inputE, recipe.inputF, recipe.inputG, recipe.inputH }
             .Where(x => x != null)
             .ToList();
 
-        string ingList = string.Join(", ", ingredients.Select(i => StripCommonPrefix(GetDisplayName(i, discovered))));
+        string ingList = string.Join(", ", ingredients.Select(i => SOHelpers.StripCommonPrefix(GetDisplayName(i, discovered))));
 
         if (selectedDetailsText != null)
         {
             if (discovered)
             {
-                string output = StripCommonPrefix(GetDisplayName(recipe.output, discovered));
+                string output = SOHelpers.StripCommonPrefix(GetDisplayName(recipe.output, discovered));
                 selectedDetailsText.text = string.Format("Ingredients: {0}\nOutput: {1}", ingList, output);
-                // If the output is a MineralData, show its sprite in the selected image (prefer big sprite)
                 if (selectedImage != null)
                 {
-                    if (recipe.output is MineralData md && md.mineralBigSprite != null)
+                    var md = recipe.output as MineralData;
+                    if (md != null && md.mineralBigSprite != null)
                     {
                         selectedImage.sprite = md.mineralBigSprite;
                         selectedImage.enabled = true;
                     }
-                    else if (recipe.output is MineralData md2 && md2.mineralSprite != null)
+                    else if (md != null && md.mineralSprite != null)
                     {
-                        selectedImage.sprite = md2.mineralSprite;
+                        selectedImage.sprite = md.mineralSprite;
                         selectedImage.enabled = true;
                     }
                     else
@@ -570,46 +558,29 @@ public class RecipeTrackerUI : MonoBehaviour
         }
     }
 
-    // Get a short symbol for an asset (tries mapping then falls back to abbreviation)
+    // Use SOHelpers.GetBaseName / StripCommonPrefix rather than duplicating logic
+    private string GetBaseName(string name)
+    {
+        return SOHelpers.GetBaseName(name);
+    }
+
+    private string GetBaseName(ScriptableObject so)
+    {
+        if (so == null) return "";
+        return SOHelpers.GetBaseName(so.name);
+    }
+
+    private string GetRecipeSortKey(CraftingRecipe r)
+    {
+        if (r == null) return "";
+        string baseName = SOHelpers.GetBaseName(r.name) ?? "";
+        string fullStripped = SOHelpers.StripCommonPrefix(r.name) ?? "";
+        return (baseName + "|" + fullStripped).ToLowerInvariant();
+    }
+
     private string GetSymbolForScriptableObject(ScriptableObject so)
     {
-        if (so == null) return "?";
-        string name = StripCommonPrefix(so.name); // asset name (E_Iron -> Iron, R_Pyrite -> Pyrite)
-    
-        // basic mapping for common elements (expandable)
-        var map = new Dictionary<string, string>(System.StringComparer.OrdinalIgnoreCase)
-        {
-            {"Hydrogen", "H"},
-            {"Helium", "He"},
-            {"Beryllium", "Be"},
-            {"Carbon", "C"},
-            {"Magnesium", "Mg"},
-            {"Aluminum", "Al"},
-            {"Silicon", "Si"},
-            {"Phosphorus", "P"},
-            {"Sulphur", "S"},
-            {"Sulfur", "S"},
-            {"Calcium", "Ca"},
-            {"Titanium", "Ti"},
-            { "Iron", "Fe"},
-            {"Copper", "Cu"},
-            {"Barium", "Ba"},
-            {"Oxygen", "O"},
-            {"Carbonate", "CO3"},
-            {"Sulfate", "SO4"},
-            {"Nitrate", "NO3"},
-            {"Phosphate", "PO4"},
-            {"Silicate", "SiO4"},
-            {"Oxide", "O2-"},
-            {"Heat", "Heat"},
-
-        };
-
-        if (map.TryGetValue(name, out var sym)) return sym;
-    
-        // fallback: take first 1-2 letters (capitalized first)
-        if (name.Length == 1) return name.ToUpper();
-        return char.ToUpper(name[0]) + (char.IsUpper(name[1]) ? name[1].ToString().ToLower() : name[1].ToString().ToLower());
+        return SOHelpers.GetSymbolForScriptableObject(so);
     }
 
     // Used to show names or mask them for undiscovered
@@ -617,8 +588,7 @@ public class RecipeTrackerUI : MonoBehaviour
     {
         if (so == null) return "";
         if (discovered) return so.name;
-        // Undiscovered objects still show their symbol so the player knows the recipe shape
-        return GetSymbolForScriptableObject(so);
+        return SOHelpers.GetSymbolForScriptableObject(so);
     }
 
     // Internal controller for each list item (keeps the script self contained)
@@ -662,13 +632,12 @@ public class RecipeTrackerUI : MonoBehaviour
             }
 
             // set initial visuals safely (use stripped name)
-            SafeSetTitle(parent.StripCommonPrefix(recipe.name));
+            SafeSetTitle(SOHelpers.StripCommonPrefix(recipe.name));
         }
 
         public void Refresh(bool discovered)
         {
-            // Title: if undiscovered show 'Undiscovered Recipe', otherwise show stripped recipe name
-            SafeSetTitle(discovered ? parent.StripCommonPrefix(recipe.name) : "Undiscovered Recipe");
+            SafeSetTitle(discovered ? SOHelpers.StripCommonPrefix(recipe.name) : "Undiscovered Recipe");
 
             // apply tint to title text only
             if (titleTextTMP != null) titleTextTMP.color = discovered ? parent.discoveredColor : parent.undiscoveredColor;

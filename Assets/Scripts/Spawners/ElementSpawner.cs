@@ -71,19 +71,16 @@ public class ElementSpawner : MonoBehaviour
             Button btn = _spawnButtons[i];
             string btnName = btn.name;
 
-            // Find the matching element by name (use the part after the first underscore in SO names)
             ElementData matchedData = _elementDataList.Find(e => e != null
                 && btnName != null
-                && btnName.IndexOf(GetElementBaseName(e.name), System.StringComparison.OrdinalIgnoreCase) >= 0);
+                && btnName.IndexOf(SOHelpers.StripCommonPrefix(e.name), System.StringComparison.OrdinalIgnoreCase) >= 0);
 
             if (matchedData != null)
             {
-                // Use wrapper so we can suppress click if a drag is happening
                 ElementData dataForClosure = matchedData;
                 btn.onClick.RemoveAllListeners();
                 btn.onClick.AddListener(() => OnSpawnButtonClicked(dataForClosure));
 
-                // Ensure a drag handler is attached so the player can drag to spawn and place manually
                 SpawnDragHandler dragHandler = btn.gameObject.GetComponent<SpawnDragHandler>() ?? btn.gameObject.AddComponent<SpawnDragHandler>();
                 dragHandler.Init(this, dataForClosure);
             }

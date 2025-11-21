@@ -108,7 +108,7 @@ public class CraftingManager : MonoBehaviour
     private bool MatchIngredients(CraftingRecipe recipe, List<ScriptableObject> ingredients)
     {
         // Filter out null values from the recipe's ingredients
-        var recipeIngredients = new List<ScriptableObject> { recipe.inputA, recipe.inputB, recipe.inputC, recipe.inputD, recipe.inputE }
+        var recipeIngredients = new List<ScriptableObject> { recipe.inputA, recipe.inputB, recipe.inputC, recipe.inputD, recipe.inputE, recipe.inputF, recipe.inputG, recipe.inputH }
             .Where(ingredient => ingredient != null)
             .ToList();
 
