@@ -266,6 +266,24 @@ public class ElementSpawner : MonoBehaviour
             SpawnElementAtRandomPosition(_elementDataList[14]);
     }
 
+    public void SpawnFluorine()
+    {
+        if (_elementDataList.Count > 15 && _elementDataList[15] != null)
+            SpawnElementAtRandomPosition(_elementDataList[15]);
+    }
+
+    public void SpawnChlorine()
+    {
+        if (_elementDataList.Count > 16 && _elementDataList[16] != null)
+            SpawnElementAtRandomPosition(_elementDataList[16]);
+    }
+
+    public void SpawnSodium()
+    {
+        if (_elementDataList.Count > 17 && _elementDataList[17] != null)
+            SpawnElementAtRandomPosition(_elementDataList[17]);
+    }
+
     // Unlock all buttons at once (call from UI)
     public void UnlockAllButtons()
     {

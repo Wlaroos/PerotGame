@@ -9,5 +9,8 @@ public class CraftingRecipe : ScriptableObject
     public ScriptableObject inputC; // Third ingredient (element or compound)
     public ScriptableObject inputD; // Fourth ingredient (element or compound)
     public ScriptableObject inputE; // Fifth ingredient (element or compound)
+    public ScriptableObject inputF; // Sixth ingredient (element or compound)
+    public ScriptableObject inputG; // Seventh ingredient (element or compound)
+    public ScriptableObject inputH; // Eighth ingredient (element or compound)
     public ScriptableObject output; // Result (element, compound, or mineral)
 }

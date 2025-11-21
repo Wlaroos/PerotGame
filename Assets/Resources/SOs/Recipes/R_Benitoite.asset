@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8957768a3b0dc29408328652609a4081, type: 3}
+  m_Name: R_Benitoite
+  m_EditorClassIdentifier: 
+  inputA: {fileID: 11400000, guid: 740f78047f55dcc40839c2bb30ce2fdb, type: 2}
+  inputB: {fileID: 11400000, guid: 5ac91380779cc674cab508359527471c, type: 2}
+  inputC: {fileID: 11400000, guid: 50e74af8235314d4889749a70bf87215, type: 2}
+  inputD: {fileID: 0}
+  inputE: {fileID: 0}
+  inputF: {fileID: 0}
+  inputG: {fileID: 0}
+  inputH: {fileID: 0}
+  output: {fileID: 11400000, guid: f2c780b1931fc57479d4e70406947508, type: 2}
