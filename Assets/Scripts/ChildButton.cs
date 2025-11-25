@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ChildButton : MonoBehaviour
 {
@@ -7,7 +8,7 @@ public class ChildButton : MonoBehaviour
     private void OnMouseDown()
     {
         // Change the sprite's color to indicate a click
-        GetComponent<SpriteRenderer>().color = Color.gray;
+        GetComponent<Image>().color = Color.gray;
 
         // Call the Craft method
         if (_craftingZone != null)
@@ -19,6 +20,6 @@ public class ChildButton : MonoBehaviour
     private void OnMouseUp()
     {
         // Revert the sprite's color when the mouse button is released
-        GetComponent<SpriteRenderer>().color = Color.white;
+        GetComponent<Image>().color = Color.white;
     }
 }

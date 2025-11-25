@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using NUnit.Framework.Internal;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CraftingZone : MonoBehaviour
 {
@@ -11,10 +13,19 @@ public class CraftingZone : MonoBehaviour
     private int _currentPresses = 0;
     private List<GameObject> _objectsSnapshot = null;
     private List<ScriptableObject> _snapshotIngredients = null;
+    private BoxCollider2D _bc;
+    private RectTransform _rect;
 
     [SerializeField] private GameObject[] __dotIndicators; // Visual indicators for crafting progress
 
-    [SerializeField] private int _pressesForCrafting = 5; // Number of presses required to craft an item 
+    [SerializeField] private int _pressesForCrafting = 5; // Number of presses required to craft an item
+
+    private void Awake()
+    {
+        _bc = GetComponent<BoxCollider2D>();
+        _rect = GetComponent<RectTransform>();
+        _bc.size = new Vector2(_rect.rect.width, _rect.rect.height); // Set the size of the BoxCollider2D
+    }
 
     // Called when an object enters the zone
     private void OnTriggerEnter2D(Collider2D collision)
@@ -228,8 +239,8 @@ public class CraftingZone : MonoBehaviour
         {
             if (__dotIndicators[i] != null)
             {
-                __dotIndicators[i].GetComponent<SpriteRenderer>().color = (i < _currentPresses) ? new Color32(13, 134, 0, 255) : new Color32(98, 0, 8, 255);
-                __dotIndicators[i].transform.GetChild(0).GetComponent<SpriteRenderer>().color = (i < _currentPresses) ? Color.green : Color.red;
+                __dotIndicators[i].GetComponent<Image>().color = (i < _currentPresses) ? new Color32(13, 134, 0, 255) : new Color32(98, 0, 8, 255);
+                __dotIndicators[i].transform.GetChild(0).GetComponent<Image>().color = (i < _currentPresses) ? Color.green : Color.red;
             }
         }
     }
@@ -242,8 +253,8 @@ public class CraftingZone : MonoBehaviour
         {
             if (__dotIndicators[i] != null)
             {
-                __dotIndicators[i].GetComponent<SpriteRenderer>().color = new Color32(98, 0, 8, 255);
-                __dotIndicators[i].transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.red;
+                __dotIndicators[i].GetComponent<Image>().color = new Color32(98, 0, 8, 255);
+                __dotIndicators[i].transform.GetChild(0).GetComponent<Image>().color = Color.red;
             }
         }
     }
