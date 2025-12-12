@@ -10901,6 +10901,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1546428849}
     - target: {fileID: 7800349832108732696, guid: 14c235503099dd24abd35d543604de8a, type: 3}
+      propertyPath: _panelWidth
+      value: 1150
+      objectReference: {fileID: 0}
+    - target: {fileID: 7800349832108732696, guid: 14c235503099dd24abd35d543604de8a, type: 3}
       propertyPath: _spawnAreaSize.x
       value: 850
       objectReference: {fileID: 0}
