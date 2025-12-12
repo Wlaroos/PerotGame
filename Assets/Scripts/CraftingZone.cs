@@ -239,8 +239,8 @@ public class CraftingZone : MonoBehaviour
         {
             if (__dotIndicators[i] != null)
             {
-                __dotIndicators[i].GetComponent<Image>().color = (i < _currentPresses) ? new Color32(13, 134, 0, 255) : new Color32(98, 0, 8, 255);
-                __dotIndicators[i].transform.GetChild(0).GetComponent<Image>().color = (i < _currentPresses) ? Color.green : Color.red;
+                __dotIndicators[i].GetComponent<Image>().color = (i < _currentPresses) ? Color.green : Color.red;
+                __dotIndicators[i].transform.GetChild(0).GetComponent<Image>().color = (i < _currentPresses) ? new Color32(13, 134, 0, 255) : new Color32(98, 0, 8, 255);
             }
         }
     }
@@ -253,8 +253,8 @@ public class CraftingZone : MonoBehaviour
         {
             if (__dotIndicators[i] != null)
             {
-                __dotIndicators[i].GetComponent<Image>().color = new Color32(98, 0, 8, 255);
-                __dotIndicators[i].transform.GetChild(0).GetComponent<Image>().color = Color.red;
+                __dotIndicators[i].GetComponent<Image>().color = Color.red;
+                __dotIndicators[i].transform.GetChild(0).GetComponent<Image>().color =  new Color32(98, 0, 8, 255);
             }
         }
     }
