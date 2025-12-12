@@ -7,86 +7,126 @@ using TMPro;
 public class RecipeTrackerUI : MonoBehaviour
 {
     [Header("References")]
-    public RectTransform contentParent;
-    public GameObject recipeItemPrefab;
-    public TextMeshProUGUI selectedTitleText;
-    public TextMeshProUGUI selectedDetailsText;
-    public Image selectedImage; // optional image shown for the selected recipe's output (when discovered)
-
-    // (Sorting modes are represented by booleans; enum removed as it was unused)
+    [SerializeField] private RectTransform _contentParent;
+    [SerializeField] private GameObject _recipeItemPrefab;
+    [SerializeField] private TextMeshProUGUI _selectedTitleText;
+    [SerializeField] private TextMeshProUGUI _selectedDetailsText;
+    [SerializeField] private Image _selectedImage; // optional image shown for the selected recipe's output (when discovered)
 
     [Header("Sort Options")]
+    [Tooltip("Enable or disable sorting. When disabled, sorting buttons and headers are hidden.")]
+    [SerializeField] private bool _enableSorting = true;
     [Tooltip("Sort recipes alphabetically by their (stripped) name")]
-    private bool sortAlphabetical = true;
+    [SerializeField] private bool _sortAlphabetical = true;
     [Tooltip("Sort recipes by number of ingredients (fewest -> most)")]
-    private bool sortByIngredientCount = false;
+    [SerializeField] private bool _sortByIngredientCount = false;
     [Tooltip("Sort recipes by output type (Mineral, Compound, Element)")]
-    private bool sortByOutputType = false;
+    [SerializeField] private bool _sortByOutputType = false;
     [Tooltip("Reverse the final sort order (after applying the enabled sorts)")]
-    private bool reverseSort = false;
+    [SerializeField] private bool _reverseSort = false;
+
+    [Header("Recipe Display Options")]
+    [Tooltip("If true, show all recipes. If false, show 5 random recipes.")]
+    [SerializeField] private bool _showAllRecipes = true;
+    [Tooltip("Recipes to exclude from the random pool.")]
+    [SerializeField] private List<CraftingRecipe> _excludedRecipes = new List<CraftingRecipe>();
 
     [Tooltip("If true, insert a small spacer or header prefab between different sort sections (e.g. between output types)")]
-    [SerializeField] private bool addSectionSpacers = true;
+    [SerializeField] private bool _addSectionSpacers = true;
 
     [Tooltip("Optional prefab to use as a section header between groups. If assigned, it's instantiated and its child Text/TMP will be set to the group label.")]
-    [SerializeField] private GameObject sectionHeaderPrefab;
+    [SerializeField] private GameObject _sectionHeaderPrefab;
 
     [Header("Runtime Sort UI (optional)")]
     [Tooltip("Optional UI Button to toggle alphabetical sort at runtime")]
-    [SerializeField] private Button sortAlphabeticalButton;
+    [SerializeField] private Button _sortAlphabeticalButton;
     [Tooltip("Optional UI Button to toggle ingredient-count sort at runtime")]
-    [SerializeField] private Button sortIngredientCountButton;
+    [SerializeField] private Button _sortIngredientCountButton;
     [Tooltip("Optional UI Button to toggle output-type sort at runtime")]
-    [SerializeField] private Button sortOutputTypeButton;
+    [SerializeField] private Button _sortOutputTypeButton;
     [Tooltip("Optional UI Button to toggle reverse order at runtime")]
-    [SerializeField] private Button reverseSortButton;
+    [SerializeField] private Button _reverseSortButton;
     [Tooltip("Color used for an active/selected sort button")]
-    [SerializeField] private Color sortButtonActiveColor = Color.green;
+    [SerializeField] private Color _sortButtonActiveColor = Color.green;
     [Tooltip("Color used for an inactive/unselected sort button")]
-    [SerializeField] private Color sortButtonInactiveColor = Color.white;
+    [SerializeField] private Color _sortButtonInactiveColor = Color.white;
+    [SerializeField] private Color _undiscoveredColor = Color.white;
+    [SerializeField] private Color _discoveredColor = Color.green;
 
-    // tint colors
-    public Color undiscoveredColor = Color.white;
-    public Color discoveredColor = Color.green;
+    [Header("Display Settings")]
+    [Tooltip("Name to show for undiscovered recipes")]
+    [SerializeField] private string _undiscoveredName = "???";
 
-    // in-memory lookup
+    // In-memory lookup
     private List<CraftingRecipe> _recipes = new List<CraftingRecipe>();
     private Dictionary<CraftingRecipe, RecipeItemController> _itemControllers = new Dictionary<CraftingRecipe, RecipeItemController>();
-    // Track instantiated section header instances so we can clear them efficiently
-    private List<GameObject> _activeSectionHeaders = new List<GameObject>();
+    private List<GameObject> _activeSectionHeaders = new List<GameObject>(); // Track instantiated section header instances
+    private HashSet<string> _discoveredRecipes = new HashSet<string>(); // Non-persistent discovery set (resets each run)
 
-    // non-persistent discovery set (resets each run)
-    private HashSet<string> _discoveredRecipes = new HashSet<string>();
+    private Coroutine _refreshCoroutine; // Deferred refresh coroutine
 
     private void Start()
     {
-        // discovery set is initialized at declaration; no need to clear here
-
         if (CraftingManager.Instance == null)
         {
             Debug.LogError("RecipeTrackerUI: CraftingManager.Instance is null. Make sure CraftingManager exists in the scene.");
             return;
         }
 
-        // grab recipes from the crafting manager
-        // Exclude internal/group recipes whose asset name starts with "GR_"
+        // Grab recipes from the crafting manager
         _recipes = CraftingManager.Instance._recipes
             .Where(r => r != null && !(r.name != null && r.name.StartsWith("GR_")))
             .ToList();
 
+        UpdateSortingUI();
         PopulateList();
 
-        // subscribe for first-time crafted events (expects CraftingManager to only fire this when craft actually occurs)
+        // Subscribe for first-time crafted events
         CraftingManager.Instance.OnFirstTimeRecipeCrafted.AddListener(OnFirstTimeRecipeCrafted);
 
         SelectRecipe(null);
+    }
+
+    private void UpdateSortingUI()
+    {
+        // Enable or disable sorting buttons and their parents based on _enableSorting
+        if (_sortAlphabeticalButton != null && _sortAlphabeticalButton.transform.parent != null)
+            _sortAlphabeticalButton.transform.parent.gameObject.SetActive(_enableSorting);
+        if (_sortIngredientCountButton != null && _sortIngredientCountButton.transform.parent != null)
+            _sortIngredientCountButton.transform.parent.gameObject.SetActive(_enableSorting);
+        if (_sortOutputTypeButton != null && _sortOutputTypeButton.transform.parent != null)
+            _sortOutputTypeButton.transform.parent.gameObject.SetActive(_enableSorting);
+        if (_reverseSortButton != null && _reverseSortButton.transform.parent != null)
+            _reverseSortButton.transform.parent.gameObject.SetActive(_enableSorting);
+
+        // Adjust content parent width and scroll view height when sorting is disabled
+        if (_contentParent != null)
+        {
+            var contentParentRect = _contentParent.GetComponent<RectTransform>();
+            if (contentParentRect != null)
+            {
+                contentParentRect.sizeDelta = _enableSorting ? new Vector2(contentParentRect.sizeDelta.x, contentParentRect.sizeDelta.y) : new Vector2(380, contentParentRect.sizeDelta.y);
+            }
+        }
+
+        var scrollView = GetComponent<RectTransform>();
+        if (scrollView != null)
+        {
+            scrollView.sizeDelta = _enableSorting ? new Vector2(scrollView.sizeDelta.x, scrollView.sizeDelta.y) : new Vector2(scrollView.sizeDelta.x, 775);
+        }
+
+        // Hide section headers if sorting is disabled
+        if (!_enableSorting)
+        {
+            ClearSectionHeaders();
+        }
     }
 
     private void OnDestroy()
     {
         if (CraftingManager.Instance != null)
             CraftingManager.Instance.OnFirstTimeRecipeCrafted.RemoveListener(OnFirstTimeRecipeCrafted);
-        // Unbind runtime UI listeners
+
         UnbindRuntimeSortButtons();
     }
 
@@ -102,32 +142,31 @@ public class RecipeTrackerUI : MonoBehaviour
 
     private void BindRuntimeSortButtons()
     {
-        if (sortAlphabeticalButton != null) sortAlphabeticalButton.onClick.AddListener(ToggleSortAlphabetical);
-        if (sortIngredientCountButton != null) sortIngredientCountButton.onClick.AddListener(ToggleSortIngredientCount);
-        if (sortOutputTypeButton != null) sortOutputTypeButton.onClick.AddListener(ToggleSortOutputType);
-        if (reverseSortButton != null) reverseSortButton.onClick.AddListener(ToggleReverseSort);
+        if (_sortAlphabeticalButton != null) _sortAlphabeticalButton.onClick.AddListener(ToggleSortAlphabetical);
+        if (_sortIngredientCountButton != null) _sortIngredientCountButton.onClick.AddListener(ToggleSortIngredientCount);
+        if (_sortOutputTypeButton != null) _sortOutputTypeButton.onClick.AddListener(ToggleSortOutputType);
+        if (_reverseSortButton != null) _reverseSortButton.onClick.AddListener(ToggleReverseSort);
         UpdateSortButtonVisuals();
     }
 
     private void UnbindRuntimeSortButtons()
     {
-        if (sortAlphabeticalButton != null) sortAlphabeticalButton.onClick.RemoveListener(ToggleSortAlphabetical);
-        if (sortIngredientCountButton != null) sortIngredientCountButton.onClick.RemoveListener(ToggleSortIngredientCount);
-        if (sortOutputTypeButton != null) sortOutputTypeButton.onClick.RemoveListener(ToggleSortOutputType);
-        if (reverseSortButton != null) reverseSortButton.onClick.RemoveListener(ToggleReverseSort);
+        if (_sortAlphabeticalButton != null) _sortAlphabeticalButton.onClick.RemoveListener(ToggleSortAlphabetical);
+        if (_sortIngredientCountButton != null) _sortIngredientCountButton.onClick.RemoveListener(ToggleSortIngredientCount);
+        if (_sortOutputTypeButton != null) _sortOutputTypeButton.onClick.RemoveListener(ToggleSortOutputType);
+        if (_reverseSortButton != null) _reverseSortButton.onClick.RemoveListener(ToggleReverseSort);
     }
 
     private void UpdateSortButtonVisuals()
     {
-        // Set the button image colors to indicate active/inactive state
-        if (sortAlphabeticalButton != null && sortAlphabeticalButton.image != null)
-            sortAlphabeticalButton.image.color = sortAlphabetical ? sortButtonActiveColor : sortButtonInactiveColor;
-        if (sortIngredientCountButton != null && sortIngredientCountButton.image != null)
-            sortIngredientCountButton.image.color = sortByIngredientCount ? sortButtonActiveColor : sortButtonInactiveColor;
-        if (sortOutputTypeButton != null && sortOutputTypeButton.image != null)
-            sortOutputTypeButton.image.color = sortByOutputType ? sortButtonActiveColor : sortButtonInactiveColor;
-        if (reverseSortButton != null && reverseSortButton.image != null)
-            reverseSortButton.image.color = reverseSort ? sortButtonActiveColor : sortButtonInactiveColor;
+        if (_sortAlphabeticalButton != null && _sortAlphabeticalButton.image != null)
+            _sortAlphabeticalButton.image.color = _sortAlphabetical ? _sortButtonActiveColor : _sortButtonInactiveColor;
+        if (_sortIngredientCountButton != null && _sortIngredientCountButton.image != null)
+            _sortIngredientCountButton.image.color = _sortByIngredientCount ? _sortButtonActiveColor : _sortButtonInactiveColor;
+        if (_sortOutputTypeButton != null && _sortOutputTypeButton.image != null)
+            _sortOutputTypeButton.image.color = _sortByOutputType ? _sortButtonActiveColor : _sortButtonInactiveColor;
+        if (_reverseSortButton != null && _reverseSortButton.image != null)
+            _reverseSortButton.image.color = _reverseSort ? _sortButtonActiveColor : _sortButtonInactiveColor;
     }
 
     // Runtime toggle methods that can be wired to UI buttons or called programmatically
@@ -154,13 +193,10 @@ public class RecipeTrackerUI : MonoBehaviour
 
     public void ToggleReverseSort()
     {
-        reverseSort = !reverseSort;
+        _reverseSort = !_reverseSort;
         UpdateSortButtonVisuals();
         ScheduleRefresh();
     }
-
-    // Defer refresh to avoid modifying UI hierarchy during event processing (prevents potential crashes)
-    private Coroutine _refreshCoroutine;
     private void ScheduleRefresh(float delayFrames = 1)
     {
         if (_refreshCoroutine != null) StopCoroutine(_refreshCoroutine);
@@ -194,15 +230,15 @@ public class RecipeTrackerUI : MonoBehaviour
         // Helper to set a specific sort
         void SetSort(string name)
         {
-            sortAlphabetical = name == "Alphabetical";
-            sortByIngredientCount = name == "IngredientCount";
-            sortByOutputType = name == "OutputType";
+            _sortAlphabetical = name == "Alphabetical";
+            _sortByIngredientCount = name == "IngredientCount";
+            _sortByOutputType = name == "OutputType";
         }
 
         // Check current state
-        bool isActive = (sortName == "Alphabetical" && sortAlphabetical)
-                        || (sortName == "IngredientCount" && sortByIngredientCount)
-                        || (sortName == "OutputType" && sortByOutputType);
+        bool isActive = (sortName == "Alphabetical" && _sortAlphabetical)
+                        || (sortName == "IngredientCount" && _sortByIngredientCount)
+                        || (sortName == "OutputType" && _sortByOutputType);
 
         if (!isActive)
         {
@@ -213,19 +249,19 @@ public class RecipeTrackerUI : MonoBehaviour
 
         // It was active; toggle it off and choose a fallback in priority order
         // Fallback priority: IngredientCount -> OutputType -> Alphabetical
-        if (sortName == "Alphabetical") sortAlphabetical = false;
-        else if (sortName == "IngredientCount") sortByIngredientCount = false;
-        else if (sortName == "OutputType") sortByOutputType = false;
+        if (sortName == "Alphabetical") _sortAlphabetical = false;
+        else if (sortName == "IngredientCount") _sortByIngredientCount = false;
+        else if (sortName == "OutputType") _sortByOutputType = false;
 
         // Pick fallback
-        if (!sortByIngredientCount && sortName != "IngredientCount")
+        if (!_sortByIngredientCount && sortName != "IngredientCount")
         {
             // prefer ingredient count as fallback
             SetSort("IngredientCount");
             return;
         }
 
-        if (!sortByOutputType && sortName != "OutputType")
+        if (!_sortByOutputType && sortName != "OutputType")
         {
             SetSort("OutputType");
             return;
@@ -238,35 +274,35 @@ public class RecipeTrackerUI : MonoBehaviour
     private void OnValidate()
     {
         // Ensure at least one sort is active. If multiple are active (inspector), prefer alphabetical, then ingredient, then output.
-        if (sortAlphabetical && (sortByIngredientCount || sortByOutputType))
+        if (_sortAlphabetical && (_sortByIngredientCount || _sortByOutputType))
         {
-            sortByIngredientCount = false;
-            sortByOutputType = false;
+            _sortByIngredientCount = false;
+            _sortByOutputType = false;
         }
-        else if (sortByIngredientCount && sortByOutputType)
+        else if (_sortByIngredientCount && _sortByOutputType)
         {
             // keep ingredient count, disable output
-            sortByOutputType = false;
+            _sortByOutputType = false;
         }
-        else if (!sortAlphabetical && !sortByIngredientCount && !sortByOutputType)
+        else if (!_sortAlphabetical && !_sortByIngredientCount && !_sortByOutputType)
         {
             // ensure at least one is active
-            sortAlphabetical = true;
+            _sortAlphabetical = true;
         }
     }
 
     private void PopulateList()
     {
-        if (contentParent == null || recipeItemPrefab == null)
+        if (_contentParent == null || _recipeItemPrefab == null)
         {
-            Debug.LogWarning("RecipeTrackerUI: contentParent or recipeItemPrefab not assigned.");
+            Debug.LogWarning("RecipeTrackerUI: _contentParent or recipeItemPrefab not assigned.");
             return;
         }
         // Clear previous section headers (we'll recreate them below if needed)
         ClearSectionHeaders();
 
         // Build sorted/filtered recipe list according to current sort options
-        var desiredRecipes = BuildSortedRecipes();
+        var desiredRecipes = BuildFilteredRecipes();
 
         // Track which controllers we reuse this pass so we can cleanup the rest
         var usedControllers = new HashSet<CraftingRecipe>();
@@ -277,7 +313,7 @@ public class RecipeTrackerUI : MonoBehaviour
         {
             string groupKey = ComputeGroupKey(recipe);
 
-            if (addSectionSpacers && (lastGroupKey == null || groupKey != lastGroupKey))
+            if (_enableSorting && _addSectionSpacers && (lastGroupKey == null || groupKey != lastGroupKey))
             {
                 CreateSectionHeader(groupKey);
             }
@@ -291,112 +327,126 @@ public class RecipeTrackerUI : MonoBehaviour
         CleanupUnusedControllers(usedControllers);
     }
 
-        // Build the sorted recipe list according to current sort options
-        private List<CraftingRecipe> BuildSortedRecipes()
+    private List<CraftingRecipe> BuildFilteredRecipes()
+    {
+        // Start with all recipes
+        var filteredRecipes = _recipes.Where(r => !_excludedRecipes.Contains(r)).ToList();
+
+        // If _showAllRecipes is false, pick 5 random recipes from the filtered list
+        if (!_showAllRecipes && filteredRecipes.Count > 5)
         {
-            IEnumerable<CraftingRecipe> sorted = _recipes.Where(r => r != null);
-
-            IOrderedEnumerable<CraftingRecipe> ordered = null;
-
-            if (sortByOutputType)
-            {
-                ordered = sorted.OrderBy(r => GetOutputTypeOrder(r)).ThenBy(r => GetRecipeSortKey(r));
-            }
-
-            if (sortByIngredientCount)
-            {
-                if (ordered != null) ordered = ordered.ThenBy(r => CountIngredients(r));
-                else ordered = sorted.OrderBy(r => CountIngredients(r)).ThenBy(r => GetRecipeSortKey(r));
-            }
-
-            if (sortAlphabetical)
-            {
-                if (ordered != null) ordered = ordered.ThenBy(r => GetRecipeSortKey(r));
-                else ordered = sorted.OrderBy(r => GetRecipeSortKey(r));
-            }
-
-            if (ordered != null) sorted = ordered;
-            else sorted = sorted.OrderBy(r => GetRecipeSortKey(r));
-
-            if (reverseSort) sorted = sorted.Reverse();
-
-            return sorted.ToList();
+            filteredRecipes = filteredRecipes.OrderBy(r => Random.value).Take(5).ToList();
         }
 
-        private void ClearSectionHeaders()
+        // Apply sorting
+        return BuildSortedRecipes(filteredRecipes);
+    }
+
+    private List<CraftingRecipe> BuildSortedRecipes(List<CraftingRecipe> recipes)
+    {
+        IEnumerable<CraftingRecipe> sorted = recipes.Where(r => r != null);
+
+        IOrderedEnumerable<CraftingRecipe> ordered = null;
+
+        if (_sortByOutputType)
         {
-            foreach (var h in _activeSectionHeaders)
-            {
-                if (h == null) continue;
-                if (Application.isPlaying) Destroy(h);
-                else DestroyImmediate(h);
-            }
-            _activeSectionHeaders.Clear();
+            ordered = sorted.OrderBy(r => GetOutputTypeOrder(r)).ThenBy(r => GetRecipeSortKey(r));
         }
 
-        private void CreateSectionHeader(string groupKey)
+        if (_sortByIngredientCount)
         {
-            if (sectionHeaderPrefab == null) return;
-            var header = Instantiate(sectionHeaderPrefab, contentParent);
-            var headerTmp = header.GetComponentInChildren<TextMeshProUGUI>(true);
-            if (headerTmp != null) headerTmp.text = groupKey;
-            else
-            {
-                var headerText = header.GetComponentInChildren<Text>(true);
-                if (headerText != null) headerText.text = groupKey;
-            }
-            _activeSectionHeaders.Add(header);
+            if (ordered != null) ordered = ordered.ThenBy(r => CountIngredients(r));
+            else ordered = sorted.OrderBy(r => CountIngredients(r)).ThenBy(r => GetRecipeSortKey(r));
         }
 
-        private void EnsureControllerForRecipe(CraftingRecipe recipe, HashSet<CraftingRecipe> usedControllers)
+        if (_sortAlphabetical)
         {
-            if (recipe == null) return;
-
-            if (_itemControllers.TryGetValue(recipe, out var existing))
-            {
-                // reuse existing controller
-                existing.root.transform.SetParent(contentParent, false);
-                existing.root.transform.SetAsLastSibling();
-                existing.root.SetActive(true);
-                existing.Refresh(IsRecipeDiscovered(recipe));
-                usedControllers.Add(recipe);
-            }
-            else
-            {
-                var go = Instantiate(recipeItemPrefab, contentParent);
-                var controller = new RecipeItemController(go, recipe, this);
-                _itemControllers.Add(recipe, controller);
-                controller.Refresh(IsRecipeDiscovered(recipe));
-                usedControllers.Add(recipe);
-            }
+            if (ordered != null) ordered = ordered.ThenBy(r => GetRecipeSortKey(r));
+            else ordered = sorted.OrderBy(r => GetRecipeSortKey(r));
         }
 
-        private void CleanupUnusedControllers(HashSet<CraftingRecipe> usedControllers)
+        if (ordered != null) sorted = ordered;
+        else sorted = sorted.OrderBy(r => GetRecipeSortKey(r));
+
+        if (_reverseSort) sorted = sorted.Reverse();
+
+        return sorted.ToList();
+    }
+
+    private void ClearSectionHeaders()
+    {
+        foreach (var h in _activeSectionHeaders)
         {
-            var toRemove = _itemControllers.Keys.Except(usedControllers).ToList();
-            foreach (var r in toRemove)
+            if (h == null) continue;
+            if (Application.isPlaying) Destroy(h);
+            else DestroyImmediate(h);
+        }
+        _activeSectionHeaders.Clear();
+    }
+
+    private void CreateSectionHeader(string groupKey)
+    {
+        if (_sectionHeaderPrefab == null) return;
+        var header = Instantiate(_sectionHeaderPrefab, _contentParent);
+        var headerTmp = header.GetComponentInChildren<TextMeshProUGUI>(true);
+        if (headerTmp != null) headerTmp.text = groupKey;
+        else
+        {
+            var headerText = header.GetComponentInChildren<Text>(true);
+            if (headerText != null) headerText.text = groupKey;
+        }
+        _activeSectionHeaders.Add(header);
+    }
+
+    private void EnsureControllerForRecipe(CraftingRecipe recipe, HashSet<CraftingRecipe> usedControllers)
+    {
+        if (recipe == null) return;
+
+        if (_itemControllers.TryGetValue(recipe, out var existing))
+        {
+            // reuse existing controller
+            existing.root.transform.SetParent(_contentParent, false);
+            existing.root.transform.SetAsLastSibling();
+            existing.root.SetActive(true);
+            existing.Refresh(IsRecipeDiscovered(recipe));
+            usedControllers.Add(recipe);
+        }
+        else
+        {
+            var go = Instantiate(_recipeItemPrefab, _contentParent);
+            var controller = new RecipeItemController(go, recipe, this);
+            _itemControllers.Add(recipe, controller);
+            controller.Refresh(IsRecipeDiscovered(recipe));
+            usedControllers.Add(recipe);
+        }
+    }
+
+    private void CleanupUnusedControllers(HashSet<CraftingRecipe> usedControllers)
+    {
+        var toRemove = _itemControllers.Keys.Except(usedControllers).ToList();
+        foreach (var r in toRemove)
+        {
+            if (_itemControllers.TryGetValue(r, out var c))
             {
-                if (_itemControllers.TryGetValue(r, out var c))
+                if (c != null && c.root != null)
                 {
-                    if (c != null && c.root != null)
-                    {
-                        if (Application.isPlaying) Destroy(c.root);
-                        else DestroyImmediate(c.root);
-                    }
-                    _itemControllers.Remove(r);
+                    if (Application.isPlaying) Destroy(c.root);
+                    else DestroyImmediate(c.root);
                 }
+                _itemControllers.Remove(r);
             }
         }
+    }
 
 
     // Clear the current list items (keeps the _recipes list intact)
     public void ClearList()
     {
-        if (contentParent == null) return;
+        if (_contentParent == null) return;
         // Destroy all children safely (use while loop to avoid iterator issues)
-        while (contentParent.childCount > 0)
+        while (_contentParent.childCount > 0)
         {
-            var c = contentParent.GetChild(0);
+            var c = _contentParent.GetChild(0);
             if (Application.isPlaying)
                 Destroy(c.gameObject);
             else
@@ -430,16 +480,16 @@ public class RecipeTrackerUI : MonoBehaviour
     {
         // Grouping is based on the highest-priority enabled sort. Priority order is:
         // OutputType -> IngredientCount -> Alphabetical
-        if (sortByOutputType)
+        if (_sortByOutputType)
         {
             var t = GetOutputTypeLabel(recipe);
             return t ?? "";
         }
-        else if (sortByIngredientCount)
+        else if (_sortByIngredientCount)
         {
             return CountIngredients(recipe).ToString();
         }
-        else if (sortAlphabetical)
+        else if (_sortAlphabetical)
         {
             string name = GetBaseName(recipe.name); // use base name so variants group under same letter
             if (string.IsNullOrEmpty(name)) return "";
@@ -507,16 +557,16 @@ public class RecipeTrackerUI : MonoBehaviour
     {
         if (recipe == null)
         {
-            if (selectedTitleText != null) selectedTitleText.text = "";
-            if (selectedDetailsText != null) selectedDetailsText.text = "";
-            if (selectedImage != null) { selectedImage.sprite = null; selectedImage.enabled = false; }
+            if (_selectedTitleText != null) _selectedTitleText.text = "";
+            if (_selectedDetailsText != null) _selectedDetailsText.text = "";
+            if (_selectedImage != null) { _selectedImage.sprite = null; _selectedImage.enabled = false; }
             return;
         }
 
         bool discovered = IsRecipeDiscovered(recipe);
 
-        if (selectedTitleText != null)
-            selectedTitleText.text = discovered ? SOHelpers.StripCommonPrefix(recipe.name) : "Undiscovered Recipe";
+        if (_selectedTitleText != null)
+            _selectedTitleText.text = discovered ? SOHelpers.StripCommonPrefix(recipe.name) : _undiscoveredName;
 
         var ingredients = new List<ScriptableObject> { recipe.inputA, recipe.inputB, recipe.inputC, recipe.inputD, recipe.inputE, recipe.inputF, recipe.inputG, recipe.inputH }
             .Where(x => x != null)
@@ -524,36 +574,36 @@ public class RecipeTrackerUI : MonoBehaviour
 
         string ingList = string.Join(", ", ingredients.Select(i => SOHelpers.StripCommonPrefix(GetDisplayName(i, discovered))));
 
-        if (selectedDetailsText != null)
+        if (_selectedDetailsText != null)
         {
             if (discovered)
             {
                 string output = SOHelpers.StripCommonPrefix(GetDisplayName(recipe.output, discovered));
-                selectedDetailsText.text = string.Format("Ingredients: {0}\nOutput: {1}", ingList, output);
-                if (selectedImage != null)
+                _selectedDetailsText.text = string.Format("Ingredients: {0}\nOutput: {1}", ingList, output);
+                if (_selectedImage != null)
                 {
                     var md = recipe.output as MineralData;
                     if (md != null && md.mineralBigSprite != null)
                     {
-                        selectedImage.sprite = md.mineralBigSprite;
-                        selectedImage.enabled = true;
+                        _selectedImage.sprite = md.mineralBigSprite;
+                        _selectedImage.enabled = true;
                     }
                     else if (md != null && md.mineralSprite != null)
                     {
-                        selectedImage.sprite = md.mineralSprite;
-                        selectedImage.enabled = true;
+                        _selectedImage.sprite = md.mineralSprite;
+                        _selectedImage.enabled = true;
                     }
                     else
                     {
-                        selectedImage.sprite = null;
-                        selectedImage.enabled = false;
+                        _selectedImage.sprite = null;
+                        _selectedImage.enabled = false;
                     }
                 }
             }
             else
             {
-                selectedDetailsText.text = string.Format("Ingredients: {0}", ingList);
-                if (selectedImage != null) { selectedImage.sprite = null; selectedImage.enabled = false; }
+                _selectedDetailsText.text = string.Format("Ingredients: {0}", ingList);
+                if (_selectedImage != null) { _selectedImage.sprite = null; _selectedImage.enabled = false; }
             }
         }
     }
@@ -637,11 +687,11 @@ public class RecipeTrackerUI : MonoBehaviour
 
         public void Refresh(bool discovered)
         {
-            SafeSetTitle(discovered ? SOHelpers.StripCommonPrefix(recipe.name) : "Undiscovered Recipe");
+            SafeSetTitle(discovered ? SOHelpers.StripCommonPrefix(recipe.name) : parent._undiscoveredName);
 
             // apply tint to title text only
-            if (titleTextTMP != null) titleTextTMP.color = discovered ? parent.discoveredColor : parent.undiscoveredColor;
-            if (titleTextUI != null) titleTextUI.color = discovered ? parent.discoveredColor : parent.undiscoveredColor;
+            if (titleTextTMP != null) titleTextTMP.color = discovered ? parent._discoveredColor : parent._undiscoveredColor;
+            if (titleTextUI != null) titleTextUI.color = discovered ? parent._discoveredColor : parent._undiscoveredColor;
         }
 
         private void OnClicked()

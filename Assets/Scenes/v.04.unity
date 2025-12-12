@@ -2054,7 +2054,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 100
 --- !u!222 &371918436
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6881,21 +6881,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a135d887ad97314f8a4e00c075f6647, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  contentParent: {fileID: 1989031145}
-  recipeItemPrefab: {fileID: 979413376460877840, guid: 23ba091be38b55041bc4fe08504a4c02, type: 3}
-  selectedTitleText: {fileID: 280596037}
-  selectedDetailsText: {fileID: 1264199064}
-  selectedImage: {fileID: 2111240245}
-  addSectionSpacers: 1
-  sectionHeaderPrefab: {fileID: 979413376460877840, guid: 3827990398dd33d4e9223801805d2f2a, type: 3}
-  sortAlphabeticalButton: {fileID: 311313232}
-  sortIngredientCountButton: {fileID: 1309218409}
-  sortOutputTypeButton: {fileID: 1521485861}
-  reverseSortButton: {fileID: 1359992432}
-  sortButtonActiveColor: {r: 0, g: 1, b: 0, a: 1}
-  sortButtonInactiveColor: {r: 1, g: 1, b: 1, a: 1}
-  undiscoveredColor: {r: 0.3962264, g: 0.3962264, b: 0.3962264, a: 1}
-  discoveredColor: {r: 0, g: 1, b: 0, a: 1}
+  _contentParent: {fileID: 1989031145}
+  _recipeItemPrefab: {fileID: 979413376460877840, guid: 23ba091be38b55041bc4fe08504a4c02, type: 3}
+  _selectedTitleText: {fileID: 280596037}
+  _selectedDetailsText: {fileID: 1264199064}
+  _selectedImage: {fileID: 2111240245}
+  _enableSorting: 0
+  _sortAlphabetical: 1
+  _sortByIngredientCount: 0
+  _sortByOutputType: 0
+  _reverseSort: 0
+  _showAllRecipes: 0
+  _excludedRecipes:
+  - {fileID: 11400000, guid: 6d2a54780135b4649812e7cb96e330ed, type: 2}
+  - {fileID: 11400000, guid: d2625fd52ea5f8b48b7e450c0cbc4c1b, type: 2}
+  - {fileID: 11400000, guid: c302beb93337fcd41b3f3cb5e94fe71c, type: 2}
+  - {fileID: 11400000, guid: 6ed96b97a73fe294b95bb635d2aac4a4, type: 2}
+  - {fileID: 11400000, guid: f2e95bf4ab94c4e45be4f90a78842c23, type: 2}
+  - {fileID: 11400000, guid: 2b14fe27ef90292448fd3b7a61db67f1, type: 2}
+  - {fileID: 11400000, guid: 40e9f8f5a793d5441a0bf6eb57fb4e7e, type: 2}
+  - {fileID: 11400000, guid: f73c951e675b16a4b9a413e256b7f77e, type: 2}
+  _addSectionSpacers: 1
+  _sectionHeaderPrefab: {fileID: 979413376460877840, guid: 3827990398dd33d4e9223801805d2f2a, type: 3}
+  _sortAlphabeticalButton: {fileID: 311313232}
+  _sortIngredientCountButton: {fileID: 1309218409}
+  _sortOutputTypeButton: {fileID: 1521485861}
+  _reverseSortButton: {fileID: 1359992432}
+  _sortButtonActiveColor: {r: 0, g: 1, b: 0, a: 1}
+  _sortButtonInactiveColor: {r: 0.5031446, g: 0.5031446, b: 0.5031446, a: 1}
+  _undiscoveredColor: {r: 1, g: 0.2908244, b: 0.17924517, a: 1}
+  _discoveredColor: {r: 0, g: 1, b: 0, a: 1}
+  _undiscoveredName: ???
 --- !u!114 &1383916215
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6955,7 +6971,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 100
 --- !u!222 &1383916217
 CanvasRenderer:
   m_ObjectHideFlags: 0
