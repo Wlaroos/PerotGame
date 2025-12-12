@@ -6,7 +6,6 @@ public class DraggableHolder : MonoBehaviour
 
     [SerializeField] private int _maxDraggables = 10;
     public int MaxDraggables => _maxDraggables;
-
     public bool IsFull => transform.childCount >= _maxDraggables;
 
     private void Awake()
@@ -19,6 +18,27 @@ public class DraggableHolder : MonoBehaviour
         else
         {
             Instance = this;
+        }
+    }
+
+    public void AddDraggable(GameObject draggable)
+    {
+        // If the holder is full, remove the oldest child
+        if (IsFull)
+        {
+            RemoveOldestChild();
+        }
+
+        // Add the new draggable as a child
+        draggable.transform.SetParent(transform);
+    }
+
+    private void RemoveOldestChild()
+    {
+        if (transform.childCount > 0)
+        {
+            var oldestChild = transform.GetChild(0).gameObject;
+            Destroy(oldestChild);
         }
     }
 

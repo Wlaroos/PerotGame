@@ -217,18 +217,8 @@ public class CompoundSpawner : MonoBehaviour
             Debug.LogError("CompoundSpawner: Cannot spawn compound, prefab is not assigned.");
             return null;
         }
-        // If there's a DraggableHolder and it's full, show the full popup and do not create anything.
-        if (DraggableHolder.Instance != null && DraggableHolder.Instance.IsFull)
-        {
-            DraggableHolder.Instance.FullPopup();
-            return null;
-        }
 
-        GameObject newCompound;
-        if (DraggableHolder.Instance != null)
-            newCompound = Instantiate(compoundPrefab, position, Quaternion.identity, DraggableHolder.Instance.transform);
-        else
-            newCompound = Instantiate(compoundPrefab, position, Quaternion.identity);
+        GameObject newCompound = Instantiate(compoundPrefab, position, Quaternion.identity);
 
         Compound compoundComponent = newCompound.GetComponent<Compound>();
         if (compoundComponent != null)
@@ -241,6 +231,12 @@ public class CompoundSpawner : MonoBehaviour
             Debug.LogError("CompoundSpawner: Spawned prefab does not have a Compound component.");
             Destroy(newCompound);
             return null;
+        }
+
+        // Add the new compound to the DraggableHolder
+        if (DraggableHolder.Instance != null)
+        {
+            DraggableHolder.Instance.AddDraggable(newCompound);
         }
 
         return newCompound;

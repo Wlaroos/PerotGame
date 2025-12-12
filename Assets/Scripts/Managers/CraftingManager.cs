@@ -136,22 +136,11 @@ public class CraftingManager : MonoBehaviour
 
     private GameObject CreateCraftedObject(ScriptableObject result, Vector3 spawnPosition)
     {
-        // If there's a DraggableHolder and it's full, show the full popup and do not create anything.
-        if (DraggableHolder.Instance != null && DraggableHolder.Instance.IsFull)
-        {
-            DraggableHolder.Instance.FullPopup();
-            return null;
-        }
-
         GameObject craftedObj = null;
 
         if (result is MineralData mineralData)
         {
-            if (DraggableHolder.Instance != null)
-                craftedObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity, DraggableHolder.Instance.transform);
-            else
-                craftedObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity);
-
+            craftedObj = Instantiate(mineralPrefab, spawnPosition, Quaternion.identity);
             Mineral mineralComponent = craftedObj.GetComponent<Mineral>();
             if (mineralComponent != null)
             {
@@ -161,11 +150,7 @@ public class CraftingManager : MonoBehaviour
         }
         else if (result is CompoundData compoundData)
         {
-            if (DraggableHolder.Instance != null)
-                craftedObj = Instantiate(compoundPrefab, spawnPosition, Quaternion.identity, DraggableHolder.Instance.transform);
-            else
-                craftedObj = Instantiate(compoundPrefab, spawnPosition, Quaternion.identity);
-
+            craftedObj = Instantiate(compoundPrefab, spawnPosition, Quaternion.identity);
             Compound compoundComponent = craftedObj.GetComponent<Compound>();
             if (compoundComponent != null)
             {
@@ -175,11 +160,7 @@ public class CraftingManager : MonoBehaviour
         }
         else if (result is ElementData elementData)
         {
-            if (DraggableHolder.Instance != null)
-                craftedObj = Instantiate(elementPrefab, spawnPosition, Quaternion.identity, DraggableHolder.Instance.transform);
-            else
-                craftedObj = Instantiate(elementPrefab, spawnPosition, Quaternion.identity);
-
+            craftedObj = Instantiate(elementPrefab, spawnPosition, Quaternion.identity);
             Element elementComponent = craftedObj.GetComponent<Element>();
             if (elementComponent != null)
             {
@@ -187,6 +168,12 @@ public class CraftingManager : MonoBehaviour
                 elementComponent.isotopeNumber = elementData.defaultIsotopeNumber;
                 elementComponent.UpdateDataVisuals();
             }
+        }
+
+        // Add the crafted object to the DraggableHolder
+        if (craftedObj != null && DraggableHolder.Instance != null)
+        {
+            DraggableHolder.Instance.AddDraggable(craftedObj);
         }
 
         // Play crafting effect using the crafted object's color

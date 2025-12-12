@@ -3,11 +3,17 @@ using UnityEngine.Rendering;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Burst.Intrinsics;
 
 // Lets you drag, drop, and combine objects in the game
 public class DragAndDrop : MonoBehaviour
 {
     [SerializeField] private float _dragSpeed = 25f; // How fast the object follows the mouse
+    
+    [Header("Main Area Panel (screen-space)")]
+    [SerializeField] private float _clampX = 5.325f;
+    [SerializeField] private float _clampY = 5f;
+
     private Vector2 _mouseOffset; // Distance from mouse to object when dragging starts
     private Element _element;     // Reference if this is an element
     private Compound _compound;   // Reference if this is a compound
@@ -66,8 +72,13 @@ public class DragAndDrop : MonoBehaviour
     private void OnMouseDrag()
     {
         // Move object smoothly to follow the mouse
-        Vector2 targetPosition = GetMouseWorldPosition() + _mouseOffset;
-        transform.position = Vector2.Lerp(transform.position, targetPosition, _dragSpeed * Time.deltaTime);
+        Vector2 mouseWorld = GetMouseWorldPosition() + _mouseOffset;
+
+        Vector3 current = transform.position;
+        Vector3 desired = new Vector3(mouseWorld.x, mouseWorld.y, current.z);
+        Vector3 interpolated = Vector3.Lerp(current, desired, _dragSpeed * Time.deltaTime);
+
+        transform.position = ClampToMainArea(interpolated);
     }
 
     // Gets the data (element, compound, or mineral) from another object
@@ -88,6 +99,10 @@ public class DragAndDrop : MonoBehaviour
         if (_collider != null)
         {
             GameObject otherObj = _collider.gameObject;
+
+            // Ensure both stay inside the main area panel
+            transform.position = ClampToMainArea(transform.position);
+            otherObj.transform.position = ClampToMainArea(otherObj.transform.position);
 
             // Get this object's data
             ScriptableObject dataA = (ScriptableObject)_element?.data ?? (ScriptableObject)_compound?.data ?? (ScriptableObject)_mineral?.data;
@@ -155,6 +170,10 @@ public class DragAndDrop : MonoBehaviour
                     transform.position -= separationDirection * separationDistance;
                     otherObj.transform.position += separationDirection * separationDistance;
 
+                    // Ensure both stay inside the main area panel
+                    transform.position = ClampToMainArea(transform.position);
+                    otherObj.transform.position = ClampToMainArea(otherObj.transform.position);
+
                     // Play fail effect at the midpoint
                     Vector3 failPosition = (transform.position + otherObj.transform.position) / 2f;
                     EffectManager.Instance.PlayFailEffect(failPosition);
@@ -194,5 +213,30 @@ public class DragAndDrop : MonoBehaviour
                 Destroy(gameObject);
             }
         }
+    }
+
+    private Vector3 ClampToMainArea(Vector3 worldPosition)
+    {
+        Camera cam = Camera.main;
+
+        // Get the object's size
+        Vector3 objectSize = Vector3.zero;
+        if (TryGetComponent(out Collider2D collider))
+        {
+            objectSize = collider.bounds.size;
+        }
+
+        // Calculate the clamped boundaries, considering the object's size
+        float halfWidth = objectSize.x / 2f;
+        float halfHeight = objectSize.y / 2f;
+
+        Vector3 bottomLeft = new Vector3(-_clampX + halfWidth, -_clampY + halfHeight, 0);
+        Vector3 topRight = new Vector3(_clampX - halfWidth, _clampY - halfHeight, 0);
+
+        Vector3 screenPos = cam.WorldToScreenPoint(worldPosition);
+        screenPos.x = Mathf.Clamp(screenPos.x, cam.WorldToScreenPoint(bottomLeft).x, cam.WorldToScreenPoint(topRight).x);
+        screenPos.y = Mathf.Clamp(screenPos.y, cam.WorldToScreenPoint(bottomLeft).y, cam.WorldToScreenPoint(topRight).y);
+
+        return cam.ScreenToWorldPoint(screenPos);
     }
 }

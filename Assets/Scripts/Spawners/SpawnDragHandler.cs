@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-// Attach to spawn buttons to allow drag-to-spawn and drop at mouse position
 public class SpawnDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     private ElementSpawner _elementSpawner;
@@ -10,7 +9,11 @@ public class SpawnDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
     private CompoundData _compoundData;
     private GameObject _draggedInstance;
 
-    // Call from ElementSpawner when wiring up the button
+    [Header("Main Area Panel (screen-space)")]
+    // Updated to match DragAndDrop values
+    [SerializeField] private float _clampX = 5.325f;
+    [SerializeField] private float _clampY = 5f;
+
     public void Init(ElementSpawner spawner, ElementData data)
     {
         _elementSpawner = spawner;
@@ -19,7 +22,6 @@ public class SpawnDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         _compoundData = null;
     }
 
-    // Call from CompoundSpawner when wiring up the button
     public void Init(CompoundSpawner spawner, CompoundData data)
     {
         _compoundSpawner = spawner;
@@ -57,10 +59,11 @@ public class SpawnDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        // Leave the spawned object where the player dropped it.
-        // If you want to cancel the spawn when dropped outside the spawn area, add checks here.
+        if (_draggedInstance == null) return;
 
+        _draggedInstance.transform.position = ClampToMainArea(_draggedInstance.transform.position);
         _draggedInstance = null;
+
         if (_elementSpawner != null)
             _elementSpawner.SetDragging(false);
         if (_compoundSpawner != null)
@@ -72,9 +75,33 @@ public class SpawnDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         Camera cam = Camera.main;
         if (cam == null) return Vector3.zero;
 
-        // distance from camera to world z=0 plane
         float z = -cam.transform.position.z;
         Vector3 screenPoint = new Vector3(screenPos.x, screenPos.y, z);
         return cam.ScreenToWorldPoint(screenPoint);
+    }
+
+    private Vector3 ClampToMainArea(Vector3 worldPosition)
+    {
+        Camera cam = Camera.main;
+
+        // Get the object's size
+        Vector3 objectSize = Vector3.zero;
+        if (_draggedInstance != null && _draggedInstance.TryGetComponent(out Collider2D collider))
+        {
+            objectSize = collider.bounds.size;
+        }
+
+        // Calculate the clamped boundaries, considering the object's size
+        float halfWidth = objectSize.x / 2f;
+        float halfHeight = objectSize.y / 2f;
+
+        Vector3 bottomLeft = new Vector3(-_clampX + halfWidth, -_clampY + halfHeight, 0);
+        Vector3 topRight = new Vector3(_clampX - halfWidth, _clampY - halfHeight, 0);
+
+        Vector3 screenPos = cam.WorldToScreenPoint(worldPosition);
+        screenPos.x = Mathf.Clamp(screenPos.x, cam.WorldToScreenPoint(bottomLeft).x, cam.WorldToScreenPoint(topRight).x);
+        screenPos.y = Mathf.Clamp(screenPos.y, cam.WorldToScreenPoint(bottomLeft).y, cam.WorldToScreenPoint(topRight).y);
+
+        return cam.ScreenToWorldPoint(screenPos);
     }
 }

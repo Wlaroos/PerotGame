@@ -153,18 +153,8 @@ public class ElementSpawner : MonoBehaviour
             Debug.LogError("ElementSpawner: Cannot spawn element, prefab is not assigned.");
             return null;
         }
-        // If there's a DraggableHolder and it's full, show the full popup and do not create anything.
-        if (DraggableHolder.Instance != null && DraggableHolder.Instance.IsFull)
-        {
-            DraggableHolder.Instance.FullPopup();
-            return null;
-        }
 
-        GameObject newElement;
-        if (DraggableHolder.Instance != null)
-            newElement = Instantiate(elementPrefab, position, Quaternion.identity, DraggableHolder.Instance.transform);
-        else
-            newElement = Instantiate(elementPrefab, position, Quaternion.identity);
+        GameObject newElement = Instantiate(elementPrefab, position, Quaternion.identity);
 
         Element elementComponent = newElement.GetComponent<Element>();
         if (elementComponent != null)
@@ -178,6 +168,12 @@ public class ElementSpawner : MonoBehaviour
             Debug.LogError("ElementSpawner: Spawned prefab does not have an Element component.");
             Destroy(newElement);
             return null;
+        }
+
+        // Add the new element to the DraggableHolder
+        if (DraggableHolder.Instance != null)
+        {
+            DraggableHolder.Instance.AddDraggable(newElement);
         }
 
         return newElement;
