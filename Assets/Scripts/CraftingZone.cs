@@ -16,9 +16,11 @@ public class CraftingZone : MonoBehaviour
     private BoxCollider2D _bc;
     private RectTransform _rect;
 
-    [SerializeField] private GameObject[] __dotIndicators; // Visual indicators for crafting progress
+    [SerializeField] private GameObject[] _dotIndicators; // Visual indicators for crafting progress
 
     [SerializeField] private int _pressesForCrafting = 5; // Number of presses required to craft an item
+
+    [SerializeField] private GameObject _slagPrefab; // Prefab for slag byproduct
 
     private void Awake()
     {
@@ -73,39 +75,24 @@ public class CraftingZone : MonoBehaviour
             return;
         }
 
-        // If we are not already in a multi-press sequence, probe whether these ingredients form a valid recipe.
+        // If we are not already in a multi-press sequence, initialize crafting state
         if (!_craftingInProgress)
         {
-            // Probe craft by asking the manager for a matching recipe (no side effects)
-            var probeRecipe = CraftingManager.Instance != null ? CraftingManager.Instance.FindMatchingRecipe(ingredients) : null;
-            if (probeRecipe != null)
-            {
-                // Valid recipe found -> start multi-press sequence
-                _craftingInProgress = true;
-                _currentPresses = 1;
-                _requiredPresses = _pressesForCrafting;
-                _objectsSnapshot = new List<GameObject>(_objectsInZone);
-                _snapshotIngredients = new List<ScriptableObject>(ingredients);
+            _craftingInProgress = true;
+            _currentPresses = 1;
+            _requiredPresses = _pressesForCrafting;
+            _objectsSnapshot = new List<GameObject>(_objectsInZone);
+            _snapshotIngredients = new List<ScriptableObject>(ingredients);
 
-                UpdateDotIndicators();
-
-                MoveObjectsCloser(_objectsSnapshot);
-                if (_currentPresses >= _requiredPresses)
-                {
-                    FinalizeCraft(_snapshotIngredients, _objectsSnapshot);
-                }
-            }
-            else
-            {
-                Debug.Log("Crafting failed: No matching recipe.");
-                ResetCraftingState();
-            }
+            UpdateDotIndicators();
+            MoveObjectsCloser(_objectsSnapshot);
         }
         else
         {
             // Already in a multi-press sequence
             _currentPresses++;
             UpdateDotIndicators();
+
             // Use the snapshot so players cannot change ingredients mid-way
             if (_objectsSnapshot == null || _objectsSnapshot.Count == 0)
             {
@@ -117,11 +104,8 @@ public class CraftingZone : MonoBehaviour
 
             if (_currentPresses >= _requiredPresses)
             {
+                // Finalize crafting at the end of the sequence
                 FinalizeCraft(_snapshotIngredients ?? ingredients, _objectsSnapshot);
-            }
-            else
-            {
-                //Debug.Log($"Crafting in progress: press {_requiredPresses - _currentPresses} more time(s).");
             }
         }
     }
@@ -188,17 +172,18 @@ public class CraftingZone : MonoBehaviour
         else
         {
             // Craft failed -> restore original parenting so objects remain in the same logical place
-            for (int i = 0; i < objectsToConsume.Count; i++)
+            foreach (var obj in objectsToConsume)
             {
-                var obj = objectsToConsume[i];
-                var parent = originalParents[i];
                 if (obj != null)
                 {
-                    obj.transform.SetParent(parent);
+                    Destroy(obj);
+                    _objectsInZone.Remove(obj);
                 }
             }
 
-            Debug.Log("Crafting failed at finalization: No matching recipe.");
+            Instantiate(_slagPrefab, spawnPosition, Quaternion.identity);
+
+            Debug.Log("Crafting failed at finalization: No matching recipe -- Created Slag as byproduct.");
             ResetCraftingState();
         }
     }
@@ -228,33 +213,33 @@ public class CraftingZone : MonoBehaviour
         _objectsSnapshot = null;
         _snapshotIngredients = null;
 
-        Invoke(nameof(ResetDotIndicators), 0.75f); // slight delay
+        ResetDotIndicators();
     }
 
     private void UpdateDotIndicators()
     {
-        if (__dotIndicators == null || __dotIndicators.Length == 0) return;
+        if (_dotIndicators == null || _dotIndicators.Length == 0) return;
 
-        for (int i = 0; i < __dotIndicators.Length; i++)
+        for (int i = 0; i < _dotIndicators.Length; i++)
         {
-            if (__dotIndicators[i] != null)
+            if (_dotIndicators[i] != null)
             {
-                __dotIndicators[i].GetComponent<Image>().color = (i < _currentPresses) ? Color.green : Color.red;
-                __dotIndicators[i].transform.GetChild(0).GetComponent<Image>().color = (i < _currentPresses) ? new Color32(13, 134, 0, 255) : new Color32(98, 0, 8, 255);
+                _dotIndicators[i].GetComponent<Image>().color = (i < _currentPresses) ? Color.green : Color.red;
+                //_dotIndicators[i].transform.GetChild(0).GetComponent<Image>().color = (i < _currentPresses) ? new Color32(13, 134, 0, 255) : new Color32(98, 0, 8, 255);
             }
         }
     }
 
     private void ResetDotIndicators()
     {
-        if (__dotIndicators == null || __dotIndicators.Length == 0) return;
+        if (_dotIndicators == null || _dotIndicators.Length == 0) return;
 
-        for (int i = 0; i < __dotIndicators.Length; i++)
+        for (int i = 0; i < _dotIndicators.Length; i++)
         {
-            if (__dotIndicators[i] != null)
+            if (_dotIndicators[i] != null)
             {
-                __dotIndicators[i].GetComponent<Image>().color = Color.red;
-                __dotIndicators[i].transform.GetChild(0).GetComponent<Image>().color =  new Color32(98, 0, 8, 255);
+                _dotIndicators[i].GetComponent<Image>().color = Color.red;
+                //_dotIndicators[i].transform.GetChild(0).GetComponent<Image>().color =  new Color32(98, 0, 8, 255);
             }
         }
     }

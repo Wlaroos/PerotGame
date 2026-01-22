@@ -28,6 +28,9 @@ public class CraftedPopupManager : MonoBehaviour
     [Tooltip("A fullscreen/persistent popup prefab for elements/compounds that stays until clicked.")]
     [SerializeField] private GameObject smallPersistentPopupPrefab;
 
+    [Tooltip("Delay (in seconds) before the popup can be dismissed.")]
+    [SerializeField] private float dismissDelay = 1f;
+
     private Canvas _uiCanvas;
 
     private void Awake()
@@ -261,6 +264,11 @@ public class CraftedPopupManager : MonoBehaviour
         overlayImg.color = new Color(0f, 0f, 0f, 0f);
         overlayImg.raycastTarget = true;
         var overlayBtn = overlay.AddComponent<UnityEngine.UI.Button>();
+
+        // Delay dismiss functionality
+        overlayBtn.interactable = false;
+        StartCoroutine(EnableDismissAfterDelay(overlayBtn, dismissDelay));
+
         overlayBtn.onClick.AddListener(() => { if (Application.isPlaying) UnityEngine.Object.Destroy(go); else UnityEngine.Object.DestroyImmediate(go); });
         // Ensure overlay is on top so any click dismisses the popup
         overlay.transform.SetAsLastSibling();
@@ -386,5 +394,11 @@ public class CraftedPopupManager : MonoBehaviour
             return persistent ? smallPersistentPopupPrefab : smallPopupPrefab;
         else
             return persistent ? persistentPopupPrefab : popupPrefab;
+    }
+
+    private IEnumerator EnableDismissAfterDelay(UnityEngine.UI.Button button, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        button.interactable = true;
     }
 }
