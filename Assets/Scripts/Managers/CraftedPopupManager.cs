@@ -225,6 +225,7 @@ public class CraftedPopupManager : MonoBehaviour
         {
             if (data is ElementData) discoveryTmp.text = "You discovered a new element!";
             else if (data is CompoundData) discoveryTmp.text = "You discovered a new compound!";
+            else if (data is MineralData && data.name.Contains("Slag")) discoveryTmp.text = "You created Slag!";
             else discoveryTmp.text = "You discovered a new mineral!";
         }
         else
@@ -234,6 +235,7 @@ public class CraftedPopupManager : MonoBehaviour
             {
                 if (data is ElementData) discoveryText.text = "You discovered a new element!";
                 else if (data is CompoundData) discoveryText.text = "You discovered a new compound!";
+                else if (data is MineralData && data.name.Contains("Slag")) discoveryText.text = "You created Slag!";
                 else discoveryText.text = "You discovered a new mineral!";
             }
         }

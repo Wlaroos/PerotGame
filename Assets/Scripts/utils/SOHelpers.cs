@@ -107,6 +107,7 @@ public static class SOHelpers
             {"Silicate", "SiO4"},
             {"Oxide", "O2-"},
             {"Heat", "Heat"},
+            {"Slag", "Waste"},
         };
 
         if (!string.IsNullOrEmpty(baseName) && map.TryGetValue(baseName, out var sym)) return sym;

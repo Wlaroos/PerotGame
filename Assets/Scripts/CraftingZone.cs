@@ -22,6 +22,8 @@ public class CraftingZone : MonoBehaviour
 
     [SerializeField] private GameObject _slagPrefab; // Prefab for slag byproduct
 
+    private bool _slagFirstTimeShown = false;
+
     private void Awake()
     {
         _bc = GetComponent<BoxCollider2D>();
@@ -182,6 +184,16 @@ public class CraftingZone : MonoBehaviour
             }
 
             Instantiate(_slagPrefab, spawnPosition, Quaternion.identity);
+
+            if (!_slagFirstTimeShown)
+            {
+                _slagFirstTimeShown = true;
+                CraftedPopupManager.Instance?.ShowPersistentCraftedPopup(_slagPrefab.GetComponent<Mineral>().data);
+            }
+            else
+            {
+                CraftedPopupManager.Instance?.ShowCraftedPopup(_slagPrefab.GetComponent<Mineral>().data, spawnPosition);
+            }
 
             Debug.Log("Crafting failed at finalization: No matching recipe -- Created Slag as byproduct.");
             ResetCraftingState();
