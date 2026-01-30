@@ -14,8 +14,8 @@ public class ElementSpawner : MonoBehaviour
     [SerializeField] private Vector2 _spawnAreaSize = new Vector2(100, 100);
     [SerializeField] private Vector2 _spawnAreaCenter = Vector2.zero;
     [SerializeField] private bool _unlockAllElements = false;
-    [SerializeField] private List<ElementData> _elementDataList = new List<ElementData>();
 
+    private List<ElementData> _elementDataList = new List<ElementData>();
     private Sprite[] _spawnButtonSprites;
     private ElementData[] _buttonDataMap; // NEW: map button index -> assigned data
     private bool _isDragging;

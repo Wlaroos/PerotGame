@@ -18,9 +18,9 @@ public class CompoundSpawner : MonoBehaviour
     [SerializeField] private Vector2 _spawnAreaSize = new Vector2(100, 100);
     [SerializeField] private Vector2 _spawnAreaCenter = Vector2.zero;
     [SerializeField] private bool _unlockAllCompounds = false;
-    [SerializeField] private CompoundData[] _compoundDataList;
     [SerializeField] private GameObject _silicateDropDown;
 
+    private CompoundData[] _compoundDataList;
     private Sprite[] _spawnButtonSprites;
     private CompoundData[] _buttonDataMap; // map per-button assigned SO
     private bool _isDragging;
