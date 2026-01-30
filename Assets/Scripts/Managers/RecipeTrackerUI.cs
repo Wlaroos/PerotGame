@@ -330,7 +330,7 @@ public class RecipeTrackerUI : MonoBehaviour
     private List<CraftingRecipe> BuildFilteredRecipes()
     {
         // Start with all recipes
-        var filteredRecipes = _recipes.Where(r => !_excludedRecipes.Contains(r)).ToList();
+        var filteredRecipes = _recipes.Where(r => r.productType == CraftingRecipe.ProductType.Mineral).ToList();
 
         // If _showAllRecipes is false, pick 5 random recipes from the filtered list
         if (!_showAllRecipes && filteredRecipes.Count > 5)

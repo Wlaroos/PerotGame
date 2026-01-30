@@ -14,4 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputA: {fileID: 11400000, guid: ec94a4e2b31d3584387361ac096fd5e3, type: 2}
   inputB: {fileID: 11400000, guid: ec94a4e2b31d3584387361ac096fd5e3, type: 2}
+  inputC: {fileID: 0}
+  inputD: {fileID: 0}
+  inputE: {fileID: 0}
+  inputF: {fileID: 0}
+  inputG: {fileID: 0}
+  inputH: {fileID: 0}
   output: {fileID: 11400000, guid: 30682a9d8167de9419593553c08fc5db, type: 2}
+  productType: 1

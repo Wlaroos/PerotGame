@@ -17,4 +17,8 @@ MonoBehaviour:
   inputC: {fileID: 11400000, guid: 66feea8961eb0774284f91cf905dac9d, type: 2}
   inputD: {fileID: 0}
   inputE: {fileID: 0}
+  inputF: {fileID: 0}
+  inputG: {fileID: 0}
+  inputH: {fileID: 0}
   output: {fileID: 11400000, guid: fec27d270a869bb4192384f0cadc913e, type: 2}
+  productType: 3

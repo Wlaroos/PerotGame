@@ -12,5 +12,16 @@ public class CraftingRecipe : ScriptableObject
     public ScriptableObject inputF; // Sixth ingredient (element or compound)
     public ScriptableObject inputG; // Seventh ingredient (element or compound)
     public ScriptableObject inputH; // Eighth ingredient (element or compound)
+    [Space]
     public ScriptableObject output; // Result (element, compound, or mineral)
+    public enum ProductType
+    {
+        Test,
+        Element,
+        Compound,
+        Mineral,
+    }
+    [Space]
+    public ProductType productType;
+
 }
