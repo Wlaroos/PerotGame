@@ -1,0 +1,43 @@
+using UnityEngine;
+using UnityEditor;
+using UnityEngine.UI;
+
+[CustomEditor(typeof(ElementData))]
+
+public class ElementPreview : Editor
+{
+    ElementData _elementSO;
+    private Sprite _sprite;
+    private Color _color;
+
+    void OnEnable()
+    {
+        _elementSO = (ElementData)target;
+        _sprite = _elementSO.elementSprite;
+        _color = _elementSO.defaultColor;
+    }
+
+    public override void OnInspectorGUI()
+    {
+        base.OnInspectorGUI();
+        if (_elementSO == null)
+        {
+            return;
+        }
+
+        Texture2D sprite = AssetPreview.GetAssetPreview(_sprite);
+
+        // Define Image Size
+        GUILayout.Label("", GUILayout.Width(100), GUILayout.Height(100));
+
+        // Apply color tint
+        Color originalColor = GUI.color; // Save the original GUI color
+        GUI.color = _color; // Set the color to the desired tint
+
+        // Draw the sprite with the color applied
+        GUI.DrawTexture(GUILayoutUtility.GetLastRect(), sprite, ScaleMode.ScaleToFit);
+
+        // Restore the original GUI color
+        GUI.color = originalColor;
+    }
+}

@@ -9,6 +9,7 @@ public class StartScreenCanvas : MonoBehaviour, IPointerClickHandler
     private void Awake()
     {
         _canvasGroup = GetComponent<CanvasGroup>();
+        _canvasGroup.alpha = 1f;
     }
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -27,7 +28,7 @@ public class StartScreenCanvas : MonoBehaviour, IPointerClickHandler
         }
 
         _canvasGroup.alpha = 0f;
-        
+
         Destroy(gameObject);
     }
 }
