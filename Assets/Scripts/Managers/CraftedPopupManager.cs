@@ -103,7 +103,7 @@ public class CraftedPopupManager : MonoBehaviour
             var big = SOHelpers.GetBigSpriteFromData(data);
             var primary = SOHelpers.GetPrimarySpriteFromData(data);
             icon.sprite = big != null ? big : primary;
-            icon.color = SOHelpers.GetColorFromData(data, Color.white);
+            icon.color = SOHelpers.GetColorFromData(data);
         }
 
         if (icon == null && chosenPrefab != smallPopupPrefab)
@@ -137,7 +137,7 @@ public class CraftedPopupManager : MonoBehaviour
             }
 
             title.text = temp;
-            title.color = SOHelpers.GetColorFromData(data, Color.white);
+            title.color = SOHelpers.GetColorFromData(data);
         }
         else
         {
@@ -216,7 +216,7 @@ public class CraftedPopupManager : MonoBehaviour
             }
 
             title.text = temp;
-            title.color = SOHelpers.GetColorFromData(data, Color.white);
+            title.color = SOHelpers.GetColorFromData(data);
         }
 
         // Update the 'discovery' text child if present to reflect element/compound/mineral

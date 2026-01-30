@@ -159,13 +159,13 @@ public static class SOHelpers
         return null;
     }
 
-    public static Color GetColorFromData(ScriptableObject so, Color fallback)
+    public static Color GetColorFromData(ScriptableObject so)
     {
-        if (so == null) return fallback;
+        if (so == null) return Color.white;
         var v = GetFieldOrPropertyValue(so, "defaultColor");
         if (v is Color c) return c;
         if (v is Color32 c32) return (Color)c32;
-        return fallback;
+        return Color.white;
     }
 
     public static string GetDisplayNameFromData(ScriptableObject so)

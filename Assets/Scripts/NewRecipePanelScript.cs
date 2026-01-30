@@ -64,6 +64,7 @@ public class NewRecipePanelScript : MonoBehaviour
             if (i < inputs.Length && inputs[i] != null)
             {
                 _ingredientImages[i].sprite = SOHelpers.GetPrimarySpriteFromData(inputs[i]);
+                _ingredientImages[i].color = SOHelpers.GetColorFromData(inputs[i]);
                 _ingredientImages[i].gameObject.SetActive(true);
             }
             else
@@ -74,6 +75,7 @@ public class NewRecipePanelScript : MonoBehaviour
 
         // Update product image
         _productImage.sprite = SOHelpers.GetPrimarySpriteFromData(recipe.output);
+        _productImage.color = SOHelpers.GetColorFromData(recipe.output);
         _productBigImage.sprite = SOHelpers.GetBigSpriteFromData(recipe.output);
     }
 }
