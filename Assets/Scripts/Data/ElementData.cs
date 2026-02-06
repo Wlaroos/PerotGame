@@ -9,6 +9,8 @@ public class ElementData : ScriptableObject
     public Sprite[] numberSprites;     // Sprites for numbers (for isotope)
     public int defaultIsotopeNumber = -1; // Default isotope number
     public Color32 defaultColor = new Color32(255, 255, 255, 255); // Default color
+    public enum ElementType { Solid, Liquid, Gas }
+    public ElementType elementType;    // Type of the element (for visual effects)
 
     private void OnEnable()
     {

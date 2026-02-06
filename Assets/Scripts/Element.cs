@@ -11,9 +11,12 @@ public class Element : MonoBehaviour
     [SerializeField] private SpriteRenderer _numberSprite2;    // Sprite for ones digit (if needed)
     [SerializeField] private SpriteRenderer _backgroundSprite; // Background sprite
 
+    private ParticleSystem _ps;
+
     // Called when the object is created
     private void Awake()
     {
+        _ps = GetComponentInChildren<ParticleSystem>();
         UpdateDataVisuals();
     }
 
@@ -46,8 +49,26 @@ public class Element : MonoBehaviour
     // Updates the element's visuals based on its data
     public void UpdateDataVisuals()
     {
-        if (data == null)
-            return;
+        // if (data == null)
+        //     return;
+
+        // switch (data.elementType)
+        // {
+        //     case ElementData.ElementType.Solid:
+        //         _ps.Stop();
+        //         break;
+        //     case ElementData.ElementType.Liquid:
+        //         var mainL = _ps.main;
+        //         mainL.startSpeed = 0.5f;
+        //         _ps.Play();
+        //         break;
+        //     case ElementData.ElementType.Gas:
+        //         var mainG = _ps.main;
+        //         mainG.startSpeed = 1.5f;
+        //         _ps.Play();
+        //         break;
+        // }
+
 
         // ensure editor-safe lazy load (avoid OnEnable loads)
         data.EnsureNumberSpritesLoaded();
@@ -56,6 +77,11 @@ public class Element : MonoBehaviour
         {
             _elementSprite.sprite = data.elementSprite;
             _elementSprite.color = data.defaultColor;
+
+            var main = _ps.main;
+            Color c1 = data.defaultColor;
+            Color c2 = new Color(Mathf.Min(1f, c1.r + 0.3f), Mathf.Min(1f, c1.g + 0.3f), Mathf.Min(1f, c1.b + 0.3f), c1.a);
+            main.startColor = new ParticleSystem.MinMaxGradient(c1, c2);
         }
 
         // Dim the background color
