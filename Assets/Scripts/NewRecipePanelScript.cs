@@ -22,13 +22,14 @@ public class NewRecipePanelScript : MonoBehaviour
     private int _currentRecipeIndex = 0;
     private int _successfulCraftCount = 0;
     private UnityAction<CraftingRecipe, GameObject, bool> _onRecipeCraftedHandler;
+    private bool[] _craftedStatus; // Tracks which recipes have been crafted at least once
 
     void OnEnable()
     {
         if (CraftingManager.Instance == null) return;
 
         // Simple: forward the recipe param to your existing method
-        _onRecipeCraftedHandler = (recipe, craftedObj, isFirstTime) => OnRecipeCrafted(recipe);
+        _onRecipeCraftedHandler = (recipe, craftedObj, isFirstTime) => OnRecipeCrafted(recipe, craftedObj, isFirstTime);
         CraftingManager.Instance.OnRecipeCrafted.AddListener(_onRecipeCraftedHandler);
     }
 
@@ -48,6 +49,7 @@ public class NewRecipePanelScript : MonoBehaviour
 
         _recipes = CraftingManager.Instance._recipes.ToList();
         _filteredRecipes = BuildFilteredRecipes();
+        _craftedStatus = new bool[_filteredRecipes.Count];
 
         UpdateUI();
     }
@@ -102,6 +104,17 @@ public class NewRecipePanelScript : MonoBehaviour
         _productImage.color = SOHelpers.GetColorFromData(recipe.output);
         _productBigImage.sprite = SOHelpers.GetBigSpriteFromData(recipe.output);
 
+        if(_craftedStatus[_currentRecipeIndex])
+        {
+            _productImage.enabled = true;
+            _productBigImage.enabled = true;
+        }
+        else
+        {
+            _productImage.enabled = false;
+            _productBigImage.enabled = false;
+        }
+
         UpdateCraftPips();
     }
 
@@ -109,7 +122,7 @@ public class NewRecipePanelScript : MonoBehaviour
     {
         for (int i = 0; i < _selectedCraftPips.Length; i++)
         {
-            _selectedCraftPips[i].color = (i == _currentRecipeIndex) ? Color.white : Color.red;
+            _selectedCraftPips[i].color = (i == _currentRecipeIndex) ? Color.red : Color.white;
         }
     }
 
@@ -122,13 +135,15 @@ public class NewRecipePanelScript : MonoBehaviour
         }
     }
 
-    private void OnRecipeCrafted(CraftingRecipe recipe)
+    private void OnRecipeCrafted(CraftingRecipe recipe, GameObject craftedObj, bool isFirstTime)
     {
-        if (_filteredRecipes.Contains(recipe))
+        if (_filteredRecipes.Contains(recipe) && isFirstTime)
         {
             UpdateSuccessfulCraftPips();
-            UpdateCraftPips();
+            _craftedStatus[_currentRecipeIndex] = true;
         }
+
+        UpdateUI();
     }
 
     public void ShowNextRecipe()
