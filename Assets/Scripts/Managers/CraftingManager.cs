@@ -13,10 +13,11 @@ public class CraftingManager : MonoBehaviour
     // Keeps track of recipes crafted at least once
     private HashSet<CraftingRecipe> _craftedRecipes = new HashSet<CraftingRecipe>();
 
-    // Event for when a recipe is crafted for the first time
+    // Event fired on every successful craft.
+    // Args: (CraftingRecipe recipe, GameObject craftedObject, bool isFirstTime)
     [System.Serializable]
-    public class RecipeCraftedEvent : UnityEvent<CraftingRecipe> { }
-    public RecipeCraftedEvent OnFirstTimeRecipeCrafted = new RecipeCraftedEvent();
+    public class RecipeCraftedEvent : UnityEvent<CraftingRecipe, GameObject, bool> { }
+    public RecipeCraftedEvent OnRecipeCrafted = new RecipeCraftedEvent();
 
     [Header("Prefabs")]
     [SerializeField] private GameObject elementPrefab;   // Prefab for new elements
@@ -64,7 +65,6 @@ public class CraftingManager : MonoBehaviour
         if (isFirstTime)
         {
             _craftedRecipes.Add(recipe);
-            OnFirstTimeRecipeCrafted.Invoke(recipe);
         }
 
         // Instantiate the crafted object
@@ -99,6 +99,12 @@ public class CraftingManager : MonoBehaviour
                 else
                     CraftedPopupManager.Instance.ShowCraftedPopup(compoundData, pos, recipe);
             }
+        }
+
+        // Fire the unified "successful craft" event for other scripts to hook into
+        if (crafted != null)
+        {
+            OnRecipeCrafted?.Invoke(recipe, crafted, isFirstTime);
         }
 
         return crafted;

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Events; // <- add
 
 public class NewRecipePanelScript : MonoBehaviour
 {
@@ -11,8 +12,31 @@ public class NewRecipePanelScript : MonoBehaviour
     [SerializeField] private Image[] _ingredientImages; 
     [SerializeField] private Image _productImage;
     [SerializeField] private Image _productBigImage;
+    [SerializeField] private int _numberOfRecipesToShow = 3;
+    [SerializeField] private Button _nextButton;
+    [SerializeField] private Button _previousButton;
+    [SerializeField] private Image[] _selectedCraftPips;
+    [SerializeField] private Image[] _successfulCraftPips;
     private List<CraftingRecipe> _recipes = new List<CraftingRecipe>();
     private List<CraftingRecipe> _filteredRecipes = new List<CraftingRecipe>();
+    private int _currentRecipeIndex = 0;
+    private int _successfulCraftCount = 0;
+    private UnityAction<CraftingRecipe, GameObject, bool> _onRecipeCraftedHandler;
+
+    void OnEnable()
+    {
+        if (CraftingManager.Instance == null) return;
+
+        // Simple: forward the recipe param to your existing method
+        _onRecipeCraftedHandler = (recipe, craftedObj, isFirstTime) => OnRecipeCrafted(recipe);
+        CraftingManager.Instance.OnRecipeCrafted.AddListener(_onRecipeCraftedHandler);
+    }
+
+    void OnDisable()
+    {
+        if (CraftingManager.Instance == null) return;
+        CraftingManager.Instance.OnRecipeCrafted.RemoveListener(_onRecipeCraftedHandler);
+    }
 
     private void Start()
     {
@@ -34,7 +58,7 @@ public class NewRecipePanelScript : MonoBehaviour
         var filteredRecipes = _recipes.Where(r => r.productType == CraftingRecipe.ProductType.Mineral).ToList();
 
         // Pick 1 random recipe from the filtered list
-        filteredRecipes = filteredRecipes.OrderBy(r => Random.value).Take(1).ToList();
+        filteredRecipes = filteredRecipes.OrderBy(r => Random.value).Take(_numberOfRecipesToShow).ToList();
 
         return(filteredRecipes);
     }
@@ -47,7 +71,7 @@ public class NewRecipePanelScript : MonoBehaviour
             return;
         }
 
-        var recipe = _filteredRecipes[0];
+        var recipe = _filteredRecipes[_currentRecipeIndex];
 
         // Update title and details
         _titleText.text = SOHelpers.GetFullStrippedName(recipe.output);
@@ -77,5 +101,49 @@ public class NewRecipePanelScript : MonoBehaviour
         _productImage.sprite = SOHelpers.GetPrimarySpriteFromData(recipe.output);
         _productImage.color = SOHelpers.GetColorFromData(recipe.output);
         _productBigImage.sprite = SOHelpers.GetBigSpriteFromData(recipe.output);
+
+        UpdateCraftPips();
+    }
+
+    private void UpdateCraftPips()
+    {
+        for (int i = 0; i < _selectedCraftPips.Length; i++)
+        {
+            _selectedCraftPips[i].color = (i == _currentRecipeIndex) ? Color.white : Color.red;
+        }
+    }
+
+    private void UpdateSuccessfulCraftPips()
+    {
+        _successfulCraftCount++;
+        for (int i = 0; i < _successfulCraftPips.Length; i++)
+        {
+            _successfulCraftPips[i].color = (i < _successfulCraftCount) ? Color.green : Color.gray;
+        }
+    }
+
+    private void OnRecipeCrafted(CraftingRecipe recipe)
+    {
+        if (_filteredRecipes.Contains(recipe))
+        {
+            UpdateSuccessfulCraftPips();
+            UpdateCraftPips();
+        }
+    }
+
+    public void ShowNextRecipe()
+    {
+        if (_filteredRecipes.Count == 0) return;
+
+        _currentRecipeIndex = (_currentRecipeIndex + 1) % _filteredRecipes.Count;
+        UpdateUI();
+    }
+
+    public void ShowPreviousRecipe()
+    {
+        if (_filteredRecipes.Count == 0) return;
+
+        _currentRecipeIndex = (_currentRecipeIndex - 1 + _filteredRecipes.Count) % _filteredRecipes.Count;
+        UpdateUI();
     }
 }

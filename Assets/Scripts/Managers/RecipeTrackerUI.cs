@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Events;
 
 public class RecipeTrackerUI : MonoBehaviour
 {
@@ -57,6 +58,13 @@ public class RecipeTrackerUI : MonoBehaviour
     [Tooltip("Name to show for undiscovered recipes")]
     [SerializeField] private string _undiscoveredName = "???";
 
+    
+    // Event fired on every successful craft.
+    // Args: (CraftingRecipe recipe, GameObject craftedObject, bool isFirstTime)
+    [System.Serializable]
+    public class RecipeCraftedEvent : UnityEvent<CraftingRecipe, GameObject, bool> { }
+    private UnityAction<CraftingRecipe, GameObject, bool> _onRecipeCraftedHandler;
+
     // In-memory lookup
     private List<CraftingRecipe> _recipes = new List<CraftingRecipe>();
     private Dictionary<CraftingRecipe, RecipeItemController> _itemControllers = new Dictionary<CraftingRecipe, RecipeItemController>();
@@ -80,9 +88,6 @@ public class RecipeTrackerUI : MonoBehaviour
 
         UpdateSortingUI();
         PopulateList();
-
-        // Subscribe for first-time crafted events
-        CraftingManager.Instance.OnFirstTimeRecipeCrafted.AddListener(OnFirstTimeRecipeCrafted);
 
         SelectRecipe(null);
     }
@@ -124,20 +129,26 @@ public class RecipeTrackerUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (CraftingManager.Instance != null)
-            CraftingManager.Instance.OnFirstTimeRecipeCrafted.RemoveListener(OnFirstTimeRecipeCrafted);
-
         UnbindRuntimeSortButtons();
     }
 
-    private void OnEnable()
-    {
-        BindRuntimeSortButtons();
-    }
+private void OnEnable()
+{
+    BindRuntimeSortButtons();
 
+    if (CraftingManager.Instance == null) return;
+
+    _onRecipeCraftedHandler = (recipe, craftedObj, isFirstTime) => OnRecipeCrafted(recipe, craftedObj, isFirstTime);
+    CraftingManager.Instance.OnRecipeCrafted.AddListener(_onRecipeCraftedHandler);
+}
+    
     private void OnDisable()
     {
         UnbindRuntimeSortButtons();
+
+        if (CraftingManager.Instance == null) return;
+        if (_onRecipeCraftedHandler != null)
+        CraftingManager.Instance.OnRecipeCrafted.RemoveListener(_onRecipeCraftedHandler);
     }
 
     private void BindRuntimeSortButtons()
@@ -538,7 +549,7 @@ public class RecipeTrackerUI : MonoBehaviour
         else _discoveredRecipes.Remove(recipe.name);
     }
 
-    private void OnFirstTimeRecipeCrafted(CraftingRecipe recipe)
+    private void OnRecipeCrafted(CraftingRecipe recipe, GameObject craftedObj, bool isFirstTime)
     {
         // mark discovered/completed (in-memory only)
         SetRecipeDiscovered(recipe, true);
