@@ -6,6 +6,7 @@ public class StartScreenCanvas : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private float _fadeDuration = 1.0f;
     private CanvasGroup _canvasGroup;
+    private CanvasGroup _childCanvasGroup;
     private void Awake()
     {
         _canvasGroup = GetComponent<CanvasGroup>();

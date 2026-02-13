@@ -78,10 +78,13 @@ public class Element : MonoBehaviour
             _elementSprite.sprite = data.elementSprite;
             _elementSprite.color = data.defaultColor;
 
-            var main = _ps.main;
-            Color c1 = data.defaultColor;
-            Color c2 = new Color(Mathf.Min(1f, c1.r + 0.3f), Mathf.Min(1f, c1.g + 0.3f), Mathf.Min(1f, c1.b + 0.3f), c1.a);
-            main.startColor = new ParticleSystem.MinMaxGradient(c1, c2);
+            if (_ps != null)
+            {
+                var main = _ps.main;
+                Color c1 = data.defaultColor;
+                Color c2 = new Color(Mathf.Min(1f, c1.r + 0.3f), Mathf.Min(1f, c1.g + 0.3f), Mathf.Min(1f, c1.b + 0.3f), c1.a);
+                main.startColor = new ParticleSystem.MinMaxGradient(c1, c2);
+            }
         }
 
         // Dim the background color
