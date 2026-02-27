@@ -81,6 +81,35 @@ public class DragAndDrop : MonoBehaviour
         transform.position = ClampToMainArea(interpolated);
     }
 
+    // External drag state (used when the object is spawned by UI drag handlers)
+    private bool _externalDragging = false;
+
+    // Start dragging from an external controller (SpawnDragHandler)
+    public void StartExternalDrag(Vector3 worldPos)
+    {
+        _mouseOffset = (Vector2)transform.position - (Vector2)worldPos;
+        if (_sg != null)
+            _sg.sortingLayerName = "Dragging";
+        _externalDragging = true;
+    }
+
+    // Update position while externally dragged
+    public void UpdateExternalDrag(Vector3 worldPos)
+    {
+        if (!_externalDragging) return;
+        transform.position = ClampToMainArea(new Vector3(worldPos.x, worldPos.y, transform.position.z));
+    }
+
+    // End external drag and perform release logic
+    public void EndExternalDrag()
+    {
+        if (!_externalDragging) return;
+        _externalDragging = false;
+        Release();
+        if (_sg != null)
+            _sg.sortingLayerName = "Default";
+    }
+
     // Gets the data (element, compound, or mineral) from another object
     private ScriptableObject GetDataFromGameObject(GameObject obj)
     {
@@ -93,8 +122,17 @@ public class DragAndDrop : MonoBehaviour
         return null;
     }
 
-    // When you let go of the mouse
     private void OnMouseUp()
+    {
+        Release();
+
+        // Put object back to normal draw order
+        if (_sg != null)
+            _sg.sortingLayerName = "Default";
+    }
+
+    // Shared release logic used both by mouse and external drags
+    private void Release()
     {
         if (_collider != null)
         {
@@ -111,13 +149,15 @@ public class DragAndDrop : MonoBehaviour
 
             if (dataB == null)
             {
-                // The other object has no valid data, so do nothing
+                if (otherObj.name == "TrashButtonBG")
+                {
+                    Destroy(gameObject);
+                }
+
                 return;
             }
 
             List<ScriptableObject> ingredients = new List<ScriptableObject> { dataA, dataB };
-
-            //Debug.Log($"Ingredients passed: {string.Join(", ", ingredients.Select(i => i.name))}");
 
             // Compute spawn position first
             Vector3 spawnPosition = (transform.position + otherObj.transform.position) / 2f;
@@ -137,13 +177,13 @@ public class DragAndDrop : MonoBehaviour
 
             if (craftedObj != null)
             {
-                // Successful craft -> remove the consumed objects
+                // Successful craft -- remove the consumed objects
                 if (otherObj != null) Destroy(otherObj);
                 Destroy(gameObject);
             }
             else
             {
-                // Craft failed -> restore original parents and run original failure behavior
+                // Craft failed -- restore original parents and run original failure behavior
                 transform.SetParent(originalParentA);
                 if (otherObj != null) otherObj.transform.SetParent(originalParentB);
 
@@ -180,9 +220,6 @@ public class DragAndDrop : MonoBehaviour
                 }
             }
         }
-        // Put object back to normal draw order
-        if (_sg != null)
-            _sg.sortingLayerName = "Default";
     }
 
     // When this object touches another collider

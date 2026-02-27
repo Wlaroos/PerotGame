@@ -47,6 +47,11 @@ public class SpawnDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
             _draggedInstance = _compoundSpawner.SpawnCompoundAtPosition(_compoundData, worldPos);
             _compoundSpawner.SetDragging(true);
         }
+
+        if (_draggedInstance != null && _draggedInstance.TryGetComponent<DragAndDrop>(out var dd))
+        {
+            dd.StartExternalDrag(worldPos);
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -54,14 +59,29 @@ public class SpawnDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         if (_draggedInstance == null) return;
 
         Vector3 worldPos = ScreenToWorld(eventData.position);
-        _draggedInstance.transform.position = worldPos;
+        if (_draggedInstance.TryGetComponent<DragAndDrop>(out var dd))
+        {
+            dd.UpdateExternalDrag(worldPos);
+        }
+        else
+        {
+            _draggedInstance.transform.position = worldPos;
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         if (_draggedInstance == null) return;
 
-        _draggedInstance.transform.position = ClampToMainArea(_draggedInstance.transform.position);
+        if (_draggedInstance.TryGetComponent<DragAndDrop>(out var dd))
+        {
+            dd.EndExternalDrag();
+        }
+        else
+        {
+            _draggedInstance.transform.position = ClampToMainArea(_draggedInstance.transform.position);
+        }
+
         _draggedInstance = null;
 
         if (_elementSpawner != null)
