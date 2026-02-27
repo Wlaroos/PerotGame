@@ -97,15 +97,20 @@ public class DragAndDrop : MonoBehaviour
     public void UpdateExternalDrag(Vector3 worldPos)
     {
         if (!_externalDragging) return;
-        transform.position = ClampToMainArea(new Vector3(worldPos.x, worldPos.y, transform.position.z));
+        transform.position = new Vector3(worldPos.x, worldPos.y, transform.position.z);
     }
 
     // End external drag and perform release logic
     public void EndExternalDrag()
     {
         if (!_externalDragging) return;
+
         _externalDragging = false;
+
+        transform.position = ClampToMainArea(transform.position);
+
         Release();
+
         if (_sg != null)
             _sg.sortingLayerName = "Default";
     }

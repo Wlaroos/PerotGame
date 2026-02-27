@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c5c8fa5a194af541a97053d1b5a4487, type: 3}
   m_Name: E_Iron
   m_EditorClassIdentifier: 
-  elementName: Iron
+  elementName: E_Iron
   elementSprite: {fileID: -7543061489181569089, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
   numberSprites:
   - {fileID: -6629531029891648246, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
@@ -28,4 +28,5 @@ MonoBehaviour:
   defaultIsotopeNumber: -1
   defaultColor:
     serializedVersion: 2
-    rgba: 4283387727
+    rgba: 4282137754
+  elementType: 0

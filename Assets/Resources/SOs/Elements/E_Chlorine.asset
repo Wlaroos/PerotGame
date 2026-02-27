@@ -14,9 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementName: E_Chlorine
   elementSprite: {fileID: -266015306, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
-  numberSprites: []
+  numberSprites:
+  - {fileID: -6629531029891648246, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -4217592887472625829, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -4412911677491635961, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -6395529614303463221, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -4417143251372694878, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: 728446850243192315, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: 5108088467900000851, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -519400735672398794, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: -1344653293438560547, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
+  - {fileID: 849386610096671516, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
   defaultIsotopeNumber: -1
   defaultColor:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4283826134
   elementType: 2
