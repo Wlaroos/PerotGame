@@ -24,6 +24,10 @@ public class CraftingZone : MonoBehaviour
 
     private bool _slagFirstTimeShown = false;
 
+    [SerializeField] private Image _spawnArea; // UI element defining the area where crafted items can spawn
+    [SerializeField] private Vector2 _spawnAreaSize = new Vector2(850, 350);
+    [SerializeField] private Vector2 _spawnAreaCenter = new Vector2(0, -350);
+
     private void Awake()
     {
         _bc = GetComponent<BoxCollider2D>();
@@ -37,6 +41,7 @@ public class CraftingZone : MonoBehaviour
         if (!_objectsInZone.Contains(collision.gameObject))
         {
             _objectsInZone.Add(collision.gameObject);
+            ResetCraftingState();
         }
     }
 
@@ -46,6 +51,7 @@ public class CraftingZone : MonoBehaviour
         if (_objectsInZone.Contains(collision.gameObject))
         {
             _objectsInZone.Remove(collision.gameObject);
+            ResetCraftingState();
         }
     }
 
@@ -141,7 +147,12 @@ public class CraftingZone : MonoBehaviour
 
     private void FinalizeCraft(List<ScriptableObject> ingredients, List<GameObject> objectsToConsume)
     {
-        Vector3 spawnPosition = ComputeCenterOf(objectsToConsume) ?? transform.position;
+        // CENTER OF ALL OBJECTS IN ZONE
+        //Vector3 spawnPosition = ComputeCenterOf(objectsToConsume) ?? transform.position;
+
+        // RANDOM POSITION IN DEAD ZONE
+        Vector3 spawnPosition = GetRandomSpawnPosition();
+
         // Unparent the objects first so they no longer count toward the DraggableHolder child count.
         // Preserve original parents so we can restore them if crafting fails.
         List<Transform> originalParents = new List<Transform>();
@@ -183,7 +194,7 @@ public class CraftingZone : MonoBehaviour
                 }
             }
 
-            Instantiate(_slagPrefab, spawnPosition, Quaternion.identity);
+            Instantiate(_slagPrefab, spawnPosition, Quaternion.identity, DraggableHolder.Instance.transform);
 
             if (!_slagFirstTimeShown)
             {
@@ -215,6 +226,16 @@ public class CraftingZone : MonoBehaviour
         }
         if (count == 0) return null;
         return center / count;
+    }
+
+    private Vector3 GetRandomSpawnPosition()
+    {
+        Rect rect = _spawnArea.rectTransform.rect;
+        float halfW = Mathf.Min(_spawnAreaSize.x * 0.5f, rect.width * 0.5f);
+        float halfH = Mathf.Min(_spawnAreaSize.y * 0.5f, rect.height * 0.5f);
+        Vector2 center = rect.center + _spawnAreaCenter;
+        Vector2 rand = new Vector2(Random.Range(center.x - halfW, center.x + halfW), Random.Range(center.y - halfH, center.y + halfH));
+        return _spawnArea.rectTransform.TransformPoint(rand);
     }
 
     private void ResetCraftingState()

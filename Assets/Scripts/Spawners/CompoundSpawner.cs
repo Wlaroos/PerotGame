@@ -15,8 +15,8 @@ public class CompoundSpawner : MonoBehaviour
     [SerializeField] private Image _spawnArea;
     [SerializeField] private Button[] _spawnButtons;
     [SerializeField] private Sprite _hiddenButtonSprite;
-    [SerializeField] private Vector2 _spawnAreaSize = new Vector2(100, 100);
-    [SerializeField] private Vector2 _spawnAreaCenter = Vector2.zero;
+    [SerializeField] private Vector2 _spawnAreaSize = new Vector2(850, 350);
+    [SerializeField] private Vector2 _spawnAreaCenter = new Vector2(0, -350);
     [SerializeField] private bool _unlockAllCompounds = false;
     [SerializeField] private GameObject _silicateDropDown;
 
@@ -190,7 +190,7 @@ public class CompoundSpawner : MonoBehaviour
 
     private Vector3 GetRandomSpawnPosition()
     {
-        Rect rect = SpawnArea.rectTransform.rect;
+        Rect rect = _spawnArea.rectTransform.rect;
         float halfW = Mathf.Min(_spawnAreaSize.x * 0.5f, rect.width * 0.5f);
         float halfH = Mathf.Min(_spawnAreaSize.y * 0.5f, rect.height * 0.5f);
         Vector2 center = rect.center + _spawnAreaCenter;
@@ -376,7 +376,4 @@ public class CompoundSpawner : MonoBehaviour
         Gizmos.DrawLine(new Vector3(max.x, max.y, 0), new Vector3(min.x, max.y, 0));
         Gizmos.DrawLine(new Vector3(min.x, max.y, 0), new Vector3(min.x, min.y, 0));
     }
-
-    // Expose SpawnArea safely
-    public Image SpawnArea => _spawnArea;
 }

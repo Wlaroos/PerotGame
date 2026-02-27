@@ -165,7 +165,7 @@ public class NewRecipePanelScript : MonoBehaviour
 
         _mineralNameTexts[index].text = SOHelpers.GetFullStrippedName(recipe.output);
 
-        _mineralImages[index].sprite = SOHelpers.GetPrimarySpriteFromData(recipe.output);
+        _mineralImages[index].sprite = SOHelpers.GetBigSpriteFromData(recipe.output);
         _mineralImages[index].preserveAspect = true;
         _mineralImages[index].color = Color.white;
 

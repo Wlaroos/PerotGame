@@ -58,6 +58,7 @@ public class Mineral : MonoBehaviour
             combinedBounds.Encapsulate(_mineralBigSprite.bounds);
 
             _bc.size = combinedBounds.size;
+            _bc.offset = combinedBounds.center - transform.position;
         }
     }
 }
