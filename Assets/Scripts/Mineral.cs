@@ -10,10 +10,12 @@ public class Mineral : MonoBehaviour
     [SerializeField] private SpriteRenderer _mineralBigSprite; // Big version of the mineral sprite
     [SerializeField] private SpriteRenderer _backgroundSprite; // Background behind the mineral
     [SerializeField] private TextMeshPro _mineralNameText; // Text showing the mineral's name
+    private BoxCollider2D _bc;
 
     // Runs when the object is created
     private void Awake()
     {
+        _bc = GetComponent<BoxCollider2D>();
         UpdateDataVisuals(); // Set up how the mineral looks
     }
 
@@ -50,6 +52,12 @@ public class Mineral : MonoBehaviour
             Color32 c = data.defaultColor;
             Color dimmed = new Color(c.r / 255f * 0.5f, c.g / 255f * 0.5f, c.b / 255f * 0.5f, c.a / 255f);
             _backgroundSprite.color = dimmed;
+
+            // Combine the bounds of the mineral sprite and the big sprite
+            Bounds combinedBounds = _mineralSprite.bounds;
+            combinedBounds.Encapsulate(_mineralBigSprite.bounds);
+
+            _bc.size = combinedBounds.size;
         }
     }
 }

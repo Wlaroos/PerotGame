@@ -13,25 +13,23 @@ public class CraftedPopupManager : MonoBehaviour
 
     [Header("Prefab & Timing")] 
     [Tooltip("A UI prefab that contains an Image named 'icon' and a TextMeshProUGUI named 'titleText'. It should be a simple root GameObject (no required components).")]
-    [SerializeField] private GameObject popupPrefab;
+    [SerializeField] private GameObject _popupPrefab;
     [Tooltip("A fullscreen/persistent popup prefab that stays until clicked. If assigned, use this for first-time big popups.")]
-    [SerializeField] private GameObject persistentPopupPrefab;
+    [SerializeField] private GameObject _persistentPopupPrefab;
     [Tooltip("How long the popup remains visible (seconds)")]
-    [SerializeField] private float popupDuration = 1.6f;
+    [SerializeField] private float _popupDuration = 1.6f;
     [Tooltip("Vertical offset in pixels the popup will move up during the animation")]
-    [SerializeField] private float moveUp = 40f;
-    [SerializeField] private Canvas overrideCanvas;      // assign the correct Canvas in Inspector
+    [SerializeField] private float _moveUp = 40f;
+    [SerializeField] private Canvas _popupCanvas;
 
     [Header("Small Popups")]
     [Tooltip("A UI prefab for elements/compounds that contains a TextMeshProUGUI named 'titleText'.")]
-    [SerializeField] private GameObject smallPopupPrefab;
+    [SerializeField] private GameObject _smallPopupPrefab;
     [Tooltip("A fullscreen/persistent popup prefab for elements/compounds that stays until clicked.")]
-    [SerializeField] private GameObject smallPersistentPopupPrefab;
+    [SerializeField] private GameObject _smallPersistentPopupPrefab;
 
     [Tooltip("Delay (in seconds) before the popup can be dismissed.")]
-    [SerializeField] private float dismissDelay = 1f;
-
-    private Canvas _uiCanvas;
+    [SerializeField] private float _dismissDelay = 1f;
 
     private void Awake()
     {
@@ -41,11 +39,6 @@ public class CraftedPopupManager : MonoBehaviour
             return;
         }
         Instance = this;
-
-        // Use unified canvas helper
-        _uiCanvas = SOHelpers.GetAnyCanvas(overrideCanvas);
-        if (_uiCanvas == null)
-            Debug.LogWarning("CraftedPopupManager: No Canvas found in scene. Popups will not be visible until a Canvas exists.");
     }
 
     // Show a popup for a mineral/element/compound at world position
@@ -63,18 +56,9 @@ public class CraftedPopupManager : MonoBehaviour
             return;
         }
 
-        if (_uiCanvas == null)
-        {
-            _uiCanvas = SOHelpers.GetAnyCanvas(overrideCanvas);
-            if (_uiCanvas == null)
-            {
-                Debug.LogWarning("CraftedPopupManager: No Canvas in scene to show popup. Ensure a Canvas exists or assign one to the manager.");
-                return;
-            }
-        }
 
         // Instantiate under the UI canvas
-        var go = Instantiate(chosenPrefab, _uiCanvas.transform, false);
+        var go = Instantiate(chosenPrefab, _popupCanvas.transform, false);
 
         // Give transient popups their own Canvas with override sorting so they appear above world sprites
         var transientCanvas = go.GetComponent<Canvas>();
@@ -89,7 +73,7 @@ public class CraftedPopupManager : MonoBehaviour
         {
             Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(Camera.main, worldPosition);
             Vector2 localPoint;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(_uiCanvas.transform as RectTransform, screenPos, _uiCanvas.worldCamera, out localPoint);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(_popupCanvas.transform as RectTransform, screenPos, _popupCanvas.worldCamera, out localPoint);
             rt.anchoredPosition = localPoint;
         }
 
@@ -106,7 +90,7 @@ public class CraftedPopupManager : MonoBehaviour
             icon.color = SOHelpers.GetColorFromData(data);
         }
 
-        if (icon == null && chosenPrefab != smallPopupPrefab)
+        if (icon == null && chosenPrefab != _smallPopupPrefab)
         {
             Debug.LogWarning("CraftedPopupManager: popup prefab does not contain an Image child named 'icon' (or similar). The icon will be missing.");
         }
@@ -141,7 +125,7 @@ public class CraftedPopupManager : MonoBehaviour
         }
         else
         {
-            if (chosenPrefab != smallPopupPrefab)
+            if (chosenPrefab != _smallPopupPrefab)
                 Debug.LogWarning("CraftedPopupManager: popup prefab does not contain a TextMeshProUGUI child named 'titleText' (or similar). The title will be missing.");
         }
 
@@ -150,7 +134,7 @@ public class CraftedPopupManager : MonoBehaviour
         if (cg == null) cg = go.AddComponent<CanvasGroup>();
 
         // start animation coroutine
-        StartCoroutine(AnimateAndDestroy(go, cg, popupDuration));
+        StartCoroutine(AnimateAndDestroy(go, cg, _popupDuration));
     }
 
     // Show a fullscreen/persistent popup that stays until the player clicks to dismiss
@@ -158,10 +142,10 @@ public class CraftedPopupManager : MonoBehaviour
     {
         if (data == null) return;
 
-        if (_uiCanvas == null)
+        if (_popupCanvas == null)
         {
-            _uiCanvas = SOHelpers.GetAnyCanvas(overrideCanvas);
-            if (_uiCanvas == null)
+            _popupCanvas = SOHelpers.GetAnyCanvas(this._popupCanvas);
+            if (_popupCanvas == null)
             {
                 Debug.LogWarning("CraftedPopupManager: No Canvas in scene to show persistent popup.");
                 return;
@@ -179,13 +163,7 @@ public class CraftedPopupManager : MonoBehaviour
             return;
         }
 
-        var go = Instantiate(chosenPrefab, _uiCanvas.transform, false);
-        // Ensure this popup draws above world sprites by giving it its own Canvas with overrideSorting
-        var popupCanvas = go.GetComponent<Canvas>();
-        if (popupCanvas == null) popupCanvas = go.AddComponent<Canvas>();
-        popupCanvas.overrideSorting = true;
-        popupCanvas.sortingOrder = 1000;
-        if (go.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null) go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+        var go = Instantiate(chosenPrefab, _popupCanvas.transform, false);
 
         // Try to populate icon/title similarly to the transient popup
         Image icon = SOHelpers.FindChildComponentByName<Image>(go, "icon");
@@ -269,7 +247,7 @@ public class CraftedPopupManager : MonoBehaviour
 
         // Delay dismiss functionality
         overlayBtn.interactable = false;
-        StartCoroutine(EnableDismissAfterDelay(overlayBtn, dismissDelay));
+        StartCoroutine(EnableDismissAfterDelay(overlayBtn, _dismissDelay));
 
         overlayBtn.onClick.AddListener(() => { if (Application.isPlaying) UnityEngine.Object.Destroy(go); else UnityEngine.Object.DestroyImmediate(go); });
         // Ensure overlay is on top so any click dismisses the popup
@@ -308,7 +286,7 @@ public class CraftedPopupManager : MonoBehaviour
             // move up slowly
             if (rt != null)
             {
-                rt.anchoredPosition += new Vector2(0f, (moveUp / duration) * Time.deltaTime);
+                rt.anchoredPosition += new Vector2(0f, (_moveUp / duration) * Time.deltaTime);
             }
 
             elapsed += Time.deltaTime;
@@ -393,9 +371,9 @@ public class CraftedPopupManager : MonoBehaviour
     {
         bool small = data != null && (data is ElementData || data is CompoundData);
         if (small)
-            return persistent ? smallPersistentPopupPrefab : smallPopupPrefab;
+            return persistent ? _smallPersistentPopupPrefab : _smallPopupPrefab;
         else
-            return persistent ? persistentPopupPrefab : popupPrefab;
+            return persistent ? _persistentPopupPrefab : _popupPrefab;
     }
 
     private IEnumerator EnableDismissAfterDelay(UnityEngine.UI.Button button, float delay)

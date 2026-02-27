@@ -384,6 +384,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dragSpeed: 25
+  _clampX: 5.325
+  _clampY: 5
 --- !u!1 &7838945425474394862
 GameObject:
   m_ObjectHideFlags: 0

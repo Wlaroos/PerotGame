@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 1007
   m_ShowMode: 4
-  m_Title: Console
+  m_Title: Scene
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 2960
+  controlID: 39569
   draggingID: 0
 --- !u!114 &6
 MonoBehaviour:
@@ -145,7 +145,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 2870
+  controlID: 39539
   draggingID: 0
 --- !u!114 &7
 MonoBehaviour:
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 2871
+  controlID: 39479
   draggingID: 0
 --- !u!114 &8
 MonoBehaviour:
@@ -251,7 +251,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 2931
+  controlID: 39540
   draggingID: 0
 --- !u!114 &11
 MonoBehaviour:
@@ -352,10 +352,10 @@ MonoBehaviour:
     m_TextWithWhitespace: "Game\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 279
+    x: 314
     y: 24
-    width: 1018.6666
-    height: 540.6667
+    width: 1146
+    height: 560
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -411,23 +411,23 @@ MonoBehaviour:
       serializedVersion: 2
       x: 0
       y: 21
-      width: 1018.6666
-      height: 519.6667
-    m_Scale: {x: 0.36087963, y: 0.36087963}
-    m_Translation: {x: 509.3333, y: 259.83334}
+      width: 1146
+      height: 539
+    m_Scale: {x: 0.37430555, y: 0.37430555}
+    m_Translation: {x: 573, y: 269.5}
     m_MarginLeft: 0
     m_MarginRight: 0
     m_MarginTop: 0
     m_MarginBottom: 0
     m_LastShownAreaInsideMargins:
       serializedVersion: 2
-      x: -1411.3662
+      x: -1530.835
       y: -720
-      width: 2822.7324
+      width: 3061.67
       height: 1440
     m_MinimalGUI: 1
-  m_defaultScale: 0.36087963
-  m_LastWindowPixelSize: {x: 1018.6666, y: 540.6667}
+  m_defaultScale: 0.37430555
+  m_LastWindowPixelSize: {x: 1146, y: 560}
   m_ClearInEditMode: 1
   m_NoCameraWarning: 1
   m_LowResolutionForAspectRatios: 01000000000000000000
@@ -475,7 +475,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 0cfbffff48b3000090b30000beb3000088b40000c0b4000004b500000eb60000
+      m_ExpandedIDs: 72c1feffe498ffffe698ffff5299ffff5499ffffc299ffffca99ffff28beffff8ebeffff24d1ffff0ae5ffff1aeaffffd6eaffff48f6ffffa8faffff56bb000076bc0000a4bc00006ebd0000e2bd000034be00004cbe0000ecbe000006bf000082a801002caa010012ab01004aac0100d4ac0100
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1093,9 +1093,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: 4.1656294, y: 0.89397407, z: 0.03211199}
+    m_Target: {x: 0.95097643, y: 0.6774675, z: 143.56815}
     speed: 2
-    m_Value: {x: -0.624093, y: 0.15389177, z: 97.89311}
+    m_Value: {x: 0.95097643, y: 0.6774675, z: 143.56815}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1145,9 +1145,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 6.7658906
+    m_Target: 7.478125
     speed: 2
-    m_Value: 7.6324906
+    m_Value: 7.478125
   m_Ortho:
     m_Target: 1
     speed: 2
@@ -1281,7 +1281,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Resources/SOs/Elements
+    - Assets/Resources/SOs/Minerals
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1291,16 +1291,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Resources/SOs/Elements
+  - Assets/Resources/SOs/Minerals
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\Mikey\Documents\Unity Projects\PerotGame
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 160.66669}
-    m_SelectedIDs: bcba0000
-    m_LastClickedID: 47804
-    m_ExpandedIDs: 0000000054ba0000
+    scrollPos: {x: 0, y: 0}
+    m_SelectedIDs: d6ba0000
+    m_LastClickedID: 47830
+    m_ExpandedIDs: 0000000090ba0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1329,7 +1329,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 0000000054ba0000
+    m_ExpandedIDs: 0000000090ba0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 

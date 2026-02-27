@@ -222,7 +222,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1892901067025458413}
   - component: {fileID: 4137579468916650684}
-  - component: {fileID: 5376692326473194943}
   m_Layer: 0
   m_Name: SmallPersistentCraftedPopup
   m_TagString: Untagged
@@ -262,18 +261,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!210 &5376692326473194943
-SortingGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3160322526219316941}
-  m_Enabled: 1
-  m_SortingLayerID: -290530463
-  m_SortingLayer: 2
-  m_SortingOrder: 0
-  m_SortAtRoot: 0
 --- !u!1 &3305945345131622900
 GameObject:
   m_ObjectHideFlags: 0

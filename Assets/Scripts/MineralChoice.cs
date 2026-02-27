@@ -3,105 +3,154 @@ using UnityEngine.UI;
 using TMPro;
 using System.Linq;
 using UnityEngine.Events;
+using System.Collections.Generic; // Added for List support
+using System.Collections.Specialized; // Added for HashSet support
 
 public class MineralChoice : MonoBehaviour
 {
-    [SerializeField] private Image[] _mineralChoice;
-    [SerializeField] private MineralData[] _excludedMinerals; // Optional: minerals to exclude from the random selection
-    private Image[] _mineralChoiceBG;
-    private MineralData[] _mineralDataArray;
-    private TextMeshProUGUI[] _mineralNameTexts; // UI Texts for mineral names
-    private Image[] _mineralImages; // UI Images for minerals
+    [SerializeField] private bool _useMineralChoice = false;
+    public bool UseMineralChoice => _useMineralChoice; // Public getter for external access
+    [SerializeField] private Image[] _mineralChoiceHolders;
+    private List<CraftingRecipe> _filteredRecipes;
+    private Image[] _mineralChoiceBGs;
+    private TextMeshProUGUI[] _mineralNameTexts; // UI Texts for recipe names
+    private Image[] _mineralImages; // UI Images for recipes
 
-    public UnityEvent<MineralData> OnMineralSelected = new UnityEvent<MineralData>(); // Event to send mineral data on click
+    [HideInInspector] public UnityEvent<CraftingRecipe> OnRecipeSelected = new UnityEvent<CraftingRecipe>(); // Event to send recipe data on click
+    [SerializeField] private NewRecipePanelScript _newRecipePanel; // Reference to the NewRecipePanelScript
+    [SerializeField] private GameObject _recipeSelectorRef;
+
+    private HashSet<CraftingRecipe> _chosenRecipes = new HashSet<CraftingRecipe>(); // Track chosen recipes
 
     private void Start() 
     {
-        // Load all minerals from the Resources folder
-        _mineralDataArray = Resources.LoadAll<MineralData>("SOs/Minerals");
-
-        if (_excludedMinerals != null && _excludedMinerals.Length > 0)
+        if(!_useMineralChoice)
         {
-            // Exclude specified minerals by comparing their names or unique identifiers
-            var excludedNames = _excludedMinerals.Select(m => m.name).ToHashSet();
-            _mineralDataArray = _mineralDataArray.Where(m => !excludedNames.Contains(m.name)).ToArray();
+            _recipeSelectorRef.SetActive(true);
+            gameObject.SetActive(false);
+        }
+        else
+        {
+            ResetMineralChoice();
         }
 
-        _mineralChoiceBG = _mineralChoice.Select(img => img.transform.GetChild(0).GetComponent<Image>()).ToArray();
-        _mineralNameTexts = _mineralChoiceBG.Select(img => img.transform.GetChild(0).GetComponent<TextMeshProUGUI>()).ToArray();
-        _mineralImages = _mineralChoiceBG.Select(img => img.transform.GetChild(1).GetComponent<Image>()).ToArray();
-
-        if (_mineralDataArray == null || _mineralDataArray.Length == 0)
+        // Load all recipes from the CraftingManager
+        if (CraftingManager.Instance == null || CraftingManager.Instance._recipes == null)
         {
-            Debug.LogError("No minerals found in the Resources/Minerals folder.");
+            Debug.LogError("No recipes found in the CraftingManager.");
+            return;
+        }
+    }
+
+    private void SetupMineralUI(int index, CraftingRecipe recipe)
+    {
+        // Set the recipe name
+        _mineralNameTexts[index].text = SOHelpers.GetFullStrippedName(recipe.output);
+
+        // Set the recipe image while maintaining the original aspect ratio
+        _mineralImages[index].sprite = SOHelpers.GetPrimarySpriteFromData(recipe.output);
+        _mineralImages[index].preserveAspect = true;
+
+        // Set the parent's parent image color to the recipe's color
+        var parentParentImage = _mineralImages[index].transform.parent.parent.GetComponent<Image>();
+        if (parentParentImage != null)
+        {
+            parentParentImage.color = SOHelpers.GetColorFromData(recipe.output);
+        }
+
+        // Set the parent's image color to a slightly darker version of the recipe's color
+        var parentImage = _mineralImages[index].transform.parent.GetComponent<Image>();
+        if (parentImage != null)
+        {
+            parentImage.color = SOHelpers.GetColorFromData(recipe.output) * new Color(0.5f, 0.5f, 0.5f, 1f);
+        }
+
+        // Ensure the recipe image is visible
+        _mineralImages[index].color = Color.white;
+
+        // Add button functionality
+        var button = _mineralChoiceHolders[index].GetComponent<Button>();
+        if (button != null)
+        {
+            button.onClick.RemoveAllListeners(); // Clear previous listeners
+            button.onClick.AddListener(() => OnRecipeSelected.Invoke(recipe));
+
+            // Add hover effects
+            var colors = button.colors;
+            colors.highlightedColor = SOHelpers.GetColorFromData(recipe.output) + new Color(0.5f, 0.5f, 0.5f, 1f); // Closer to white on hover
+            colors.pressedColor = SOHelpers.GetColorFromData(recipe.output) * new Color(0.8f, 0.8f, 0.8f, 1f); // Slightly darker on click
+            button.colors = colors;
+        }
+    }
+
+    private void OnEnable()
+    {
+        if(_useMineralChoice)
+        {
+            OnRecipeSelected.AddListener(HandleRecipeSelected);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if(_useMineralChoice)
+        {
+            OnRecipeSelected.RemoveListener(HandleRecipeSelected);
+        }
+    }
+
+    private void HandleRecipeSelected(CraftingRecipe selectedRecipe)
+    {
+        Debug.Log($"Selected recipe: {SOHelpers.GetFullStrippedName(selectedRecipe.output)}");
+
+        // Add the selected recipe to the chosen set
+        _chosenRecipes.Add(selectedRecipe);
+
+        // If integration with NewRecipePanelScript is enabled, invoke the event to update the panel
+        if (_useMineralChoice)
+        {
+            if (_newRecipePanel != null)
+            {
+                _newRecipePanel.DisplaySelectedRecipe(selectedRecipe);
+            }
+        }
+        
+        gameObject.SetActive(false);
+    }
+
+    public void ResetMineralChoice()
+    {
+        _filteredRecipes = CraftingManager.Instance._recipes
+            .Where(r => r.productType == CraftingRecipe.ProductType.Mineral && !_chosenRecipes.Contains(r)) // Exclude already chosen recipes
+            .OrderBy(x => Random.value)
+            .Take(3)
+            .ToList();
+
+        _mineralChoiceBGs = _mineralChoiceHolders.Select(img => img.transform.GetChild(0).GetComponent<Image>()).ToArray();
+        _mineralNameTexts = _mineralChoiceBGs.Select(img => img.transform.GetChild(0).GetComponent<TextMeshProUGUI>()).ToArray();
+        _mineralImages = _mineralChoiceBGs.Select(img => img.transform.GetChild(1).GetComponent<Image>()).ToArray();
+
+        if (_filteredRecipes == null || _filteredRecipes.Count == 0)
+        {
+            Debug.LogError("No recipes available after filtering.");
             return;
         }
 
-        // Select three random minerals
-        var randomMinerals = _mineralDataArray.OrderBy(x => Random.value).Take(3).ToArray();
-
-        // Update the UI with the selected minerals
-        for (int i = 0; i < randomMinerals.Length; i++)
+        // Update the UI with the selected recipes
+        for (int i = 0; i < _filteredRecipes.Count; i++)
         {
             if (i < _mineralNameTexts.Length && i < _mineralImages.Length)
             {
-                // Set the mineral name
-                _mineralNameTexts[i].text = SOHelpers.GetFullStrippedName(randomMinerals[i]); // Assuming MineralData has a mineralName property
-
-                // Set the mineral image while maintaining the original aspect ratio
-                if (randomMinerals[i].mineralBigSprite != null) // Check if the big sprite is assigned
-                {
-                    _mineralImages[i].sprite = randomMinerals[i].mineralBigSprite; // Assuming MineralData has a mineralBigSprite property
-                }
-                else if (randomMinerals[i].mineralSprite != null) // Fallback to the regular sprite if big sprite is not assigned
-                {
-                    _mineralImages[i].sprite = randomMinerals[i].mineralSprite; // Assuming MineralData has a mineralSprite property
-                }
-                else
-                {
-                    Debug.LogWarning($"Mineral '{randomMinerals[i].name}' does not have a sprite assigned.");
-                    _mineralImages[i].sprite = null; // Clear the image if no sprite is available
-                }
-                _mineralImages[i].preserveAspect = true;
-
-                // Set the parent's parent image color to the mineral's color
-                var parentParentImage = _mineralImages[i].transform.parent.parent.GetComponent<Image>();
-                if (parentParentImage != null)
-                {
-                    parentParentImage.color = randomMinerals[i].defaultColor; // Assuming MineralData has a defaultColor property
-                }
-
-                // Set the parent's image color to a slightly darker version of the mineral's color
-                var parentImage = _mineralImages[i].transform.parent.GetComponent<Image>();
-                if (parentImage != null)
-                {
-                    parentImage.color = (Color)randomMinerals[i].defaultColor * new Color(0.5f, 0.5f, 0.5f, 1f); // Darken the color slightly
-                }
-
-                // Ensure the mineral image is visible
-                _mineralImages[i].color = Color.white;
-
-                // Add button functionality
-                var button = _mineralChoice[i].GetComponent<Button>();
-                if (button != null)
-                {
-                    int index = i; // Capture the current index for the lambda
-                    button.onClick.AddListener(() => OnMineralSelected.Invoke(randomMinerals[index]));
-
-                    // Add hover effects
-                    var colors = button.colors;
-                    colors.highlightedColor = (Color)randomMinerals[index].defaultColor + new Color(0.5f, 0.5f, 0.5f, 1f); // Closer to white on hover
-                    colors.pressedColor = (Color)randomMinerals[index].defaultColor * new Color(0.8f, 0.8f, 0.8f, 1f); // Slightly darker on click
-                    button.colors = colors;
-                }
+                SetupMineralUI(i, _filteredRecipes[i]);
             }
         }
 
-        // Hide any extra UI elements if there are fewer than 3 minerals
-        for (int i = randomMinerals.Length; i < _mineralNameTexts.Length; i++)
+        // Hide any extra UI elements if there are fewer than 3 recipes
+        for (int i = _filteredRecipes.Count; i < _mineralNameTexts.Length; i++)
         {
             _mineralNameTexts[i].gameObject.SetActive(false);
             _mineralImages[i].gameObject.SetActive(false);
         }
     }
+
 }

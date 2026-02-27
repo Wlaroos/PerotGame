@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // Add this
 
 public class GameManager : MonoBehaviour
 {
@@ -19,14 +18,24 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (_inputActions.UI.Quit.WasPressedThisFrame()) // Map this to Escape in your Input Actions
+        if (_inputActions.UI.Quit.WasPressedThisFrame())
         {
-            Application.Quit();
+            QuitGame();
         }
 
-        if (_inputActions.UI.Restart.WasPressedThisFrame()) // Map this to R in your Input Actions
+        if (_inputActions.UI.Restart.WasPressedThisFrame())
         {
-            UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+            RestartGame();
         }
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
+    public void RestartGame()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
 }
