@@ -1074,6 +1074,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da0db04033c393e4297283903919950b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _useMineralChoice: 1
+  _mineralChoiceRoot: {fileID: 2119632537}
+  _mineralChoiceHolders:
+  - {fileID: 1633646682}
+  - {fileID: 151678821}
+  - {fileID: 18348115}
+  _recipeSelectorRef: {fileID: 1493774463}
   _titleText: {fileID: 280596037}
   _detailsText: {fileID: 1264199064}
   _ingredientImages:
@@ -1096,7 +1103,6 @@ MonoBehaviour:
   - {fileID: 939760550}
   - {fileID: 169056463}
   - {fileID: 391497902}
-  _mineralChoice: {fileID: 2119632542}
   _winCanvasPrefab: {fileID: 2118462347}
 --- !u!1 &146114329
 GameObject:
@@ -13340,7 +13346,6 @@ GameObject:
   - component: {fileID: 2119632540}
   - component: {fileID: 2119632539}
   - component: {fileID: 2119632538}
-  - component: {fileID: 2119632542}
   m_Layer: 5
   m_Name: Mineral Choice Canvas
   m_TagString: Untagged
@@ -13431,28 +13436,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &2119632542
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2119632537}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51fd869765b5d884a8bcb5b2d6e9fe4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _useMineralChoice: 1
-  _mineralChoiceHolders:
-  - {fileID: 1633646682}
-  - {fileID: 151678821}
-  - {fileID: 18348115}
-  OnRecipeSelected:
-    m_PersistentCalls:
-      m_Calls: []
-  _newRecipePanel: {fileID: 139456130}
-  _recipeSelectorRef: {fileID: 1493774463}
 --- !u!1 &2123059213
 GameObject:
   m_ObjectHideFlags: 0

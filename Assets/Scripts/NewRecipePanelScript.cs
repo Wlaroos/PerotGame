@@ -7,6 +7,12 @@ using UnityEngine.Events;
 
 public class NewRecipePanelScript : MonoBehaviour
 {
+    [Header("Mineral Choice (Optional)")]
+    [SerializeField] private bool _useMineralChoice = false;
+    [SerializeField] private GameObject _mineralChoiceRoot;
+    [SerializeField] private Image[] _mineralChoiceHolders;
+    [SerializeField] private GameObject _recipeSelectorRef;
+    [Space(10)]
     [SerializeField] private TextMeshProUGUI _titleText;
     [SerializeField] private TextMeshProUGUI _detailsText;
     [SerializeField] private Image[] _ingredientImages; 
@@ -23,9 +29,15 @@ public class NewRecipePanelScript : MonoBehaviour
     private int _successfulCraftCount = 0;
     private UnityAction<CraftingRecipe, GameObject, bool> _onRecipeCraftedHandler;
     private bool[] _craftedStatus; // Tracks which recipes have been crafted at least once
-    [SerializeField] private MineralChoice _mineralChoice; // Reference to MineralChoice
     private int _craftedMineralCount = 0; // Track the number of crafted minerals
     [SerializeField] private GameObject _winCanvasPrefab;
+
+    // Mineral-choice internal state
+    private readonly HashSet<CraftingRecipe> _chosenRecipes = new HashSet<CraftingRecipe>();
+    private List<CraftingRecipe> _choiceRecipes = new List<CraftingRecipe>();
+    private Image[] _mineralChoiceBGs;
+    private TextMeshProUGUI[] _mineralNameTexts;
+    private Image[] _mineralImages;
 
     private void Start()
     {
@@ -37,20 +49,26 @@ public class NewRecipePanelScript : MonoBehaviour
 
         _recipes = CraftingManager.Instance._recipes.ToList();
 
-        if (_mineralChoice != null && _mineralChoice.UseMineralChoice)
+        if (_recipeSelectorRef != null)
         {
-            _mineralChoice.OnRecipeSelected.AddListener(SetFirstRecipeFromMineralChoice);
+            _recipeSelectorRef.SetActive(!_useMineralChoice);
+        }
+
+        if (_mineralChoiceRoot != null)
+        {
+            _mineralChoiceRoot.SetActive(_useMineralChoice);
         }
 
         _filteredRecipes = BuildFilteredRecipes();
         _craftedStatus = new bool[_filteredRecipes.Count];
 
         UpdateUI();
-    }
 
-    private void OnEnable()
-    {
-        if (CraftingManager.Instance == null) return;
+        if (_useMineralChoice)
+        {
+            CacheMineralChoiceUIRefs();
+            ShowMineralChoice();
+        }
 
         _onRecipeCraftedHandler = (recipe, craftedObj, isFirstTime) => OnRecipeCrafted(recipe, craftedObj, isFirstTime);
         CraftingManager.Instance.OnRecipeCrafted.AddListener(_onRecipeCraftedHandler);
@@ -58,18 +76,163 @@ public class NewRecipePanelScript : MonoBehaviour
 
     private void OnDisable()
     {
-        if (CraftingManager.Instance == null) return;
         CraftingManager.Instance.OnRecipeCrafted.RemoveListener(_onRecipeCraftedHandler);
     }
 
-    private void SetFirstRecipeFromMineralChoice(CraftingRecipe selectedRecipe)
+    private void CacheMineralChoiceUIRefs()
     {
-        if (_recipes.Contains(selectedRecipe))
+        if (_mineralChoiceHolders == null || _mineralChoiceHolders.Length == 0) return;
+
+        _mineralChoiceBGs = _mineralChoiceHolders
+            .Select(img => img != null ? img.transform.GetChild(0).GetComponent<Image>() : null)
+            .ToArray();
+
+        _mineralNameTexts = _mineralChoiceBGs
+            .Select(img => img != null ? img.transform.GetChild(0).GetComponent<TextMeshProUGUI>() : null)
+            .ToArray();
+
+        _mineralImages = _mineralChoiceBGs
+            .Select(img => img != null ? img.transform.GetChild(1).GetComponent<Image>() : null)
+            .ToArray();
+    }
+
+    private void ShowMineralChoice()
+    {
+        if (!_useMineralChoice) return;
+        if (_mineralChoiceRoot != null) _mineralChoiceRoot.SetActive(true);
+        PopulateMineralChoice();
+    }
+
+    private void HideMineralChoice()
+    {
+        if (_mineralChoiceRoot != null) _mineralChoiceRoot.SetActive(false);
+    }
+
+    private void PopulateMineralChoice()
+    {
+        if (!_useMineralChoice) return;
+        if (CraftingManager.Instance == null || CraftingManager.Instance._recipes == null)
         {
-            _filteredRecipes[_currentRecipeIndex] = selectedRecipe; // Replace the current recipe with the selected one
-            _filteredRecipes = _filteredRecipes.Distinct().ToList(); // Ensure no duplicates
-            UpdateUI();
+            Debug.LogError("No recipes found in the CraftingManager.");
+            return;
         }
+
+        if (_mineralChoiceHolders == null || _mineralChoiceHolders.Length == 0)
+        {
+            Debug.LogError("MineralChoice is enabled, but no holders are assigned.");
+            return;
+        }
+
+        if (_mineralNameTexts == null || _mineralImages == null)
+        {
+            CacheMineralChoiceUIRefs();
+        }
+
+        _choiceRecipes = CraftingManager.Instance._recipes
+            .Where(r => r.productType == CraftingRecipe.ProductType.Mineral && !_chosenRecipes.Contains(r))
+            .OrderBy(_ => Random.value)
+            .Take(3)
+            .ToList();
+
+        if (_choiceRecipes.Count == 0)
+        {
+            Debug.LogError("No recipes available after filtering.");
+            return;
+        }
+
+        for (int i = 0; i < _mineralChoiceHolders.Length; i++)
+        {
+            bool hasRecipe = i < _choiceRecipes.Count;
+
+            if (_mineralNameTexts != null && i < _mineralNameTexts.Length && _mineralNameTexts[i] != null)
+                _mineralNameTexts[i].gameObject.SetActive(hasRecipe);
+            if (_mineralImages != null && i < _mineralImages.Length && _mineralImages[i] != null)
+                _mineralImages[i].gameObject.SetActive(hasRecipe);
+
+            if (!hasRecipe) continue;
+
+            SetupMineralUI(i, _choiceRecipes[i]);
+        }
+    }
+
+    private void SetupMineralUI(int index, CraftingRecipe recipe)
+    {
+        if (recipe == null) return;
+        if (_mineralNameTexts == null || _mineralImages == null) return;
+        if (index < 0 || index >= _mineralChoiceHolders.Length) return;
+        if (index >= _mineralNameTexts.Length || index >= _mineralImages.Length) return;
+        if (_mineralNameTexts[index] == null || _mineralImages[index] == null) return;
+
+        _mineralNameTexts[index].text = SOHelpers.GetFullStrippedName(recipe.output);
+
+        _mineralImages[index].sprite = SOHelpers.GetPrimarySpriteFromData(recipe.output);
+        _mineralImages[index].preserveAspect = true;
+        _mineralImages[index].color = Color.white;
+
+        var parentParentImage = _mineralImages[index].transform.parent.parent.GetComponent<Image>();
+        if (parentParentImage != null)
+        {
+            parentParentImage.color = SOHelpers.GetColorFromData(recipe.output);
+        }
+
+        var parentImage = _mineralImages[index].transform.parent.GetComponent<Image>();
+        if (parentImage != null)
+        {
+            parentImage.color = SOHelpers.GetColorFromData(recipe.output) * new Color(0.5f, 0.5f, 0.5f, 1f);
+        }
+
+        var button = _mineralChoiceHolders[index].GetComponent<Button>();
+        if (button != null)
+        {
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(() => SelectMineralChoice(recipe));
+
+            var colors = button.colors;
+            colors.highlightedColor = SOHelpers.GetColorFromData(recipe.output) + new Color(0.5f, 0.5f, 0.5f, 1f);
+            colors.pressedColor = SOHelpers.GetColorFromData(recipe.output) * new Color(0.8f, 0.8f, 0.8f, 1f);
+            button.colors = colors;
+        }
+    }
+
+    private void SelectMineralChoice(CraftingRecipe selectedRecipe)
+    {
+        if (!_useMineralChoice) return;
+        if (selectedRecipe == null) return;
+
+        Debug.Log($"Selected recipe: {SOHelpers.GetFullStrippedName(selectedRecipe.output)}");
+        _chosenRecipes.Add(selectedRecipe);
+
+        ReplaceCurrentRecipe(selectedRecipe);
+        HideMineralChoice();
+    }
+
+    private void ReplaceCurrentRecipe(CraftingRecipe selectedRecipe)
+    {
+        if (selectedRecipe == null) return;
+        if (!_recipes.Contains(selectedRecipe)) return;
+        if (_filteredRecipes == null || _filteredRecipes.Count == 0) return;
+        if (_currentRecipeIndex < 0 || _currentRecipeIndex >= _filteredRecipes.Count) return;
+
+        int otherIndex = _filteredRecipes.IndexOf(selectedRecipe);
+        if (otherIndex >= 0 && otherIndex != _currentRecipeIndex)
+        {
+            (_filteredRecipes[_currentRecipeIndex], _filteredRecipes[otherIndex]) =
+                (_filteredRecipes[otherIndex], _filteredRecipes[_currentRecipeIndex]);
+
+            if (_craftedStatus != null &&
+                otherIndex < _craftedStatus.Length &&
+                _currentRecipeIndex < _craftedStatus.Length)
+            {
+                (_craftedStatus[_currentRecipeIndex], _craftedStatus[otherIndex]) =
+                    (_craftedStatus[otherIndex], _craftedStatus[_currentRecipeIndex]);
+            }
+        }
+        else
+        {
+            _filteredRecipes[_currentRecipeIndex] = selectedRecipe;
+        }
+
+        UpdateUI();
     }
 
     private List<CraftingRecipe> BuildFilteredRecipes()
@@ -171,7 +334,15 @@ public class NewRecipePanelScript : MonoBehaviour
             {
                 _currentRecipeIndex += 1;
 
-                ResetMineralChoice();
+                if (_currentRecipeIndex >= _filteredRecipes.Count)
+                {
+                    _currentRecipeIndex = Mathf.Clamp(_filteredRecipes.Count - 1, 0, _filteredRecipes.Count - 1);
+                }
+
+                if (_useMineralChoice)
+                {
+                    ShowMineralChoice();
+                }
             }
             else
             {
@@ -182,17 +353,11 @@ public class NewRecipePanelScript : MonoBehaviour
         UpdateUI();
     }
 
-    private void ResetMineralChoice()
-    {
-        _mineralChoice.gameObject.SetActive(true); // Reactivate the MineralChoice canvas
-        _mineralChoice.ResetMineralChoice();
-    }
-
     private void EndGame()
     {
         _winCanvasPrefab.SetActive(true);
 
-        _mineralChoice.gameObject.SetActive(false);
+        HideMineralChoice();
         this.enabled = false;
     }
 
@@ -210,15 +375,5 @@ public class NewRecipePanelScript : MonoBehaviour
 
         _currentRecipeIndex = (_currentRecipeIndex - 1 + _filteredRecipes.Count) % _filteredRecipes.Count;
         UpdateUI();
-    }
-
-    public void DisplaySelectedRecipe(CraftingRecipe selectedRecipe)
-    {
-        if (_recipes.Contains(selectedRecipe))
-        {
-            _filteredRecipes[_currentRecipeIndex] = selectedRecipe;
-            _filteredRecipes = _filteredRecipes.Distinct().ToList(); // Ensure no duplicates
-            UpdateUI();
-        }
     }
 }
