@@ -80,6 +80,7 @@ public class CraftedPopupManager : MonoBehaviour
         // Use SOHelpers for child lookups and data extraction
         Image icon = SOHelpers.FindChildComponentByName<Image>(go, "icon");
         TextMeshProUGUI title = SOHelpers.FindChildComponentByName<TextMeshProUGUI>(go, "titleText");
+        TextMeshProUGUI funFact = SOHelpers.FindChildComponentByName<TextMeshProUGUI>(go, "funFactText");
 
         // Populate icon (if present) using best available sprite fields on the ScriptableObject
         if (icon != null)
@@ -168,6 +169,7 @@ public class CraftedPopupManager : MonoBehaviour
         // Try to populate icon/title similarly to the transient popup
         Image icon = SOHelpers.FindChildComponentByName<Image>(go, "icon");
         TextMeshProUGUI title = SOHelpers.FindChildComponentByName<TextMeshProUGUI>(go, "titleText");
+        TextMeshProUGUI funFact = SOHelpers.FindChildComponentByName<TextMeshProUGUI>(go, "funFactText");
 
         if (icon != null)
         {
@@ -195,6 +197,12 @@ public class CraftedPopupManager : MonoBehaviour
 
             title.text = temp;
             title.color = SOHelpers.GetColorFromData(data);
+        }
+
+        if(funFact != null)
+        {
+            string temp = SOHelpers.GetFunFactFromData(data);
+            funFact.text = temp;
         }
 
         // Update the 'discovery' text child if present to reflect element/compound/mineral

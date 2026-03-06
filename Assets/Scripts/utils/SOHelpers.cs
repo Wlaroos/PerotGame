@@ -192,7 +192,19 @@ public static class SOHelpers
         return string.Empty;
     }
 
-    // TMP/subscript helpers
+    public static string GetFunFactFromData(ScriptableObject so)
+    {
+        if (so == null) return string.Empty;
+        var candidates = new[] { "mineralFunFact", "elementFunFact", "compoundFunFact", "funFact" };
+        foreach (var name in candidates)
+        {
+            var v = GetFieldOrPropertyValue(so, name);
+            if (v is string s && !string.IsNullOrEmpty(s)) return s;
+        }
+        return string.Empty;
+    }
+
+    // TMP subscript helpers
     public static string MakeSubscriptTMP(string number) => $"<sub>{number}</sub>";
 
     public static string ToSubscript(int value)

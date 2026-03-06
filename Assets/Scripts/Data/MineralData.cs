@@ -10,6 +10,7 @@ public class MineralData : ScriptableObject
 {
     public string mineralName;         // Name of the mineral
     public string description;       // Description of the mineral
+    public string funFact;       // Fun fact about the mineral
     public Sprite mineralSprite;       // Main sprite for the mineral
     public Sprite mineralBigSprite;    // Big version of the mineral sprite
     public Color32 defaultColor = new Color32(255, 255, 255, 255); // Default color

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: M_Azurite
   m_EditorClassIdentifier: 
   mineralName: M_Azurite
-  description: 
+  description: Azurite is blue
+  funFact: Azurite is a made from science
   mineralSprite: {fileID: 223053218, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
   mineralBigSprite: {fileID: 0}
   defaultColor:
