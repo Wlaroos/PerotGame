@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.Assertions.Must;
 
 public class ElementSpawner : MonoBehaviour
 {
@@ -17,7 +19,7 @@ public class ElementSpawner : MonoBehaviour
 
     private List<ElementData> _elementDataList = new List<ElementData>();
     private Sprite[] _spawnButtonSprites;
-    private ElementData[] _buttonDataMap; // NEW: map button index -> assigned data
+    private ElementData[] _buttonDataMap;
     private bool _isDragging;
 
     public bool IsDragging => _isDragging;
@@ -72,7 +74,7 @@ public class ElementSpawner : MonoBehaviour
             var matchedData = FindMatchingElementData(button.name);
             if (matchedData != null)
             {
-                _buttonDataMap[i] = matchedData; // NEW: record mapping
+                _buttonDataMap[i] = matchedData;
                 SetupButton(button, matchedData);
             }
             else
@@ -91,15 +93,58 @@ public class ElementSpawner : MonoBehaviour
     private void SetupButton(Button button, ElementData data)
     {
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(() => OnSpawnButtonClicked(data));
+        button.onClick.AddListener(() => OnSpawnButtonClicked(button, data));
 
         var dragHandler = button.gameObject.GetComponent<SpawnDragHandler>() ?? button.gameObject.AddComponent<SpawnDragHandler>();
         dragHandler.Init(this, data);
     }
 
-    private void OnSpawnButtonClicked(ElementData data)
+    private void OnSpawnButtonClicked(Button button, ElementData data)
     {
-        if (!_isDragging) SpawnElementAtRandomPosition(data);
+        //if (!_isDragging) SpawnElementAtRandomPosition(data);
+        button.transform.localScale = new Vector3(1f, 1f, 1f);
+        if (!_isDragging) StartCoroutine(FlipTile(button, data));
+    }
+
+    private IEnumerator FlipTile(Button button, ElementData data)
+    {
+        float elapsedTime = 0f;
+        float flipDuration = 0.25f;
+        Image childImage = button.transform.GetChild(0).gameObject.GetComponent<Image>();
+
+        while (elapsedTime < flipDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsedTime / flipDuration);
+            float scaleX = Mathf.Lerp(1f, 0f, t);
+
+            button.transform.localScale = new Vector3(scaleX, 1f, 1f);
+            yield return null;
+        }
+
+        if (childImage != null)
+        {
+            Sprite current = childImage.sprite;
+            if (current == data.altElementSprite)
+            {
+                childImage.sprite = data.elementSprite;
+            }
+            else
+            {
+                childImage.sprite = data.altElementSprite;
+            }
+        }
+
+        elapsedTime = 0f;
+
+        while (elapsedTime < flipDuration)        
+        {
+            elapsedTime += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsedTime / flipDuration);
+            float scaleX = Mathf.Lerp(0f, 1f, t);
+            button.transform.localScale = new Vector3(scaleX, 1f, 1f);
+            yield return null;
+        }
     }
 
     public GameObject SpawnElementAtRandomPosition(ElementData data, int isotopeNumber = -1)

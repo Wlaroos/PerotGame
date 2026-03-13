@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementName: E_Hydrogen
   elementSprite: {fileID: 6620621745411573659, guid: 3f9420c6ec6a03f43a88cd7afc393bf0, type: 3}
+  altElementSprite: {fileID: 21300000, guid: 90ff1148bfef61142bb069a6c2a7a3b7, type: 3}
   numberSprites:
   - {fileID: -6629531029891648246, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
   - {fileID: -4217592887472625829, guid: a27ca2d8ce47593458829e88a996a57d, type: 3}
