@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 409d8cd5aa9f6be44bd910fd31ae3301
+guid: 2599904e266cf94418d70fda2d5226c7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4749963172660462827
-    second: CraftButton_0
+      213: -4154249914132590372
+    second: Heat_0
+  - first:
+      213: 2945309933033736019
+    second: Heat_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -96,49 +99,62 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: CraftButton_0
+      name: Heat_0
       rect:
         serializedVersion: 2
         x: 1
-        y: 39
-        width: 44
+        y: 4
+        width: 37
         height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 51bb26d29adb41eb0800000000000000
-      internalID: -4749963172660462827
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: CraftButton_1
-      rect:
-        serializedVersion: 2
-        x: 1
-        y: 1
-        width: 79
-        height: 38
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 80baec0d8024ec04389ef1661624cb95
-      internalID: -1534235674
+      spriteID: cd01ee796b32956c0800000000000000
+      internalID: -4154249914132590372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Heat_1
+      rect:
+        serializedVersion: 2
+        x: 41
+        y: 1
+        width: 20
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 357c7e777c7dfd820800000000000000
+      internalID: 2945309933033736019
       vertices: []
       indices: 
       edges: []
@@ -147,7 +163,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -157,8 +173,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      CraftButton_0: -4749963172660462827
-      CraftButton_1: -1534235674
+      Heat_0: -4154249914132590372
+      Heat_1: 2945309933033736019
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

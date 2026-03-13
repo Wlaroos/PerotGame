@@ -1,34 +1,34 @@
 fileFormatVersion: 2
-guid: ff42a6cbaa625d0428ac7b94399e9c69
+guid: 33836116809ba8f4c9e4bf173213ec18
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8311069866052299848
-    second: Compounds_0
+      213: -2384598366680337647
+    second: PerotGamify_0
   - first:
-      213: -5251323006414098139
-    second: Compounds_1
+      213: -3943896620099903856
+    second: PerotGamify_1
   - first:
-      213: -3063416783596571714
-    second: Compounds_2
+      213: 760422833650635200
+    second: PerotGamify_2
   - first:
-      213: 3910277626042831518
-    second: Compounds_3
+      213: -3543467140955364082
+    second: PerotGamify_3
   - first:
-      213: -1317123517822203223
-    second: Compounds_4
+      213: 213563675870572751
+    second: PerotGamify_4
   - first:
-      213: -4525682949422155351
-    second: Compounds_5
+      213: -3003875112808724784
+    second: PerotGamify_5
   - first:
-      213: 1671388855734654993
-    second: Compounds_6
+      213: -11362587797596483
+    second: PerotGamify_6
   - first:
-      213: 4109181436914183405
-    second: Compounds_7
+      213: -8129289376399414965
+    second: PerotGamify_7
   - first:
-      213: 3661986174613673984
-    second: Compounds_8
+      213: -2997079684649796795
+    second: PerotGamify_8
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -120,17 +120,43 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Compounds_0
+      name: PerotGamify_0
       rect:
         serializedVersion: 2
         x: 1
-        y: 17
-        width: 21
-        height: 16
+        y: 14
+        width: 33
+        height: 33
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -139,20 +165,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 84c208d520ad65370800000000000000
-      internalID: 8311069866052299848
+      spriteID: 113ba0e6b6438eed0800000000000000
+      internalID: -2384598366680337647
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Compounds_1
+      name: PerotGamify_1
       rect:
         serializedVersion: 2
-        x: 1
-        y: 1
-        width: 28
-        height: 16
+        x: 58
+        y: 36
+        width: 19
+        height: 28
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -161,20 +187,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 521f9d16c8d8f17b0800000000000000
-      internalID: -5251323006414098139
+      spriteID: 09ed4107be67449c0800000000000000
+      internalID: -3943896620099903856
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Compounds_2
+      name: PerotGamify_2
       rect:
         serializedVersion: 2
-        x: 22
-        y: 17
+        x: 85
+        y: 38
         width: 25
-        height: 16
+        height: 23
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -183,20 +209,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: eb3b1ce7aae8c75d0800000000000000
-      internalID: -3063416783596571714
+      spriteID: 0c197dec9809d8a00800000000000000
+      internalID: 760422833650635200
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Compounds_3
+      name: PerotGamify_3
       rect:
         serializedVersion: 2
-        x: 29
-        y: 1
-        width: 32
-        height: 16
+        x: 115
+        y: 33
+        width: 33
+        height: 33
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -205,20 +231,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e92d07988c8144630800000000000000
-      internalID: 3910277626042831518
+      spriteID: e05261ec86313dec0800000000000000
+      internalID: -3543467140955364082
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Compounds_4
+      name: PerotGamify_4
       rect:
         serializedVersion: 2
-        x: 47
-        y: 17
-        width: 25
-        height: 16
+        x: 150
+        y: 32
+        width: 35
+        height: 37
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -227,20 +253,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9aa05e29323a8bde0800000000000000
-      internalID: -1317123517822203223
+      spriteID: fc0313d180bb6f200800000000000000
+      internalID: 213563675870572751
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Compounds_5
+      name: PerotGamify_5
       rect:
         serializedVersion: 2
-        x: 61
-        y: 1
-        width: 34
-        height: 16
+        x: 187
+        y: 32
+        width: 24
+        height: 40
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -249,74 +275,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9a976a9e55b8131c0800000000000000
-      internalID: -4525682949422155351
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Compounds_6
-      rect:
-        serializedVersion: 2
-        x: 72
-        y: 17
-        width: 25
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1185c931f47f13710800000000000000
-      internalID: 1671388855734654993
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Compounds_7
-      rect:
-        serializedVersion: 2
-        x: 95
-        y: 1
-        width: 34
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: dec26e8debeb60930800000000000000
-      internalID: 4109181436914183405
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Compounds_8
-      rect:
-        serializedVersion: 2
-        x: 97
-        y: 17
-        width: 28
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0085d36160df1d230800000000000000
-      internalID: 3661986174613673984
+      spriteID: 0d6466700871056d0800000000000000
+      internalID: -3003875112808724784
       vertices: []
       indices: 
       edges: []
@@ -325,7 +285,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 7498200311f0cfe43b33cd17c57c9cad
+    spriteID: fcf8090e539ea724fa8db3fdd13f58a1
     internalID: 0
     vertices: []
     indices: 
@@ -335,15 +295,15 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Compounds_0: 8311069866052299848
-      Compounds_1: -5251323006414098139
-      Compounds_2: -3063416783596571714
-      Compounds_3: 3910277626042831518
-      Compounds_4: -1317123517822203223
-      Compounds_5: -4525682949422155351
-      Compounds_6: 1671388855734654993
-      Compounds_7: 4109181436914183405
-      Compounds_8: 3661986174613673984
+      PerotGamify_0: -2384598366680337647
+      PerotGamify_1: -3943896620099903856
+      PerotGamify_2: 760422833650635200
+      PerotGamify_3: -3543467140955364082
+      PerotGamify_4: 213563675870572751
+      PerotGamify_5: -3003875112808724784
+      PerotGamify_6: -11362587797596483
+      PerotGamify_7: -8129289376399414965
+      PerotGamify_8: -2997079684649796795
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -68,6 +68,7 @@ public class NewRecipePanelScript : MonoBehaviour
         {
             CacheMineralChoiceUIRefs();
             ShowMineralChoice();
+            
         }
 
         _onRecipeCraftedHandler = (recipe, craftedObj, isFirstTime) => OnRecipeCrafted(recipe, craftedObj, isFirstTime);
